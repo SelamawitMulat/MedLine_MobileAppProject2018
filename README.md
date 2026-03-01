@@ -16,7 +16,7 @@
  ### 1. Appointment Management (Patient)
 
 Create: Patients can book appointments by selecting an available date and time slot. The system validates availability to prevent double booking.
-Read: Patients can view all their appointments along with details such as date, status, queue position, and estimated waiting time.
+Read: Patients can view all their appointments along with details such as date, status, queue position.
 Update: Patients can reschedule their appointments based on available time slots.
 Delete: Patients can cancel their appointments, which automatically updates the queue.
 
@@ -28,7 +28,7 @@ Create: Each confirmed appointment is automatically assigned a queue position ba
 Read: Doctors can view the full queue list, including patient details and check-in status.
 Update: Doctors can manage the queue dynamically by:
 
-- Calling the next patient
+
 - Skipping patients who have not checked in
 - Automatically reordering queue positions
   Delete: Doctors can remove patients from the queue by marking appointments as completed or cancelled.
@@ -58,7 +58,7 @@ Authorization (Role-Based Access Control)
   
   - Book, view, update, and cancel appointments
   - Check in upon arrival
-  - View queue position and estimated waiting time
+  - View queue position .
 
 - Doctor:
   
@@ -69,14 +69,12 @@ Authorization (Role-Based Access Control)
 
 ### 5. System Intelligence & Enhancements
 
-- Smart Waiting Time Estimation:
-  Calculates estimated waiting time using queue position and average consultation time.
+
 
 - Time Slot Validation:
   Prevents double booking by ensuring only available time slots can be selected.
 
-- Turn Notification Alert:
-  Notifies patients when their turn is near (e.g., when queue position ≤ 2).
+
 
 - Dynamic Queue Adjustment:
   Automatically updates queue positions when appointments are added, cancelled, skipped, or completed.
