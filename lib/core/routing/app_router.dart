@@ -1,13 +1,20 @@
 import 'package:go_router/go_router.dart';
-// Ensure this points to where your LandingScreen actually is
 import 'package:med_line/features/home/presentation/screens/landing_page.dart';
+// Standardized path for your Signup Screen
+import 'package:med_line/features/auth/presentation/screens/signup_screen.dart';
 
 class AppRouter {
-  // This is the 'router' variable that main.dart is looking for
   static final GoRouter router = GoRouter(
     initialLocation: '/',
     routes: [
+      // Landing Route
       GoRoute(path: '/', builder: (context, state) => const LandingScreen()),
+
+      // Signup Route - Fixed the class name to 'SignupScreen'
+      GoRoute(
+        path: '/signup',
+        builder: (context, state) => const SignupScreen(),
+      ),
     ],
   );
 }
