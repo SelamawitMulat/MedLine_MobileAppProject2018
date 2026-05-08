@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+// Double check this path! If your project name is different,
+// you might need: import 'package:med_line/core/constants/app_colors.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/widgets/medline_logo.dart';
 import '../../../../core/widgets/primary_button.dart';
@@ -26,31 +28,43 @@ class SignupScreen extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 30),
             child: Column(
               children: [
-                const Center(
-                  child: Container(
-                    padding: EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: AppColors.primaryBlue,
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    child: Icon(
-                      Icons.stacked_line_chart,
-                      color: Colors.white,
-                      size: 40,
-                    ),
+                // --- LOGO SECTION ---
+                // This mimics the logo in Screenshot 2026-05-09 12.29.14 AM.png
+                Center(
+                  child: Column(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: AppColors.primaryBlue,
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        child: const Icon(
+                          Icons.stacked_line_chart,
+                          color: Colors.white,
+                          size: 40,
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      const Text(
+                        "MedLine",
+                        style: TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-                const SizedBox(height: 16),
-                const Text(
-                  "MedLine",
-                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                ),
+                const SizedBox(height: 8),
                 const Text(
                   "Clinical Appointment Management",
                   style: TextStyle(color: AppColors.textGrey, fontSize: 14),
                 ),
                 const SizedBox(height: 40),
 
+                // --- FORM BOX ---
                 Container(
                   padding: const EdgeInsets.all(24),
                   decoration: BoxDecoration(
@@ -75,51 +89,45 @@ class SignupScreen extends StatelessWidget {
                         isPassword: true,
                       ),
 
-                      const Text("I am a", style: TextStyle(fontSize: 16)),
+                      const Text(
+                        "I am a",
+                        style: TextStyle(fontSize: 16, color: Colors.black),
+                      ),
                       const SizedBox(height: 8),
 
-                      // Radio Selection - Matches Screenshot 2026-05-09 12.29.14 AM.png
-                      Theme(
-                        data: ThemeData(unselectedWidgetColor: Colors.black),
-                        child: Column(
-                          children: [
-                            Row(
-                              children: [
-                                Radio<String>(
-                                  value: "Patient",
-                                  groupValue: "Patient", // Selected by default
-                                  activeColor: Colors.black,
-                                  onChanged: (val) {},
-                                ),
-                                const Text(
-                                  "Patient",
-                                  style: TextStyle(fontSize: 16),
-                                ),
-                              ],
-                            ),
-                            Row(
-                              children: [
-                                Radio<String>(
-                                  value: "Doctor",
-                                  groupValue: "Patient", // Unselected
-                                  activeColor: Colors.black,
-                                  onChanged: (val) {},
-                                ),
-                                const Text(
-                                  "Doctor",
-                                  style: TextStyle(fontSize: 16),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
+                      // Radio selection area
+                      Column(
+                        children: [
+                          Row(
+                            children: [
+                              Radio<String>(
+                                value: "Patient",
+                                groupValue: "Patient",
+                                activeColor: Colors.black,
+                                onChanged: (val) {},
+                              ),
+                              const Text("Patient"),
+                            ],
+                          ),
+                          Row(
+                            children: [
+                              Radio<String>(
+                                value: "Doctor",
+                                groupValue: "Patient",
+                                activeColor: Colors.black,
+                                onChanged: (val) {},
+                              ),
+                              const Text("Doctor"),
+                            ],
+                          ),
+                        ],
                       ),
 
                       const SizedBox(height: 30),
                       PrimaryButton(
                         text: "Sign Up",
                         onPressed: () {
-                          // Perform logic
+                          // Logic for signup
                         },
                       ),
                     ],
