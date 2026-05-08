@@ -7,12 +7,10 @@ version: 1.0.0+1
 environment:
   sdk: ^3.11.1
 
-# 1. TOP-LEVEL DEPENDENCIES SECTION
 dependencies:
   flutter:
     sdk: flutter
   cupertino_icons: ^1.0.8
-  # Added go_router here, at the correct indentation level
   go_router: ^13.0.0 
 
 dev_dependencies:
@@ -20,9 +18,5 @@ dev_dependencies:
     sdk: flutter
   flutter_lints: ^6.0.0
 
-# 2. FLUTTER CONFIGURATION SECTION
 flutter:
   uses-material-design: true
-
-  # Assets and fonts would go under here if needed, 
-  # but NOT general package dependencies.

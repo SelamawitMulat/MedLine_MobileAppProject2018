@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-// Replace 'med_line' with your actual project name from pubspec.yaml
 import 'package:med_line/core/routing/app_router.dart';
 import 'package:med_line/core/constants/app_colors.dart';
 
@@ -18,7 +17,11 @@ class MedLineApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         useMaterial3: true,
-        colorScheme: ColorScheme.fromSeed(seedColor: AppColors.primaryBlue),
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: AppColors.primaryBlue,
+          primary: AppColors.primaryBlue,
+        ),
+        scaffoldBackgroundColor: AppColors.scaffoldBg,
       ),
       routerConfig: AppRouter.router,
     );
