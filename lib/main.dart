@@ -1,79 +1,26 @@
 import 'package:flutter/material.dart';
-import '../../../../core/constants/app_colors.dart';
+// Replace 'med_line' with your actual project name from pubspec.yaml
+import 'package:med_line/core/routing/app_router.dart';
+import 'package:med_line/core/constants/app_colors.dart';
 
-class RoleBenefitCard extends StatelessWidget {
-  final String title;
-  final IconData headerIcon;
-  final Color iconBgColor;
-  final List<String> benefits;
+void main() {
+  WidgetsFlutterBinding.ensureInitialized();
+  runApp(const MedLineApp());
+}
 
-  const RoleBenefitCard({
-    super.key,
-    required this.title,
-    required this.headerIcon,
-    required this.iconBgColor,
-    required this.benefits,
-  });
+class MedLineApp extends StatelessWidget {
+  const MedLineApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(20),
-      margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-      decoration: BoxDecoration(
-        color: AppColors.cardWhite,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.grey.shade300),
+    return MaterialApp.router(
+      title: 'MedLine',
+      debugShowCheckedModeBanner: false,
+      theme: ThemeData(
+        useMaterial3: true,
+        colorScheme: ColorScheme.fromSeed(seedColor: AppColors.primaryBlue),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: iconBgColor,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Icon(headerIcon, color: AppColors.primaryBlue),
-              ),
-              const SizedBox(width: 12),
-            ],
-          ),
-          const SizedBox(height: 12),
-          Text(
-            title,
-            style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 16),
-          ...benefits.map(
-            (benefit) => Padding(
-              padding: const EdgeInsets.only(bottom: 12),
-              child: Row(
-                children: [
-                  const Icon(
-                    Icons.check_circle_outline,
-                    color: AppColors.successGreen,
-                    size: 20,
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: Text(
-                      benefit,
-                      style: const TextStyle(
-                        fontSize: 14,
-                        color: AppColors.textGrey,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ],
-      ),
+      routerConfig: AppRouter.router,
     );
   }
 }
