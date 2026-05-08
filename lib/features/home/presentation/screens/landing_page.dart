@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
-import '../../../../core/constants/app_colors.dart';
-import '../../../../core/widgets/medline_logo.dart';
-import '../../../../core/widgets/primary_button.dart';
-import '../widgets/feature_info_card.dart';
-import '../widgets/role_benefit_card.dart';
+import 'package:go_router/go_router.dart';
+// Using package imports to keep the linter happy
+import 'package:med_line/core/constants/app_colors.dart';
+import 'package:med_line/core/widgets/medline_logo.dart';
+import 'package:med_line/core/widgets/primary_button.dart';
+import 'package:med_line/features/home/presentation/widgets/feature_info_card.dart';
+import 'package:med_line/features/home/presentation/widgets/role_benefit_card.dart';
 
 class LandingScreen extends StatelessWidget {
   const LandingScreen({super.key});
@@ -32,6 +34,7 @@ class LandingScreen extends StatelessWidget {
                           fontSize: 32,
                           fontWeight: FontWeight.bold,
                           height: 1.2,
+                          color: Colors.black,
                         ),
                       ),
                     ),
@@ -42,12 +45,17 @@ class LandingScreen extends StatelessWidget {
                       style: TextStyle(fontSize: 16, color: AppColors.textGrey),
                     ),
                     const SizedBox(height: 32),
-                    PrimaryButton(text: "Login", onPressed: () {}),
+                    PrimaryButton(
+                      text: "Login",
+                      onPressed: () {
+                        // Navigation for login can be added here later
+                      },
+                    ),
                   ],
                 ),
               ),
 
-              // --- FOR PATIENTS CARD ---
+              // --- ROLE CARDS ---
               const RoleBenefitCard(
                 title: "For Patients",
                 headerIcon: Icons.people_outline,
@@ -58,8 +66,6 @@ class LandingScreen extends StatelessWidget {
                   "Get alerts when your turn is near",
                 ],
               ),
-
-              // --- FOR DOCTORS CARD ---
               const RoleBenefitCard(
                 title: "For Doctors",
                 headerIcon: Icons.monitor_heart_outlined,
@@ -68,35 +74,10 @@ class LandingScreen extends StatelessWidget {
                   "Manage patient queue efficiently",
                   "Call next patient with one tap",
                   "Create and manage visit summaries",
-                  "View appointment overview at a glance",
                 ],
               ),
 
-              const SizedBox(height: 40),
-              const Text(
-                "Everything You Need!",
-                style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 10),
-
-              const FeatureInfoCard(
-                icon: Icons.calendar_today_outlined,
-                title: "Smart Scheduling",
-                description:
-                    "Book appointments with intelligent slot management and conflict prevention",
-              ),
-              const FeatureInfoCard(
-                icon: Icons.access_time,
-                title: "Real-Time Queue",
-                description:
-                    "Live queue updates and automatic position tracking for patients",
-              ),
-              const FeatureInfoCard(
-                icon: Icons.description_outlined,
-                title: "Visit Records",
-                description:
-                    "Complete medical history with diagnoses, prescriptions, and notes",
-              ), // --- FOOTER CTA SECTION ---
+              // --- FOOTER CTA SECTION ---
               Container(
                 width: double.infinity,
                 margin: const EdgeInsets.all(20),
@@ -123,9 +104,12 @@ class LandingScreen extends StatelessWidget {
                       style: TextStyle(color: Colors.white70, fontSize: 14),
                     ),
                     const SizedBox(height: 30),
+                    // --- NAVIGATION TRIGGER ---
                     PrimaryButton(
                       text: "Create Your Account",
-                      onPressed: () {},
+                      onPressed: () => context.push(
+                        '/signup',
+                      ), // This triggers the navigation
                       bgColor: Colors.white,
                       textColor: AppColors.primaryBlue,
                       suffixIcon: Icons.arrow_forward,
@@ -134,18 +118,11 @@ class LandingScreen extends StatelessWidget {
                 ),
               ),
 
-              // --- COPYRIGHT FOOTER ---
-              // Added based on the small image provided
               const Padding(
-                padding: EdgeInsets.only(bottom: 30, left: 20, right: 20),
+                padding: EdgeInsets.only(bottom: 30),
                 child: Text(
-                  "© 2026 MedLine. Clinical Appointment and Queue Management System.",
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: AppColors.textGrey,
-                    height: 1.5,
-                  ),
+                  "© 2026 MedLine. Clinical Appointment System.",
+                  style: TextStyle(fontSize: 12, color: AppColors.textGrey),
                 ),
               ),
             ],

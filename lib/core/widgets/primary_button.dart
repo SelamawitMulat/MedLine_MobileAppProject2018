@@ -1,48 +1,50 @@
 import 'package:flutter/material.dart';
+import 'package:med_line/core/constants/app_colors.dart';
 
 class PrimaryButton extends StatelessWidget {
   final String text;
   final VoidCallback onPressed;
-  final Color bgColor;
-  final Color textColor;
-  final bool isFullWidth;
+  final Color? bgColor;
+  final Color? textColor;
   final IconData? suffixIcon;
 
   const PrimaryButton({
     super.key,
     required this.text,
     required this.onPressed,
-    this.bgColor = const Color(0xFF3F51B5),
-    this.textColor = Colors.white,
-    this.isFullWidth = true,
+    this.bgColor,
+    this.textColor,
     this.suffixIcon,
   });
 
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      width: isFullWidth ? double.infinity : null,
-      height: 50,
+      width: double.infinity,
+      height: 56,
       child: ElevatedButton(
+        onPressed: onPressed,
         style: ElevatedButton.styleFrom(
-          backgroundColor: bgColor,
-          foregroundColor: textColor,
+          backgroundColor: bgColor ?? AppColors.primaryBlue,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(16),
           ),
           elevation: 0,
         ),
-        onPressed: onPressed,
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Text(
               text,
-              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+              style: TextStyle(
+                color: textColor ?? Colors.white,
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+              ),
             ),
             if (suffixIcon != null) ...[
               const SizedBox(width: 8),
-              Icon(suffixIcon, size: 20),
+              Icon(suffixIcon, color: textColor ?? Colors.white),
             ],
           ],
         ),
