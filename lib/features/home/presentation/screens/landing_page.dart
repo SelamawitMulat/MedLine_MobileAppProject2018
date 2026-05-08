@@ -17,6 +17,7 @@ class LandingScreen extends StatelessWidget {
           child: Column(
             children: [
               // --- HERO SECTION ---
+              // Matches the top of Screenshot 2026-05-08 11.50.49 PM.png
               Padding(
                 padding: const EdgeInsets.all(20.0),
                 child: Column(
@@ -42,10 +43,7 @@ class LandingScreen extends StatelessWidget {
                       style: TextStyle(fontSize: 16, color: AppColors.textGrey),
                     ),
                     const SizedBox(height: 32),
-                    PrimaryButton(
-                      text: "Login As Doctor",
-                      onPressed: () {}, // Navigation logic goes here later
-                    ),
+                    PrimaryButton(text: "Login As Doctor", onPressed: () {}),
                     const SizedBox(height: 12),
                     PrimaryButton(text: "Login As Patient", onPressed: () {}),
                   ],
@@ -53,6 +51,7 @@ class LandingScreen extends StatelessWidget {
               ),
 
               // --- FOR PATIENTS CARD ---
+              // Matches the middle section of Screenshot 2026-05-08 11.50.49 PM.png
               const RoleBenefitCard(
                 title: "For Patients",
                 headerIcon: Icons.people_outline,
@@ -65,9 +64,11 @@ class LandingScreen extends StatelessWidget {
               ),
 
               // --- FOR DOCTORS CARD ---
+              // Matches the top section of Screenshot 2026-05-08 11.50.58 PM.png
               const RoleBenefitCard(
                 title: "For Doctors",
-                headerIcon: Icons.pulse_tracker,
+                headerIcon: Icons
+                    .monitor_heart_outlined, // Fixed the pulse_tracker error
                 iconBgColor: AppColors.heartBeatGreen,
                 benefits: [
                   "Manage patient queue efficiently",
@@ -85,6 +86,7 @@ class LandingScreen extends StatelessWidget {
               const SizedBox(height: 10),
 
               // --- INFO CARDS ---
+              // Matches middle/bottom of Screenshot 2026-05-08 11.50.58 PM.png and 11.51.05 PM.png
               const FeatureInfoCard(
                 icon: Icons.calendar_today_outlined,
                 title: "Smart Scheduling",
@@ -105,6 +107,7 @@ class LandingScreen extends StatelessWidget {
               ),
 
               // --- FOOTER CTA ---
+              // Matches bottom of Screenshot 2026-05-08 11.51.05 PM.png
               Container(
                 width: double.infinity,
                 margin: const EdgeInsets.all(20),
