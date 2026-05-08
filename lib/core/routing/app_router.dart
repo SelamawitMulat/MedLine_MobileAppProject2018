@@ -1,29 +1,13 @@
-import 'package:flutter/material.dart';
-import 'package:med_line/core/routing/app_router.dart';
-import 'package:med_line/core/constants/app_colors.dart';
+import 'package:go_router/go_router.dart';
+// Ensure this points to where your LandingScreen actually is
+import 'package:med_line/features/home/presentation/screens/landing_page.dart';
 
-void main() {
-  WidgetsFlutterBinding.ensureInitialized();
-  runApp(const MedLineApp());
-}
-
-class MedLineApp extends StatelessWidget {
-  const MedLineApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp.router(
-      title: 'MedLine',
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        useMaterial3: true,
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: AppColors.primaryBlue,
-          primary: AppColors.primaryBlue,
-        ),
-        scaffoldBackgroundColor: AppColors.scaffoldBg,
-      ),
-      routerConfig: AppRouter.router,
-    );
-  }
+class AppRouter {
+  // This is the 'router' variable that main.dart is looking for
+  static final GoRouter router = GoRouter(
+    initialLocation: '/',
+    routes: [
+      GoRoute(path: '/', builder: (context, state) => const LandingScreen()),
+    ],
+  );
 }

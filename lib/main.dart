@@ -23,6 +23,7 @@ class MedLineApp extends StatelessWidget {
         ),
         scaffoldBackgroundColor: AppColors.scaffoldBg,
       ),
+      // This refers to the 'static final GoRouter router' in the file above
       routerConfig: AppRouter.router,
     );
   }
