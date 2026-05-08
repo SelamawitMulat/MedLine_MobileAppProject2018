@@ -17,7 +17,6 @@ class LandingScreen extends StatelessWidget {
           child: Column(
             children: [
               // --- HERO SECTION ---
-              // Matches the top of Screenshot 2026-05-08 11.50.49 PM.png
               Padding(
                 padding: const EdgeInsets.all(20.0),
                 child: Column(
@@ -43,15 +42,12 @@ class LandingScreen extends StatelessWidget {
                       style: TextStyle(fontSize: 16, color: AppColors.textGrey),
                     ),
                     const SizedBox(height: 32),
-                    PrimaryButton(text: "Login As Doctor", onPressed: () {}),
-                    const SizedBox(height: 12),
-                    PrimaryButton(text: "Login As Patient", onPressed: () {}),
+                    PrimaryButton(text: "Login", onPressed: () {}),
                   ],
                 ),
               ),
 
               // --- FOR PATIENTS CARD ---
-              // Matches the middle section of Screenshot 2026-05-08 11.50.49 PM.png
               const RoleBenefitCard(
                 title: "For Patients",
                 headerIcon: Icons.people_outline,
@@ -64,11 +60,9 @@ class LandingScreen extends StatelessWidget {
               ),
 
               // --- FOR DOCTORS CARD ---
-              // Matches the top section of Screenshot 2026-05-08 11.50.58 PM.png
               const RoleBenefitCard(
                 title: "For Doctors",
-                headerIcon: Icons
-                    .monitor_heart_outlined, // Fixed the pulse_tracker error
+                headerIcon: Icons.monitor_heart_outlined,
                 iconBgColor: AppColors.heartBeatGreen,
                 benefits: [
                   "Manage patient queue efficiently",
@@ -85,8 +79,6 @@ class LandingScreen extends StatelessWidget {
               ),
               const SizedBox(height: 10),
 
-              // --- INFO CARDS ---
-              // Matches middle/bottom of Screenshot 2026-05-08 11.50.58 PM.png and 11.51.05 PM.png
               const FeatureInfoCard(
                 icon: Icons.calendar_today_outlined,
                 title: "Smart Scheduling",
@@ -104,10 +96,7 @@ class LandingScreen extends StatelessWidget {
                 title: "Visit Records",
                 description:
                     "Complete medical history with diagnoses, prescriptions, and notes",
-              ),
-
-              // --- FOOTER CTA ---
-              // Matches bottom of Screenshot 2026-05-08 11.51.05 PM.png
+              ), // --- FOOTER CTA SECTION ---
               Container(
                 width: double.infinity,
                 margin: const EdgeInsets.all(20),
@@ -135,40 +124,30 @@ class LandingScreen extends StatelessWidget {
                     ),
                     const SizedBox(height: 30),
                     PrimaryButton(
-                      text: "Create Your Account As",
+                      text: "Create Your Account",
                       onPressed: () {},
                       bgColor: Colors.white,
                       textColor: AppColors.primaryBlue,
                       suffixIcon: Icons.arrow_forward,
                     ),
-                    const SizedBox(height: 16),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: PrimaryButton(
-                            text: "Patient",
-                            onPressed: () {},
-                            bgColor: Colors.white,
-                            textColor: AppColors.primaryBlue,
-                            isFullWidth: false,
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: PrimaryButton(
-                            text: "Doctor",
-                            onPressed: () {},
-                            bgColor: Colors.white,
-                            textColor: AppColors.primaryBlue,
-                            isFullWidth: false,
-                          ),
-                        ),
-                      ],
-                    ),
                   ],
                 ),
               ),
-              const SizedBox(height: 20),
+
+              // --- COPYRIGHT FOOTER ---
+              // Added based on the small image provided
+              const Padding(
+                padding: EdgeInsets.only(bottom: 30, left: 20, right: 20),
+                child: Text(
+                  "© 2026 MedLine. Clinical Appointment and Queue Management System.",
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: AppColors.textGrey,
+                    height: 1.5,
+                  ),
+                ),
+              ),
             ],
           ),
         ),
