@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'features/home/presentation/screens/landing_screen.dart';
+import 'features/home/presentation/screens/landing_page.dart';
 
 void main() {
   runApp(const MedLineApp());
