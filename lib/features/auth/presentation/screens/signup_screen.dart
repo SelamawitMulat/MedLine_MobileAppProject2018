@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-// Double check this path! If your project name is different,
-// you might need: import 'package:med_line/core/constants/app_colors.dart';
-import '../../../../core/constants/app_colors.dart';
-
-import '../../../../core/widgets/primary_button.dart';
-import '../widgets/auth_text_field.dart';
+// Standardizing to package imports to fix "yellow light" warnings
+import 'package:med_line/core/constants/app_colors.dart';
+import 'package:med_line/core/widgets/primary_button.dart';
+import 'package:med_line/features/auth/presentation/widgets/auth_text_field.dart';
 
 class SignupScreen extends StatelessWidget {
   const SignupScreen({super.key});
@@ -17,6 +15,7 @@ class SignupScreen extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
+        // GoRouter back button logic
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.black),
           onPressed: () => context.pop(),
@@ -29,7 +28,6 @@ class SignupScreen extends StatelessWidget {
             child: Column(
               children: [
                 // --- LOGO SECTION ---
-                // This mimics the logo in Screenshot 2026-05-09 12.29.14 AM.png
                 Center(
                   child: Column(
                     children: [
@@ -64,7 +62,7 @@ class SignupScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 40),
 
-                // --- FORM BOX ---
+                // --- SIGNUP FORM BOX ---
                 Container(
                   padding: const EdgeInsets.all(24),
                   decoration: BoxDecoration(
@@ -91,33 +89,43 @@ class SignupScreen extends StatelessWidget {
 
                       const Text(
                         "I am a",
-                        style: TextStyle(fontSize: 16, color: Colors.black),
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                          color: Colors.black,
+                        ),
                       ),
                       const SizedBox(height: 8),
 
-                      // Radio selection area
+                      // Radio Selection (Visual Only)
                       Column(
                         children: [
                           Row(
                             children: [
                               Radio<String>(
                                 value: "Patient",
-                                groupValue: "Patient",
+                                groupValue: "Patient", // Hardcoded selection
                                 activeColor: Colors.black,
                                 onChanged: (val) {},
                               ),
-                              const Text("Patient"),
+                              const Text(
+                                "Patient",
+                                style: TextStyle(color: Colors.black),
+                              ),
                             ],
                           ),
                           Row(
                             children: [
                               Radio<String>(
                                 value: "Doctor",
-                                groupValue: "Patient",
+                                groupValue: "Patient", // Unselected
                                 activeColor: Colors.black,
                                 onChanged: (val) {},
                               ),
-                              const Text("Doctor"),
+                              const Text(
+                                "Doctor",
+                                style: TextStyle(color: Colors.black),
+                              ),
                             ],
                           ),
                         ],
@@ -127,7 +135,7 @@ class SignupScreen extends StatelessWidget {
                       PrimaryButton(
                         text: "Sign Up",
                         onPressed: () {
-                          // Logic for signup
+                          // TODO: Implement Auth Logic
                         },
                       ),
                     ],
