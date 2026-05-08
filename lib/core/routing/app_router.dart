@@ -1,7 +1,7 @@
-import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import '../../../features/home/presentation/screens/landing_page.dart';
-import '../../../features/auth/presentation/screens/signup_screen.dart';
+// Replacing relative paths with package imports to remove yellow lines
+import 'package:med_line/features/home/presentation/screens/landing_page.dart';
+import 'package:med_line/features/auth/presentation/screens/signup_screen.dart';
 
 class AppRouter {
   static final GoRouter router = GoRouter(

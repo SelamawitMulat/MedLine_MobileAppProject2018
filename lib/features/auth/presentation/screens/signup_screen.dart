@@ -3,7 +3,7 @@ import 'package:go_router/go_router.dart';
 // Double check this path! If your project name is different,
 // you might need: import 'package:med_line/core/constants/app_colors.dart';
 import '../../../../core/constants/app_colors.dart';
-import '../../../../core/widgets/medline_logo.dart';
+
 import '../../../../core/widgets/primary_button.dart';
 import '../widgets/auth_text_field.dart';
 
