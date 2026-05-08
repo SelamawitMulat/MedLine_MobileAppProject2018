@@ -4,7 +4,6 @@ import 'package:go_router/go_router.dart';
 import 'package:med_line/core/constants/app_colors.dart';
 import 'package:med_line/core/widgets/medline_logo.dart';
 import 'package:med_line/core/widgets/primary_button.dart';
-import 'package:med_line/features/home/presentation/widgets/feature_info_card.dart';
 import 'package:med_line/features/home/presentation/widgets/role_benefit_card.dart';
 
 class LandingScreen extends StatelessWidget {
