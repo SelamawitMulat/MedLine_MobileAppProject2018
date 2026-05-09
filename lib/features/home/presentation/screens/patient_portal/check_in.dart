@@ -10,8 +10,8 @@ class CheckInScreen extends StatefulWidget {
 }
 
 class _CheckInScreenState extends State<CheckInScreen> {
-  // In a real app, this would come from your backend/Firebase
-  bool isCalledByDoctor = false;
+  // UI State Toggle: false = Green/Waiting, true = Blue/Called In
+  bool isCalledIn = false;
 
   @override
   Widget build(BuildContext context) {
@@ -41,7 +41,7 @@ class _CheckInScreenState extends State<CheckInScreen> {
               width: double.infinity,
               padding: const EdgeInsets.all(25),
               decoration: BoxDecoration(
-                color: const Color(0xFFF5F5F5), // Light grey background
+                color: const Color(0xFFF5F5F5),
                 borderRadius: BorderRadius.circular(20),
               ),
               child: Column(
@@ -55,15 +55,18 @@ class _CheckInScreenState extends State<CheckInScreen> {
                   _infoRow(Icons.access_time, "10:00 PM"),
                   const SizedBox(height: 30),
 
-                  // The "Checked In" Status Box from your image
-                  Container(
+                  // Status Box - Transitions color and content based on state
+                  AnimatedContainer(
+                    duration: const Duration(milliseconds: 400),
                     padding: const EdgeInsets.all(15),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFD4E9B2), // Light green from image
+                      color: isCalledIn
+                          ? AppColors.primaryBlue
+                          : const Color(0xFFD4E9B2),
                       borderRadius: BorderRadius.circular(12),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.1),
+                          color: Colors.black.withOpacity(0.05),
                           blurRadius: 4,
                           offset: const Offset(0, 2),
                         ),
@@ -71,28 +74,36 @@ class _CheckInScreenState extends State<CheckInScreen> {
                     ),
                     child: Row(
                       children: [
-                        const Icon(
-                          Icons.check_box,
-                          color: Color(0xFF2D5A27),
+                        Icon(
+                          isCalledIn ? Icons.campaign : Icons.check_box,
+                          color: isCalledIn
+                              ? Colors.white
+                              : const Color(0xFF2D5A27),
                           size: 35,
                         ),
                         const SizedBox(width: 15),
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text(
-                              "Checked In",
+                            Text(
+                              isCalledIn ? "It's Your Turn!" : "Checked In",
                               style: TextStyle(
                                 fontSize: 18,
                                 fontWeight: FontWeight.bold,
-                                color: Color(0xFF1B3A1A),
+                                color: isCalledIn
+                                    ? Colors.white
+                                    : const Color(0xFF1B3A1A),
                               ),
                             ),
                             Text(
-                              "Queue Position: 1",
+                              isCalledIn
+                                  ? "Proceed to Room 1"
+                                  : "Queue Position: 1",
                               style: TextStyle(
                                 fontSize: 16,
-                                color: Colors.grey.shade800,
+                                color: isCalledIn
+                                    ? Colors.white70
+                                    : Colors.grey.shade800,
                               ),
                             ),
                           ],
@@ -103,19 +114,40 @@ class _CheckInScreenState extends State<CheckInScreen> {
                 ],
               ),
             ),
-
             const SizedBox(height: 40),
-
-            // CONNECTION TO DOCTOR PORTAL:
-            // This section appears only when the doctor clicks "Call In"
-            if (isCalledByDoctor)
-              _buildCallInNotification()
-            else
-              const Text(
-                "Please wait in the reception area.\nWe will notify you here when the doctor is ready.",
-                textAlign: TextAlign.center,
-                style: TextStyle(color: Colors.grey, fontSize: 16),
+            Text(
+              isCalledIn
+                  ? "The doctor is waiting for you."
+                  : "Please wait in the reception area.\nWe will notify you here when the doctor is ready.",
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                color: Colors.grey,
+                fontSize: 16,
+                height: 1.5,
               ),
+            ),
+            const Spacer(),
+            // UI Test Button
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton(
+                onPressed: () => setState(() => isCalledIn = !isCalledIn),
+                style: OutlinedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 15),
+                  side: BorderSide(color: Colors.grey.shade300),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+                child: Text(
+                  isCalledIn ? "RESET TO WAITING" : "SIMULATE DOCTOR CALL",
+                  style: const TextStyle(
+                    color: Colors.grey,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ),
           ],
         ),
       ),
@@ -132,35 +164,6 @@ class _CheckInScreenState extends State<CheckInScreen> {
           style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w500),
         ),
       ],
-    );
-  }
-
-  Widget _buildCallInNotification() {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: AppColors.primaryBlue,
-        borderRadius: BorderRadius.circular(15),
-      ),
-      child: const Column(
-        children: [
-          Icon(Icons.campaign, color: Colors.white, size: 40),
-          SizedBox(height: 10),
-          Text(
-            "IT'S YOUR TURN!",
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          Text(
-            "Please proceed to Examination Room 1",
-            style: TextStyle(color: Colors.white70, fontSize: 16),
-          ),
-        ],
-      ),
     );
   }
 }
