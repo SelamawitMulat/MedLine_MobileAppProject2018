@@ -4,7 +4,6 @@ import 'package:med_line/core/constants/app_colors.dart';
 class PrimaryButton extends StatelessWidget {
   final String text;
   final VoidCallback onPressed;
-  // Make these optional with the '?' so the Signup page doesn't break
   final Color? bgColor;
   final Color? textColor;
   final IconData? suffixIcon;
@@ -25,7 +24,6 @@ class PrimaryButton extends StatelessWidget {
       height: 55,
       child: ElevatedButton(
         style: ElevatedButton.styleFrom(
-          // Uses the color you pass in, or defaults to primaryBlue
           backgroundColor: bgColor ?? AppColors.primaryBlue,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
@@ -44,7 +42,6 @@ class PrimaryButton extends StatelessWidget {
                 fontWeight: FontWeight.bold,
               ),
             ),
-            // Only draws the icon if you actually provide one
             if (suffixIcon != null) ...[
               const SizedBox(width: 10),
               Icon(suffixIcon, color: textColor ?? Colors.white, size: 20),

@@ -23,7 +23,23 @@ class LandingScreen extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const MedLineLogo(),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const MedLineLogo(),
+                        // Added text button to navigate to login page
+                        TextButton(
+                          onPressed: () => context.push('/login'),
+                          child: const Text(
+                            "Login",
+                            style: TextStyle(
+                              color: AppColors.primaryBlue,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                     const SizedBox(height: 40),
                     const Center(
                       child: Text(
@@ -44,11 +60,10 @@ class LandingScreen extends StatelessWidget {
                       style: TextStyle(fontSize: 16, color: AppColors.textGrey),
                     ),
                     const SizedBox(height: 32),
+                    // Navigation to login page as requested
                     PrimaryButton(
                       text: "Login",
-                      onPressed: () {
-                        // Navigation for login can be added here later
-                      },
+                      onPressed: () => context.push('/login'),
                     ),
                   ],
                 ),
