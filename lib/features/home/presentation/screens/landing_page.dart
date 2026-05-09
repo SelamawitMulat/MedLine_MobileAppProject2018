@@ -69,7 +69,7 @@ class LandingScreen extends StatelessWidget {
                 ),
               ),
 
-              // --- ROLE CARDS ---
+              // --- ROLE CARDS -
               const RoleBenefitCard(
                 title: "For Patients",
                 headerIcon: Icons.people_outline,
