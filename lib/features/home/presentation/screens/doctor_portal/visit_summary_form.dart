@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:med_line/core/constants/app_colors.dart';
-import 'package:med_line/core/widgets/primary_button.dart';
 
 class VisitSummaryForm extends StatefulWidget {
   const VisitSummaryForm({super.key});
@@ -13,15 +12,24 @@ class VisitSummaryForm extends StatefulWidget {
 class _VisitSummaryFormState extends State<VisitSummaryForm> {
   final _formKey = GlobalKey<FormState>();
 
-  // Controllers to capture the data
-  final _patientController = TextEditingController();
+  // State variable for the dropdown
+  String? _selectedPatient;
+
+  // Mock list of patients
+  final List<String> _patients = [
+    "John Doe",
+    "Jane Wilson",
+    "Robert Brown",
+    "Emily Davis",
+  ];
+
   final _diagnosisController = TextEditingController();
   final _prescriptionController = TextEditingController();
   final _notesController = TextEditingController();
 
   void _submitForm() {
     if (_formKey.currentState!.validate()) {
-      // Process data here
+      // Logic to save the summary using _selectedPatient
       context.pop();
     }
   }
@@ -38,7 +46,7 @@ class _VisitSummaryFormState extends State<VisitSummaryForm> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // --- HEADER WITH CLOSE ICON ---
+                // --- HEADER ---
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -50,28 +58,51 @@ class _VisitSummaryFormState extends State<VisitSummaryForm> {
                       ),
                     ),
                     IconButton(
-                      icon: const Icon(
-                        Icons.close,
-                        size: 30,
-                        color: Colors.black,
-                      ),
+                      icon: const Icon(Icons.close, size: 30),
                       onPressed: () => context.pop(),
                     ),
                   ],
                 ),
                 const SizedBox(height: 25),
 
-                // --- SELECT PATIENT ---
+                // --- SELECT PATIENT (DROPDOWN) ---
                 const Text(
                   "Select Patient",
                   style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                 ),
                 const SizedBox(height: 8),
-                _buildInputField(
-                  controller: _patientController,
-                  hintText: "Choose a patient",
-                  validator: (v) =>
-                      v!.isEmpty ? "Please select a patient" : null,
+                DropdownButtonFormField<String>(
+                  value: _selectedPatient,
+                  hint: const Text(
+                    "Choose a patient",
+                    style: TextStyle(color: Colors.grey),
+                  ),
+                  isExpanded: true,
+                  decoration: InputDecoration(
+                    filled: true,
+                    fillColor: AppColors.cardGrey, // Matching image_9ddd1c.png
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 15,
+                      vertical: 5,
+                    ),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide: BorderSide.none,
+                    ),
+                  ),
+                  items: _patients.map((String patient) {
+                    return DropdownMenuItem<String>(
+                      value: patient,
+                      child: Text(patient),
+                    );
+                  }).toList(),
+                  onChanged: (newValue) {
+                    setState(() {
+                      _selectedPatient = newValue;
+                    });
+                  },
+                  validator: (value) =>
+                      value == null ? "Please select a patient" : null,
                 ),
                 const SizedBox(height: 20),
 
@@ -87,7 +118,6 @@ class _VisitSummaryFormState extends State<VisitSummaryForm> {
                   validator: (v) => v!.isEmpty ? "Required" : null,
                 ),
                 const SizedBox(height: 20),
-
                 // --- PRESCRIPTION ---
                 const Text(
                   "Prescription",
@@ -109,8 +139,7 @@ class _VisitSummaryFormState extends State<VisitSummaryForm> {
                 const SizedBox(height: 8),
                 _buildInputField(
                   controller: _notesController,
-                  hintText:
-                      "Additionl notes", // Kept typo from image per request
+                  hintText: "Additionl notes",
                   maxLines: 3,
                 ),
                 const SizedBox(height: 40),
@@ -125,7 +154,6 @@ class _VisitSummaryFormState extends State<VisitSummaryForm> {
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
-                      elevation: 0,
                     ),
                     onPressed: _submitForm,
                     child: const Row(
@@ -153,7 +181,6 @@ class _VisitSummaryFormState extends State<VisitSummaryForm> {
     );
   }
 
-  // Custom Input Field to match image style
   Widget _buildInputField({
     required TextEditingController controller,
     required String hintText,
