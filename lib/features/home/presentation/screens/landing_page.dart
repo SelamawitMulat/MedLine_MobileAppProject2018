@@ -60,7 +60,7 @@ class LandingScreen extends StatelessWidget {
                       style: TextStyle(fontSize: 16, color: AppColors.textGrey),
                     ),
                     const SizedBox(height: 32),
-                    // Navigation to login page as requested
+
                     PrimaryButton(
                       text: "Login",
                       onPressed: () => context.push('/login'),
