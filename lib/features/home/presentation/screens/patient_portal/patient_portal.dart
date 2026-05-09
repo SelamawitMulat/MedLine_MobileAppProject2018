@@ -15,7 +15,7 @@ class PatientPortalScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Header Section
+              // header with welcome message & actions
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -38,6 +38,7 @@ class PatientPortalScreen extends StatelessWidget {
                       ),
                     ],
                   ),
+
                   Row(
                     children: [
                       IconButton(
@@ -48,6 +49,7 @@ class PatientPortalScreen extends StatelessWidget {
                         ),
                         onPressed: () {},
                       ),
+
                       IconButton(
                         icon: const Icon(
                           Icons.logout,
@@ -60,10 +62,70 @@ class PatientPortalScreen extends StatelessWidget {
                   ),
                 ],
               ),
+
               const SizedBox(height: 25),
 
-              // Appointment Info Card
-              _buildAppointmentCard(),
+              // Queue status card
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: AppColors.cardGrey,
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Row(
+                      children: [
+                        Icon(
+                          Icons.access_time_filled,
+                          color: AppColors.secondaryPurple,
+                          size: 28,
+                        ),
+                        SizedBox(width: 10),
+                        Text(
+                          "Next Appointment",
+                          style: TextStyle(
+                            color: AppColors.secondaryPurple,
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
+
+                    const SizedBox(height: 15),
+
+                    _detailRow(
+                      Icons.calendar_today,
+                      "Wednesday, April 15, 2026",
+                    ),
+
+                    _detailRow(Icons.access_time, "10:00 PM"),
+
+                    _detailRow(Icons.people_outline, "Queue Position : 1"),
+
+                    const SizedBox(height: 15),
+
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      decoration: BoxDecoration(
+                        color: AppColors.successGreen.withOpacity(0.25),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: const Center(
+                        child: Text(
+                          "Your turn is coming up soon!",
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
               const SizedBox(height: 35),
 
               // Action Grid
@@ -81,6 +143,7 @@ class PatientPortalScreen extends StatelessWidget {
                     AppColors.primaryBlue,
                     () {},
                   ),
+
                   _actionTile(
                     "My\nAppointments",
                     Icons.access_time,
@@ -111,57 +174,23 @@ class PatientPortalScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildAppointmentCard() {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: AppColors.cardGrey,
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+  Widget _detailRow(IconData icon, String text) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8.0),
+      child: Row(
         children: [
-          const Row(
-            children: [
-              Icon(
-                Icons.access_time_filled,
-                color: AppColors.secondaryPurple,
-                size: 28,
-              ),
-              SizedBox(width: 10),
-              Text(
-                "Next Appointment",
-                style: TextStyle(
-                  color: AppColors.secondaryPurple,
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ],
+          Icon(icon, color: AppColors.textGrey, size: 20),
+
+          const SizedBox(width: 10),
+
+          Text(
+            text,
+            style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
           ),
-          const SizedBox(height: 15),
-          _detailRow(Icons.calendar_today, "Wednesday, April 15, 2026"),
-          _detailRow(Icons.access_time, "10:00 PM"),
-          _detailRow(Icons.people_outline, "Queue Position : 1"),
         ],
       ),
     );
   }
-
-  Widget _detailRow(IconData icon, String text) => Padding(
-    padding: const EdgeInsets.only(bottom: 8.0),
-    child: Row(
-      children: [
-        Icon(icon, color: AppColors.textGrey, size: 20),
-        const SizedBox(width: 10),
-        Text(
-          text,
-          style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
-        ),
-      ],
-    ),
-  );
 
   Widget _actionTile(
     String title,
@@ -190,6 +219,7 @@ class PatientPortalScreen extends StatelessWidget {
                 ),
               ),
             ),
+
             Align(
               alignment: Alignment.topRight,
               child: Icon(icon, color: color, size: 30),
