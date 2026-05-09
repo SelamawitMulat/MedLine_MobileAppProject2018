@@ -17,7 +17,7 @@ class LandingScreen extends StatelessWidget {
         child: SingleChildScrollView(
           child: Column(
             children: [
-              // --- HERO SECTION ---
+              // hero section
               Padding(
                 padding: const EdgeInsets.all(20.0),
                 child: Column(
@@ -69,7 +69,7 @@ class LandingScreen extends StatelessWidget {
                 ),
               ),
 
-              // --- ROLE CARDS -
+              // role cards
               const RoleBenefitCard(
                 title: "For Patients",
                 headerIcon: Icons.people_outline,
@@ -118,7 +118,7 @@ class LandingScreen extends StatelessWidget {
                       style: TextStyle(color: Colors.white70, fontSize: 14),
                     ),
                     const SizedBox(height: 30),
-                    // --- NAVIGATION TRIGGER ---
+                    //navigation trigger
                     PrimaryButton(
                       text: "Create Your Account",
                       onPressed: () => context.push(
