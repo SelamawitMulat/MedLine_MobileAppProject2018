@@ -91,7 +91,7 @@ class LandingScreen extends StatelessWidget {
                 ],
               ),
 
-              // --- FOOTER CTA SECTION ---
+              //  FOOTER CTA SECTION
               Container(
                 width: double.infinity,
                 margin: const EdgeInsets.all(20),
