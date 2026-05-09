@@ -13,7 +13,7 @@ class _QueueManagementScreenState extends State<QueueManagementScreen> {
   bool _isPatientInRoom = false;
   final String _currentPatient = "John Doe";
 
-  // MUCH softer green: Very low opacity background with a matching dark green text
+  // Using the ultra-soft coloring we defined
   final Color _ultraSoftGreenBg = Colors.green.withOpacity(0.12);
   final Color _deepGreenText = Colors.green.shade800;
 
@@ -115,6 +115,7 @@ class _QueueManagementScreenState extends State<QueueManagementScreen> {
                 ],
               ),
             ),
+
             const SizedBox(height: 30),
             const Text(
               "Queue ( 2 Patients )",
@@ -198,28 +199,37 @@ class _QueueManagementScreenState extends State<QueueManagementScreen> {
           const SizedBox(height: 15),
           Row(
             children: [
+              // --- SKIP BUTTON WITH ICON ---
               Expanded(
-                child: OutlinedButton(
+                child: OutlinedButton.icon(
                   onPressed: () {},
+                  icon: const Icon(Icons.skip_next_outlined, size: 20),
+                  label: const Text("Skip"),
                   style: OutlinedButton.styleFrom(
                     foregroundColor: Colors.grey,
                     side: BorderSide(color: Colors.grey.shade200),
+                    padding: const EdgeInsets.symmetric(vertical: 12),
                   ),
-                  child: const Text("Skip"),
                 ),
               ),
               const SizedBox(width: 10),
+              // --- COMPLETE BUTTON WITH ICON ---
               Expanded(
-                child: ElevatedButton(
+                child: ElevatedButton.icon(
                   onPressed: () => context.push('/create-summary'),
+                  icon: const Icon(Icons.check_circle_outline, size: 20),
+                  label: const Text(
+                    "Complete",
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: _ultraSoftGreenBg,
                     foregroundColor: _deepGreenText,
                     elevation: 0,
-                  ),
-                  child: const Text(
-                    "Complete",
-                    style: TextStyle(fontWeight: FontWeight.bold),
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
                   ),
                 ),
               ),
