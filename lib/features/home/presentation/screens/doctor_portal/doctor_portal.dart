@@ -62,7 +62,7 @@ class DoctorPortalScreen extends StatelessWidget {
               ),
               const SizedBox(height: 25),
 
-              // --- STATS CARDS ---
+              //  status card design
               Row(
                 children: [
                   _buildStatCard("Total\nAppointments", "2"),
@@ -76,7 +76,7 @@ class DoctorPortalScreen extends StatelessWidget {
               ),
               const SizedBox(height: 25),
 
-              // --- QUEUE OVERVIEW CARD ---
+              // que overviw card
               Container(
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
@@ -120,7 +120,7 @@ class DoctorPortalScreen extends StatelessWidget {
               // Reduced vertical space as requested
               const SizedBox(height: 15),
 
-              // --- BOTTOM DASHBOARD BUTTONS ---
+              // bottom dashboard buttons
               Row(
                 children: [
                   Expanded(
@@ -179,7 +179,7 @@ class DoctorPortalScreen extends StatelessWidget {
     );
   }
 
-  // Helper Widget for Patient Rows
+  // Helper Widget  Patient Rows
   Widget _buildPatientTile(String name, String time, String queueNum) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 12),

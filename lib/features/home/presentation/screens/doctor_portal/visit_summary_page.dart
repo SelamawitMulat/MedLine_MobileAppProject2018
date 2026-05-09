@@ -50,7 +50,7 @@ class VisitSummaryPage extends StatelessWidget {
               ),
               const SizedBox(height: 30),
 
-              // --- EMPTY STATE CARD ---
+              //  EMPTY STATE CARD
               Container(
                 width: double.infinity,
                 padding: const EdgeInsets.symmetric(vertical: 60),
