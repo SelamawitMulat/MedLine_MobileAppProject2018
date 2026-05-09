@@ -9,24 +9,75 @@ class VisitSummaryPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.scaffoldBg,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black),
-          onPressed: () => context.pop(),
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(20.0),
+          child: Column(
+            children: [
+              // --- CUSTOM APP BAR AREA ---
+              Row(
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.arrow_back, size: 30),
+                    onPressed: () => context.pop(),
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(),
+                  ),
+                  const SizedBox(width: 15),
+                  const Text(
+                    "Visit History",
+                    style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+                  ),
+                  const Spacer(),
+                  // The Square Blue + Button
+                  GestureDetector(
+                    onTap: () => context.push('/create-summary'),
+                    child: Container(
+                      width: 45,
+                      height: 45,
+                      decoration: BoxDecoration(
+                        color: AppColors.primaryBlue,
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: const Icon(
+                        Icons.add,
+                        color: Colors.white,
+                        size: 30,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 30),
+
+              // --- EMPTY STATE CARD ---
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(vertical: 60),
+                decoration: BoxDecoration(
+                  color: AppColors.cardGrey,
+                  borderRadius: BorderRadius.circular(15),
+                  border: Border.all(color: Colors.grey.shade200),
+                ),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.description_outlined,
+                      size: 60,
+                      color: Colors.grey.shade400,
+                    ),
+                    const SizedBox(height: 15),
+                    const Text(
+                      "No visit summaries yet",
+                      style: TextStyle(fontSize: 18, color: AppColors.textGrey),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
-        title: const Text(
-          "Visit Summaries",
-          style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
-        ),
-      ),
-      body: const Center(child: Text("No summaries yet. Tap + to create one.")),
-      // The + Button navigation
-      floatingActionButton: FloatingActionButton(
-        backgroundColor: AppColors.primaryBlue,
-        child: const Icon(Icons.add, color: Colors.white),
-        onPressed: () => context.push('/create-summary'),
       ),
     );
   }
