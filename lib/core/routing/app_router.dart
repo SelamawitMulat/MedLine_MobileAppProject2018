@@ -10,11 +10,16 @@ import 'package:med_line/features/home/presentation/screens/patient_portal/patie
 import 'package:med_line/features/home/presentation/screens/patient_portal/visit_history_page.dart';
 // Important Import
 import 'package:med_line/features/home/presentation/screens/patient_portal/check_in.dart';
+import 'package:med_line/features/home/presentation/screens/patient_portal/my_appointments.dart';
 
 class AppRouter {
   static final GoRouter router = GoRouter(
     initialLocation: '/',
     routes: [
+<<<<<<< HEAD
+=======
+      // --- Initial Landing & Auth ---
+>>>>>>> 51198e1ef6e111a6fe6ff0b02a51d392a83eb63d
       GoRoute(path: '/', builder: (context, state) => const LandingScreen()),
       GoRoute(
         path: '/signup',
@@ -45,11 +50,19 @@ class AppRouter {
         path: '/visit-summary',
         builder: (context, state) => const VisitHistoryPage(),
       ),
+<<<<<<< HEAD
 
       // Patient Check-In Route
+=======
+>>>>>>> 51198e1ef6e111a6fe6ff0b02a51d392a83eb63d
       GoRoute(
         path: '/check-in',
         builder: (context, state) => const CheckInScreen(),
+      ),
+      // Path is correctly spelled here
+      GoRoute(
+        path: '/my-appointments',
+        builder: (context, state) => const MyAppointmentsScreen(),
       ),
     ],
   );
