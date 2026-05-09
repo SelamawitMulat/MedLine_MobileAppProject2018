@@ -2,8 +2,37 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:med_line/core/constants/app_colors.dart';
 
-class QueueManagementScreen extends StatelessWidget {
+class QueueManagementScreen extends StatefulWidget {
   const QueueManagementScreen({super.key});
+
+  @override
+  State<QueueManagementScreen> createState() => _QueueManagementScreenState();
+}
+
+class _QueueManagementScreenState extends State<QueueManagementScreen> {
+  bool _isPatientInRoom = false;
+  final String _currentPatient = "John Doe";
+
+  // MUCH softer green: Very low opacity background with a matching dark green text
+  final Color _ultraSoftGreenBg = Colors.green.withOpacity(0.12);
+  final Color _deepGreenText = Colors.green.shade800;
+
+  void _handleCallIn() {
+    setState(() {
+      _isPatientInRoom = true;
+    });
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          "Notification sent to $_currentPatient.",
+          style: TextStyle(color: _deepGreenText),
+        ),
+        backgroundColor: _ultraSoftGreenBg,
+        duration: const Duration(seconds: 2),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -26,33 +55,61 @@ class QueueManagementScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Next Patient Card
+            // --- NEXT PATIENT SECTION ---
             Container(
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(15),
-                border: Border.all(color: Colors.grey.shade200),
+                border: Border.all(color: Colors.grey.shade100),
               ),
               child: Column(
                 children: [
-                  const Text(
-                    "Next Patient",
-                    style: TextStyle(color: Colors.grey),
+                  Text(
+                    _isPatientInRoom ? "Currently Serving" : "Next Patient",
+                    style: const TextStyle(color: Colors.grey),
                   ),
-                  const Text(
-                    "John Doe",
-                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                  const SizedBox(height: 5),
+                  Text(
+                    _currentPatient,
+                    style: const TextStyle(
+                      fontSize: 26,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                   const Text("10:00", style: TextStyle(color: Colors.grey)),
-                  const SizedBox(height: 15),
-                  ElevatedButton.icon(
-                    onPressed: () {},
-                    icon: const Icon(Icons.call),
-                    label: const Text("Call In Patient"),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.greenAccent.shade400,
-                      minimumSize: const Size(double.infinity, 50),
+                  const SizedBox(height: 20),
+
+                  SizedBox(
+                    width: double.infinity,
+                    height: 55,
+                    child: ElevatedButton.icon(
+                      onPressed: _isPatientInRoom ? null : _handleCallIn,
+                      icon: Icon(
+                        Icons.call,
+                        color: _isPatientInRoom ? Colors.grey : _deepGreenText,
+                      ),
+                      label: Text(
+                        _isPatientInRoom
+                            ? "In Consultation"
+                            : "Call In Patient",
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: _isPatientInRoom
+                              ? Colors.grey
+                              : _deepGreenText,
+                        ),
+                      ),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: _isPatientInRoom
+                            ? Colors.grey.shade100
+                            : _ultraSoftGreenBg,
+                        elevation: 0,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
                     ),
                   ),
                 ],
@@ -64,17 +121,22 @@ class QueueManagementScreen extends StatelessWidget {
               style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
             ),
             const SizedBox(height: 15),
-            // Example Queue Item
-            _buildQueueItem("John Doe", "10:00", "#1"),
-            const SizedBox(height: 10),
-            _buildQueueItem("Jane Wilson", "10:30", "#2"),
+
+            _buildQueueItem("John Doe", "10:00", "#1", true),
+            const SizedBox(height: 12),
+            _buildQueueItem("Jane Wilson", "10:30", "#2", false),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildQueueItem(String name, String time, String queueNum) {
+  Widget _buildQueueItem(
+    String name,
+    String time,
+    String queueNum,
+    bool isCheckedIn,
+  ) {
     return Container(
       padding: const EdgeInsets.all(15),
       decoration: BoxDecoration(
@@ -92,37 +154,73 @@ class QueueManagementScreen extends StatelessWidget {
                 children: [
                   Text(
                     name,
-                    style: const TextStyle(fontWeight: FontWeight.bold),
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                    ),
                   ),
-                  Text(time, style: const TextStyle(color: Colors.grey)),
+                  Row(
+                    children: [
+                      Text(time, style: const TextStyle(color: Colors.grey)),
+                      const SizedBox(width: 8),
+                      Icon(
+                        Icons.circle,
+                        size: 8,
+                        color: isCheckedIn
+                            ? _deepGreenText.withOpacity(0.5)
+                            : Colors.orange.withOpacity(0.5),
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        isCheckedIn ? "Checked In" : "Waiting",
+                        style: TextStyle(
+                          color: isCheckedIn
+                              ? _deepGreenText
+                              : Colors.orange.shade800,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ),
                 ],
               ),
               Text(
                 queueNum,
                 style: const TextStyle(
-                  color: Colors.blue,
+                  color: AppColors.primaryBlue,
                   fontWeight: FontWeight.bold,
+                  fontSize: 18,
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 15),
           Row(
             children: [
               Expanded(
                 child: OutlinedButton(
                   onPressed: () {},
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: Colors.grey,
+                    side: BorderSide(color: Colors.grey.shade200),
+                  ),
                   child: const Text("Skip"),
                 ),
               ),
               const SizedBox(width: 10),
               Expanded(
                 child: ElevatedButton(
-                  onPressed: () {},
+                  onPressed: () => context.push('/create-summary'),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.greenAccent,
+                    backgroundColor: _ultraSoftGreenBg,
+                    foregroundColor: _deepGreenText,
+                    elevation: 0,
                   ),
-                  child: const Text("Complete"),
+                  child: const Text(
+                    "Complete",
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
                 ),
               ),
             ],
