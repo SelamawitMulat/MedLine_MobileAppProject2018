@@ -8,14 +8,14 @@ class PatientPortalScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.scaffoldBg,
+      backgroundColor: Colors.white,
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 10),
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 20),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // --- HEADER ---
+              // --- HEADER WITH DELETE & LOGOUT ---
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -25,17 +25,15 @@ class PatientPortalScreen extends StatelessWidget {
                       Text(
                         "Welcome\nback,",
                         style: TextStyle(
-                          fontSize: 22,
+                          fontSize: 18,
                           fontWeight: FontWeight.bold,
-                          color: AppColors.textBlack,
                         ),
                       ),
                       Text(
                         "John Doe",
                         style: TextStyle(
-                          fontSize: 26,
+                          fontSize: 22,
                           fontWeight: FontWeight.bold,
-                          color: AppColors.textBlack,
                         ),
                       ),
                     ],
@@ -45,30 +43,36 @@ class PatientPortalScreen extends StatelessWidget {
                       IconButton(
                         icon: const Icon(
                           Icons.delete_outline,
-                          color: AppColors.errorRed,
-                          size: 32,
+                          color: Colors.red,
+                          size: 35,
                         ),
-                        onPressed: () {},
+                        onPressed: () {
+                          // Requirement: Delete Account
+                        },
                       ),
                       IconButton(
                         icon: const Icon(
                           Icons.logout,
-                          color: AppColors.textBlack,
-                          size: 32,
+                          color: Colors.black,
+                          size: 35,
                         ),
-                        onPressed: () => context.go('/'),
+                        onPressed: () =>
+                            context.go('/login'), // Requirement: User Logout
                       ),
                     ],
                   ),
                 ],
               ),
-              const SizedBox(height: 30),
+              const SizedBox(height: 25),
 
               // --- NEXT APPOINTMENT CARD ---
               Container(
+                width: double.infinity,
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
-                  color: AppColors.cardGrey,
+                  color: const Color(
+                    0xFFF8F8F8,
+                  ), // Light grey background from image
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Column(
@@ -76,61 +80,47 @@ class PatientPortalScreen extends StatelessWidget {
                   children: [
                     const Row(
                       children: [
-                        Icon(
-                          Icons.access_time_filled,
-                          color: AppColors.primaryBlue,
-                          size: 30,
-                        ),
+                        Icon(Icons.access_time, color: Colors.indigo, size: 28),
                         SizedBox(width: 10),
                         Text(
                           "Next Appointment",
                           style: TextStyle(
-                            fontSize: 20,
+                            color: Colors.indigo,
+                            fontSize: 18,
                             fontWeight: FontWeight.bold,
-                            color: AppColors.primaryBlue,
                           ),
                         ),
                       ],
                     ),
-                    const SizedBox(height: 20),
-                    _buildInfoRow(
+                    const SizedBox(height: 15),
+                    _buildAppointmentDetail(
                       Icons.calendar_today_outlined,
-                      "Wednsday, April 15, 2026",
+                      "Wednesday, April 15, 2026",
                     ),
-                    const SizedBox(height: 15),
-                    _buildInfoRow(Icons.access_time, "10:00 PM"),
-                    const SizedBox(height: 15),
-                    _buildInfoRow(
-                      Icons.groups_outlined,
+                    const SizedBox(height: 10),
+                    _buildAppointmentDetail(Icons.access_time, "10:00 PM"),
+                    const SizedBox(height: 10),
+                    _buildAppointmentDetail(
+                      Icons.group_outlined,
                       "Queue Position : 1",
-                      isBold: true,
                     ),
-                    const SizedBox(height: 25),
+                    const SizedBox(height: 20),
 
-                    // Status Banner
+                    // Requirement: Turn Notification Alert (Position <= 2)
                     Container(
                       width: double.infinity,
-                      padding: const EdgeInsets.symmetric(vertical: 15),
+                      padding: const EdgeInsets.symmetric(vertical: 12),
                       decoration: BoxDecoration(
-                        color: const Color(
-                          0xFFD1F2B9,
-                        ), // Light green from image
-                        borderRadius: BorderRadius.circular(12),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.1),
-                            blurRadius: 4,
-                            offset: const Offset(0, 2),
-                          ),
-                        ],
+                        color: const Color(0xFFD4F1B4), // Soft green from image
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(color: Colors.black12),
                       ),
                       child: const Center(
                         child: Text(
                           "Your turn is coming up soon!",
                           style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w500,
-                            color: Color(0xFF2E4D1A),
+                            fontWeight: FontWeight.bold,
+                            fontSize: 15,
                           ),
                         ),
                       ),
@@ -138,38 +128,42 @@ class PatientPortalScreen extends StatelessWidget {
                   ],
                 ),
               ),
-              const SizedBox(height: 40),
+              const SizedBox(height: 35),
 
-              // --- GRID BUTTONS ---
-              Expanded(
-                child: GridView.count(
-                  crossAxisCount: 2,
-                  crossAxisSpacing: 15,
-                  mainAxisSpacing: 15,
-                  childAspectRatio: 1.3,
-                  children: [
-                    _buildMenuButton(
-                      "Book\nAppointment",
-                      Icons.calendar_month,
-                      AppColors.primaryBlue,
-                    ),
-                    _buildMenuButton(
-                      "My\nAppointments",
-                      Icons.access_time,
-                      AppColors.primaryBlue,
-                    ),
-                    _buildMenuButton(
-                      "Check In",
-                      Icons.groups_outlined,
-                      AppColors.heartBeatGreen,
-                    ),
-                    _buildMenuButton(
-                      "Visit\nHistory",
-                      Icons.assignment_outlined,
-                      AppColors.primaryBlue,
-                    ),
-                  ],
-                ),
+              // --- ACTION GRID ---
+              GridView.count(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                crossAxisCount: 2,
+                mainAxisSpacing: 20,
+                crossAxisSpacing: 20,
+                childAspectRatio: 1.3, // Matches the rectangular shape in image
+                children: [
+                  _actionCard(
+                    "Book\nAppointment",
+                    Icons.calendar_month,
+                    Colors.indigo,
+                    () => context.push('/patient-portal/appointment-booking'),
+                  ),
+                  _actionCard(
+                    "My\nAppointments",
+                    Icons.access_time,
+                    Colors.indigo,
+                    () => context.push('/patient-portal/my-appointments'),
+                  ),
+                  _actionCard(
+                    "Check In",
+                    Icons.group_outlined,
+                    Colors.green,
+                    () => context.push('/patient-portal/check-in'),
+                  ),
+                  _actionCard(
+                    "Visit\nHistory",
+                    Icons.description_outlined,
+                    Colors.indigo,
+                    () => context.push('/patient-portal/visit-summary'),
+                  ),
+                ],
               ),
             ],
           ),
@@ -178,49 +172,53 @@ class PatientPortalScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildInfoRow(IconData icon, String text, {bool isBold = false}) {
+  Widget _buildAppointmentDetail(IconData icon, String text) {
     return Row(
       children: [
-        Icon(icon, color: AppColors.textDark, size: 24),
-        const SizedBox(width: 15),
+        Icon(icon, color: Colors.black54, size: 22),
+        const SizedBox(width: 12),
         Text(
           text,
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: isBold ? FontWeight.bold : FontWeight.w400,
-            color: AppColors.textDark,
-          ),
+          style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
         ),
       ],
     );
   }
 
-  Widget _buildMenuButton(String title, IconData icon, Color iconColor) {
-    return Container(
-      decoration: BoxDecoration(
-        color: AppColors.cardGrey,
-        borderRadius: BorderRadius.circular(15),
-      ),
-      child: Stack(
-        children: [
-          Positioned(
-            top: 15,
-            right: 15,
-            child: Icon(icon, color: iconColor, size: 35),
-          ),
-          Positioned(
-            bottom: 15,
-            left: 15,
-            child: Text(
-              title,
-              style: const TextStyle(
-                fontSize: 15,
-                fontWeight: FontWeight.bold,
-                color: AppColors.textBlack,
+  Widget _actionCard(
+    String title,
+    IconData icon,
+    Color iconColor,
+    VoidCallback onTap,
+  ) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(18),
+      child: Container(
+        padding: const EdgeInsets.all(15),
+        decoration: BoxDecoration(
+          color: const Color(0xFFEEEEEE), // Muted grey button background
+          borderRadius: BorderRadius.circular(18),
+        ),
+        child: Stack(
+          children: [
+            Align(
+              alignment: Alignment.bottomLeft,
+              child: Text(
+                title,
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 15,
+                  height: 1.2,
+                ),
               ),
             ),
-          ),
-        ],
+            Align(
+              alignment: Alignment.topRight,
+              child: Icon(icon, color: iconColor, size: 35),
+            ),
+          ],
+        ),
       ),
     );
   }

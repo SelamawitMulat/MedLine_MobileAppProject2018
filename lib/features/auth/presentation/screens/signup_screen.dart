@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:med_line/core/constants/app_colors.dart';
-import 'package:med_line/core/widgets/primary_button.dart';
 
 class SignupScreen extends StatefulWidget {
   const SignupScreen({super.key});
@@ -11,36 +10,16 @@ class SignupScreen extends StatefulWidget {
 }
 
 class _SignupScreenState extends State<SignupScreen> {
-  // Key to manage the form state and trigger validation
-  final _formKey = GlobalKey<FormState>();
-
-  // Controllers to capture user input
-  final _nameController = TextEditingController();
-  final _emailController = TextEditingController();
-  final _passwordController = TextEditingController();
-  final _confirmPasswordController = TextEditingController();
-
-  String _selectedRole = "Patient";
-  bool _isPasswordVisible = false;
-  bool _isConfirmVisible = false;
-
-  @override
-  void dispose() {
-    _nameController.dispose();
-    _emailController.dispose();
-    _passwordController.dispose();
-    _confirmPasswordController.dispose();
-    super.dispose();
-  }
+  // Requirement: Role-Based Access Control
+  String _selectedRole = 'Patient';
 
   void _handleSignup() {
-    // currentState!.validate() calls every 'validator' function in the TextFormFields
-    if (_formKey.currentState!.validate()) {
-      if (_selectedRole == "Doctor") {
-        context.go('/doctor-portal');
-      } else {
-        context.go('/patient-portal');
-      }
+    // In a real app, you would save this user data to your local/cloud DB here.
+    // For now, we navigate based on the chosen role.
+    if (_selectedRole == 'Patient') {
+      context.go('/patient-portal');
+    } else {
+      context.go('/doctor-portal');
     }
   }
 
@@ -52,197 +31,146 @@ class _SignupScreenState extends State<SignupScreen> {
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: AppColors.textBlack),
+          icon: const Icon(Icons.arrow_back, color: Colors.black),
           onPressed: () => context.pop(),
         ),
       ),
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 10),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              children: [
-                // --- LOGO & TITLE ---
-                const Icon(
-                  Icons.stacked_line_chart,
-                  color: AppColors.primaryBlue,
-                  size: 60,
-                ),
-                const SizedBox(height: 10),
-                const Text(
-                  "Create Account",
-                  style: TextStyle(
-                    fontSize: 28,
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.textBlack,
-                  ),
-                ),
-                const SizedBox(height: 30),
+          padding: const EdgeInsets.symmetric(horizontal: 30.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                "Create Account",
+                style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
+              ),
+              const Text(
+                "Join MedLine today",
+                style: TextStyle(color: Colors.grey),
+              ),
+              const SizedBox(height: 40),
 
-                // --- FULL NAME ---
-                _buildFieldLabel("Full Name"),
-                TextFormField(
-                  controller: _nameController,
-                  decoration: _inputDecoration("John Doe"),
-                  validator: (value) {
-                    if (value == null || value.trim().isEmpty) {
-                      return "Name is required";
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 20),
+              _buildInputLabel("Full Name"),
+              _buildTextField("Enter your full name", Icons.person_outline),
 
-                // --- EMAIL ---
-                _buildFieldLabel("Email Address"),
-                TextFormField(
-                  controller: _emailController,
-                  keyboardType: TextInputType.emailAddress,
-                  decoration: _inputDecoration("example@mail.com"),
-                  validator: (value) {
-                    if (value == null || value.trim().isEmpty) {
-                      return "Email is required";
-                    }
-                    if (!value.contains('@')) {
-                      return "Enter a valid email with @";
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 20),
+              const SizedBox(height: 20),
+              _buildInputLabel("Email"),
+              _buildTextField("Enter your email", Icons.email_outlined),
 
-                // --- PASSWORD ---
-                _buildFieldLabel("Password"),
-                TextFormField(
-                  controller: _passwordController,
-                  obscureText: !_isPasswordVisible,
-                  decoration: _inputDecoration("Min. 6 characters").copyWith(
-                    suffixIcon: IconButton(
-                      icon: Icon(
-                        _isPasswordVisible
-                            ? Icons.visibility
-                            : Icons.visibility_off,
-                      ),
-                      onPressed: () => setState(
-                        () => _isPasswordVisible = !_isPasswordVisible,
-                      ),
-                    ),
-                  ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return "Password is required";
-                    }
-                    if (value.length < 6) {
-                      return "Must be at least 6 characters";
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 20),
+              const SizedBox(height: 20),
+              _buildInputLabel("Password"),
+              _buildTextField(
+                "Create a password",
+                Icons.lock_outline,
+                isPassword: true,
+              ),
 
-                // --- CONFIRM PASSWORD ---
-                _buildFieldLabel("Confirm Password"),
-                TextFormField(
-                  controller: _confirmPasswordController,
-                  obscureText: !_isConfirmVisible,
-                  decoration: _inputDecoration("Repeat password").copyWith(
-                    suffixIcon: IconButton(
-                      icon: Icon(
-                        _isConfirmVisible
-                            ? Icons.visibility
-                            : Icons.visibility_off,
-                      ),
-                      onPressed: () => setState(
-                        () => _isConfirmVisible = !_isConfirmVisible,
-                      ),
-                    ),
-                  ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return "Confirmation is required";
-                    }
-                    if (value != _passwordController.text) {
-                      return "Passwords do not match";
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 25),
+              const SizedBox(height: 30),
+              const Text(
+                "I am a:",
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+              ),
+              const SizedBox(height: 10),
 
-                // --- ROLE SELECTION ---
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: _buildFieldLabel("I am a:"),
+              // --- ROLE SELECTION (Radio Buttons) ---
+              Container(
+                decoration: BoxDecoration(
+                  color: AppColors.cardGrey,
+                  borderRadius: BorderRadius.circular(12),
                 ),
-                Row(
+                child: Row(
                   children: [
-                    Radio<String>(
-                      value: "Patient",
-                      groupValue: _selectedRole,
-                      activeColor: AppColors.primaryBlue,
-                      onChanged: (val) {
-                        setState(() {
-                          _selectedRole = val!;
-                        });
-                      },
+                    Expanded(
+                      child: RadioListTile<String>(
+                        title: const Text("Patient"),
+                        value: 'Patient',
+                        activeColor: AppColors.primaryBlue,
+                        groupValue: _selectedRole,
+                        onChanged: (value) =>
+                            setState(() => _selectedRole = value!),
+                      ),
                     ),
-                    const Text("Patient"),
-                    const SizedBox(width: 20),
-                    Radio<String>(
-                      value: "Doctor",
-                      groupValue: _selectedRole,
-                      activeColor: AppColors.primaryBlue,
-                      onChanged: (val) {
-                        setState(() {
-                          _selectedRole = val!;
-                        });
-                      },
+                    Expanded(
+                      child: RadioListTile<String>(
+                        title: const Text("Doctor"),
+                        value: 'Doctor',
+                        activeColor: AppColors.primaryBlue,
+                        groupValue: _selectedRole,
+                        onChanged: (value) =>
+                            setState(() => _selectedRole = value!),
+                      ),
                     ),
-                    const Text("Doctor"),
                   ],
                 ),
-                const SizedBox(height: 35),
+              ),
 
-                // --- SIGNUP BUTTON ---
-                PrimaryButton(text: "Sign Up", onPressed: _handleSignup),
-                const SizedBox(height: 20),
-              ],
-            ),
+              const SizedBox(height: 40),
+              SizedBox(
+                width: double.infinity,
+                height: 55,
+                child: ElevatedButton(
+                  onPressed: _handleSignup,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primaryBlue,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  child: const Text(
+                    "Sign Up",
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 20),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Text("Already have an account?"),
+                  TextButton(
+                    onPressed: () => context.pop(),
+                    child: const Text("Login"),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 30),
+            ],
           ),
         ),
       ),
     );
   }
 
-  // --- UI HELPERS ---
-  Widget _buildFieldLabel(String label) {
+  Widget _buildInputLabel(String label) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 8.0),
-      child: Align(
-        alignment: Alignment.centerLeft,
-        child: Text(
-          label,
-          style: const TextStyle(
-            fontWeight: FontWeight.bold,
-            color: AppColors.darkText,
-          ),
-        ),
-      ),
+      child: Text(label, style: const TextStyle(fontWeight: FontWeight.w600)),
     );
   }
 
-  InputDecoration _inputDecoration(String hint) {
-    return InputDecoration(
-      hintText: hint,
-      filled: true,
-      fillColor: AppColors.cardGrey,
-      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide.none,
+  Widget _buildTextField(
+    String hint,
+    IconData icon, {
+    bool isPassword = false,
+  }) {
+    return TextField(
+      obscureText: isPassword,
+      decoration: InputDecoration(
+        hintText: hint,
+        prefixIcon: Icon(icon, color: Colors.grey),
+        filled: true,
+        fillColor: AppColors.cardGrey,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide.none,
+        ),
       ),
-      errorStyle: const TextStyle(color: AppColors.errorRed),
     );
   }
 }
