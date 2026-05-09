@@ -15,7 +15,7 @@ class PatientPortalScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Header with Welcome and Account Actions
+              // header with welcome messagen acc actions
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -62,7 +62,7 @@ class PatientPortalScreen extends StatelessWidget {
               ),
               const SizedBox(height: 25),
 
-              // Queue Status Card
+              // Queue status card
               Container(
                 width: double.infinity,
                 padding: const EdgeInsets.all(20),
