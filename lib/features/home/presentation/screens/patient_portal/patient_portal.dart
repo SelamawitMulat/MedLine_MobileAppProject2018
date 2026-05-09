@@ -15,11 +15,7 @@ class PatientPortalScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-<<<<<<< HEAD
-              // header with welcome message & actions
-=======
-              // Header
->>>>>>> 51198e1ef6e111a6fe6ff0b02a51d392a83eb63d
+              // header with welcome messagen acc actions
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -38,17 +34,12 @@ class PatientPortalScreen extends StatelessWidget {
                   Row(
                     children: [
                       IconButton(
-<<<<<<< HEAD
                         icon: const Icon(
                           Icons.delete_outline,
                           color: AppColors.errorRed,
                           size: 32,
                         ),
-=======
-                        icon: const Icon(Icons.delete_outline,
-                            color: AppColors.errorRed, size: 32),
->>>>>>> 51198e1ef6e111a6fe6ff0b02a51d392a83eb63d
-                        onPressed: () {},
+                        onPressed: () {}, // Account deletion icon
                       ),
 
                       IconButton(
@@ -63,7 +54,6 @@ class PatientPortalScreen extends StatelessWidget {
 
               const SizedBox(height: 25),
 
-<<<<<<< HEAD
               // Queue status card
               Container(
                 width: double.infinity,
@@ -93,20 +83,14 @@ class PatientPortalScreen extends StatelessWidget {
                         ),
                       ],
                     ),
-
                     const SizedBox(height: 15),
-
                     _detailRow(
                       Icons.calendar_today,
                       "Wednesday, April 15, 2026",
                     ),
-
                     _detailRow(Icons.access_time, "10:00 PM"),
-
                     _detailRow(Icons.people_outline, "Queue Position : 1"),
-
                     const SizedBox(height: 15),
-
                     Container(
                       width: double.infinity,
                       padding: const EdgeInsets.symmetric(vertical: 12),
@@ -124,10 +108,6 @@ class PatientPortalScreen extends StatelessWidget {
                   ],
                 ),
               ),
-
-=======
-              _buildAppointmentCard(),
->>>>>>> 51198e1ef6e111a6fe6ff0b02a51d392a83eb63d
               const SizedBox(height: 35),
 
               // Navigation Grid
@@ -139,50 +119,29 @@ class PatientPortalScreen extends StatelessWidget {
                 crossAxisSpacing: 15,
                 childAspectRatio: 1.4,
                 children: [
-<<<<<<< HEAD
                   _actionTile(
                     "Book\nAppointment",
                     Icons.calendar_today,
                     AppColors.primaryBlue,
                     () {},
                   ),
-
-=======
-                  _actionTile("Book\nAppointment", Icons.calendar_today,
-                      AppColors.primaryBlue, () {}),
-                  // TYPO FIXED: path is now '/my-appointments'
->>>>>>> 51198e1ef6e111a6fe6ff0b02a51d392a83eb63d
                   _actionTile(
                     "My\nAppointments",
                     Icons.access_time,
                     AppColors.secondaryPurple,
                     () => context.push('/my-appointments'),
                   ),
-<<<<<<< HEAD
-
-                  // FIXED: Added the navigation for Check In
                   _actionTile(
                     "Check In",
                     Icons.people_outline,
                     AppColors.successGreen,
-                    () => context.push('/check-in'),
+                    () {},
                   ),
-
-                  _actionTile(
-                    "Visit\nHistory",
-                    Icons.description_outlined,
-                    AppColors.accentBlue,
-                    () => context.push('/visit-summary'),
-                  ),
-=======
-                  _actionTile("Check In", Icons.people_outline,
-                      AppColors.successGreen, () => context.push('/check-in')),
                   _actionTile(
                       "Visit\nHistory",
                       Icons.description_outlined,
                       AppColors.accentBlue,
                       () => context.push('/visit-summary')),
->>>>>>> 51198e1ef6e111a6fe6ff0b02a51d392a83eb63d
                 ],
               ),
             ],
@@ -192,21 +151,6 @@ class PatientPortalScreen extends StatelessWidget {
     );
   }
 
-<<<<<<< HEAD
-  Widget _detailRow(IconData icon, String text) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 8.0),
-      child: Row(
-        children: [
-          Icon(icon, color: AppColors.textGrey, size: 20),
-
-          const SizedBox(width: 10),
-
-          Text(
-            text,
-            style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
-          ),
-=======
   Widget _buildAppointmentCard() {
     return Container(
       width: double.infinity,
@@ -234,27 +178,24 @@ class PatientPortalScreen extends StatelessWidget {
           _detailRow(Icons.calendar_today, "Wednesday, April 15, 2026"),
           _detailRow(Icons.access_time, "10:00 PM"),
           _detailRow(Icons.people_outline, "Queue Position : 1"),
->>>>>>> 51198e1ef6e111a6fe6ff0b02a51d392a83eb63d
         ],
       ),
     );
   }
-<<<<<<< HEAD
-=======
 
   Widget _detailRow(IconData icon, String text) => Padding(
-        padding: const EdgeInsets.only(bottom: 8.0),
-        child: Row(
-          children: [
-            Icon(icon, color: AppColors.textGrey, size: 20),
-            const SizedBox(width: 10),
-            Text(text,
-                style:
-                    const TextStyle(fontSize: 15, fontWeight: FontWeight.w500)),
-          ],
+    padding: const EdgeInsets.only(bottom: 8.0),
+    child: Row(
+      children: [
+        Icon(icon, color: AppColors.textGrey, size: 20),
+        const SizedBox(width: 10),
+        Text(
+          text,
+          style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
         ),
-      );
->>>>>>> 51198e1ef6e111a6fe6ff0b02a51d392a83eb63d
+      ],
+    ),
+  );
 
   Widget _actionTile(
       String title, IconData icon, Color color, VoidCallback onTap) {
@@ -270,7 +211,6 @@ class PatientPortalScreen extends StatelessWidget {
         child: Stack(
           children: [
             Align(
-<<<<<<< HEAD
               alignment: Alignment.bottomLeft,
               child: Text(
                 title,
@@ -280,13 +220,6 @@ class PatientPortalScreen extends StatelessWidget {
                 ),
               ),
             ),
-
-=======
-                alignment: Alignment.bottomLeft,
-                child: Text(title,
-                    style: const TextStyle(
-                        fontWeight: FontWeight.bold, fontSize: 14))),
->>>>>>> 51198e1ef6e111a6fe6ff0b02a51d392a83eb63d
             Align(
                 alignment: Alignment.topRight,
                 child: Icon(icon, color: color, size: 30)),
