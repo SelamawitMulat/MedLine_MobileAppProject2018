@@ -15,15 +15,14 @@ import 'package:med_line/features/home/presentation/screens/doctor_portal/visit_
 import 'package:med_line/features/home/presentation/screens/patient_portal/patient_portal.dart';
 import 'package:med_line/features/home/presentation/screens/patient_portal/visit_history_page.dart';
 import 'package:med_line/features/home/presentation/screens/patient_portal/check_in.dart';
+import 'package:med_line/features/home/presentation/screens/patient_portal/my_appointments.dart';
 
 class AppRouter {
   static final GoRouter router = GoRouter(
     initialLocation: '/',
     routes: [
-      // --- Initial Landing ---
+      // --- Initial Landing & Auth ---
       GoRoute(path: '/', builder: (context, state) => const LandingScreen()),
-
-      // --- Authentication ---
       GoRoute(
         path: '/signup',
         builder: (context, state) => const SignupScreen(),
@@ -43,7 +42,6 @@ class AppRouter {
         path: '/create-summary',
         builder: (context, state) => const VisitSummaryForm(),
       ),
-      // Note: This is the Doctor's version of the summary list
       GoRoute(
         path: '/doctor-visit-summary',
         builder: (context, state) => const VisitSummaryPage(),
@@ -54,15 +52,18 @@ class AppRouter {
         path: '/patient-portal',
         builder: (context, state) => const PatientPortalScreen(),
       ),
-      // Read-only history for patients (Matches image_912e16.png)
       GoRoute(
         path: '/visit-summary',
         builder: (context, state) => const VisitHistoryPage(),
       ),
-      // Check-in status page (Matches image_8fcd3b.png)
       GoRoute(
         path: '/check-in',
         builder: (context, state) => const CheckInScreen(),
+      ),
+      // Path is correctly spelled here
+      GoRoute(
+        path: '/my-appointments',
+        builder: (context, state) => const MyAppointmentsScreen(),
       ),
     ],
   );
