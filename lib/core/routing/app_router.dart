@@ -4,6 +4,7 @@ import 'package:med_line/features/auth/presentation/screens/signup_screen.dart';
 import 'package:med_line/features/auth/presentation/screens/login_screen.dart';
 import 'package:med_line/features/home/presentation/screens/doctor_portal/doctor_portal.dart';
 import 'package:med_line/features/home/presentation/screens/patient_portal/patient_portal.dart';
+import 'package:med_line/features/home/presentation/screens/doctor_portal/queue_management.dart';
 
 class AppRouter {
   static final GoRouter router = GoRouter(
@@ -22,6 +23,12 @@ class AppRouter {
       GoRoute(
         path: '/patient-portal',
         builder: (context, state) => const PatientPortalScreen(),
+      ),
+
+      // New route added here
+      GoRoute(
+        path: '/queue-management',
+        builder: (context, state) => const QueueManagementScreen(),
       ),
     ],
   );
