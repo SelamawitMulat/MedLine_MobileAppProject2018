@@ -15,7 +15,7 @@ class PatientPortalScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Header Section
+              // Header
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -48,7 +48,6 @@ class PatientPortalScreen extends StatelessWidget {
               ),
               const SizedBox(height: 25),
 
-              // Appointment Info Card
               _buildAppointmentCard(),
               const SizedBox(height: 35),
 
@@ -61,16 +60,19 @@ class PatientPortalScreen extends StatelessWidget {
                 crossAxisSpacing: 15,
                 childAspectRatio: 1.4,
                 children: [
-                  _actionTile("Book\nAppointment", Icons.calendar_today,
-                      AppColors.primaryBlue, () {} // Placeholder
-                      ),
+                  // FIXED: Now navigates to book-appointment
+                  _actionTile(
+                    "Book\nAppointment",
+                    Icons.calendar_today,
+                    AppColors.primaryBlue,
+                    () => context.push('/book-appointment'),
+                  ),
                   _actionTile(
                     "My\nAppointments",
                     Icons.access_time,
                     AppColors.secondaryPurple,
                     () => context.push('/my-appointments'),
                   ),
-                  // FIXED: This now pushes to the '/check-in' route
                   _actionTile(
                     "Check In",
                     Icons.people_outline,

@@ -16,6 +16,7 @@ import 'package:med_line/features/home/presentation/screens/patient_portal/patie
 import 'package:med_line/features/home/presentation/screens/patient_portal/visit_history_page.dart';
 import 'package:med_line/features/home/presentation/screens/patient_portal/check_in.dart';
 import 'package:med_line/features/home/presentation/screens/patient_portal/my_appointments.dart';
+import 'package:med_line/features/home/presentation/screens/patient_portal/appointment_booking.dart';
 
 class AppRouter {
   static final GoRouter router = GoRouter(
@@ -24,49 +25,41 @@ class AppRouter {
       // --- Initial Landing & Auth ---
       GoRoute(path: '/', builder: (context, state) => const LandingScreen()),
       GoRoute(
-        path: '/signup',
-        builder: (context, state) => const SignupScreen(),
-      ),
+          path: '/signup', builder: (context, state) => const SignupScreen()),
       GoRoute(path: '/login', builder: (context, state) => const LoginScreen()),
 
       // --- Doctor Portal Section ---
       GoRoute(
-        path: '/doctor-portal',
-        builder: (context, state) => const DoctorPortalScreen(),
-      ),
+          path: '/doctor-portal',
+          builder: (context, state) => const DoctorPortalScreen()),
       GoRoute(
-        path: '/queue-management',
-        builder: (context, state) => const QueueManagementScreen(),
-      ),
+          path: '/queue-management',
+          builder: (context, state) => const QueueManagementScreen()),
       GoRoute(
-        path: '/create-summary',
-        builder: (context, state) => const VisitSummaryForm(),
-      ),
+          path: '/create-summary',
+          builder: (context, state) => const VisitSummaryForm()),
       GoRoute(
-        path: '/doctor-visit-summary',
-        builder: (context, state) => const VisitSummaryPage(),
-      ),
+          path: '/doctor-visit-summary',
+          builder: (context, state) => const VisitSummaryPage()),
 
       // --- Patient Portal Section ---
       GoRoute(
-        path: '/patient-portal',
-        builder: (context, state) => const PatientPortalScreen(),
-      ),
+          path: '/patient-portal',
+          builder: (context, state) => const PatientPortalScreen()),
       GoRoute(
-        path: '/visit-summary',
-        builder: (context, state) => const VisitHistoryPage(),
-      ),
+          path: '/visit-summary',
+          builder: (context, state) => const VisitHistoryPage()),
+      GoRoute(
+          path: '/check-in',
+          builder: (context, state) => const CheckInScreen()),
+      GoRoute(
+          path: '/my-appointments',
+          builder: (context, state) => const MyAppointmentsScreen()),
 
-      // Patient Check-In Route
+      // New Booking Route
       GoRoute(
-        path: '/check-in',
-        builder: (context, state) => const CheckInScreen(),
-      ),
-
-      // Appointments & Rescheduling Route
-      GoRoute(
-        path: '/my-appointments',
-        builder: (context, state) => const MyAppointmentsScreen(),
+        path: '/book-appointment',
+        builder: (context, state) => const BookAppointmentScreen(),
       ),
     ],
   );
