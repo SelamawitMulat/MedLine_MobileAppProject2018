@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:med_line/core/constants/app_colors.dart';
+import 'package:med_line/core/widgets/primary_button.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -10,16 +11,19 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  final _loginFormKey = GlobalKey<FormState>();
-  String _selectedRole = 'Patient';
+  final _formKey = GlobalKey<FormState>();
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
+
+  String _selectedRole = "Patient";
+  bool _isPasswordVisible = false;
 
   void _handleLogin() {
-    // Only navigates if the form passes all validation checks
-    if (_loginFormKey.currentState!.validate()) {
-      if (_selectedRole == 'Patient') {
-        context.go('/patient-portal');
-      } else {
+    if (_formKey.currentState!.validate()) {
+      if (_selectedRole == "Doctor") {
         context.go('/doctor-portal');
+      } else {
+        context.go('/patient-portal');
       }
     }
   }
@@ -28,73 +32,161 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.scaffoldBg,
+
+      // ✅ BACK BUTTON RESTORED
+      appBar: AppBar(
+        backgroundColor: AppColors.scaffoldBg,
+        elevation: 0,
+        iconTheme: const IconThemeData(color: Colors.black),
+      ),
+
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.all(30.0),
+          padding: const EdgeInsets.all(30),
           child: Form(
-            key: _loginFormKey,
+            key: _formKey,
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const SizedBox(height: 50),
+                const Icon(
+                  Icons.stacked_line_chart,
+                  color: AppColors.primaryBlue,
+                  size: 80,
+                ),
                 const Text(
-                  "Login",
+                  "MedLine",
                   style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
                 ),
+                const Text(
+                  "Clinical Appointment Management",
+                  style: TextStyle(color: AppColors.textGrey),
+                ),
+
                 const SizedBox(height: 40),
 
-                _buildLabel("Email"),
-                TextFormField(
-                  decoration: _inputDecoration(
-                    "Enter your email",
-                    Icons.email_outlined,
+                Container(
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    color: AppColors.cardGrey,
+                    borderRadius: BorderRadius.circular(20),
                   ),
-                  validator: (value) => (value == null || value.isEmpty)
-                      ? "Email is required"
-                      : null,
-                ),
-
-                const SizedBox(height: 20),
-                _buildLabel("Password"),
-                TextFormField(
-                  obscureText: true,
-                  decoration: _inputDecoration(
-                    "Enter your password",
-                    Icons.lock_outline,
-                  ),
-                  validator: (value) => (value == null || value.length < 6)
-                      ? "Password must be 6+ characters"
-                      : null,
-                ),
-
-                const SizedBox(height: 30),
-                const Text(
-                  "Select Role",
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                ),
-                const SizedBox(height: 10),
-                _roleSelector(),
-
-                const SizedBox(height: 50),
-                SizedBox(
-                  width: double.infinity,
-                  height: 55,
-                  child: ElevatedButton(
-                    onPressed: _handleLogin,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primaryBlue,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        "Email",
+                        style: TextStyle(fontWeight: FontWeight.bold),
                       ),
-                    ),
-                    child: const Text(
-                      "Login",
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
+                      const SizedBox(height: 8),
+
+                      TextFormField(
+                        controller: _emailController,
+                        decoration: const InputDecoration(
+                          hintText: "Enter your email",
+                          filled: true,
+                          fillColor: Colors.white,
+                          border: OutlineInputBorder(
+                            borderSide: BorderSide.none,
+                          ),
+                        ),
+                        validator: (v) {
+                          if (v == null || v.isEmpty) {
+                            return 'Enter your email';
+                          }
+                          if (!v.contains('@')) {
+                            return 'Enter a valid email';
+                          }
+                          return null;
+                        },
                       ),
-                    ),
+
+                      const SizedBox(height: 20),
+
+                      const Text(
+                        "Password",
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      const SizedBox(height: 8),
+
+                      TextFormField(
+                        controller: _passwordController,
+                        obscureText: !_isPasswordVisible,
+                        decoration: InputDecoration(
+                          hintText: "Enter your password",
+                          filled: true,
+                          fillColor: Colors.white,
+                          border: const OutlineInputBorder(
+                            borderSide: BorderSide.none,
+                          ),
+                          suffixIcon: IconButton(
+                            icon: Icon(
+                              _isPasswordVisible
+                                  ? Icons.visibility
+                                  : Icons.visibility_off,
+                            ),
+                            onPressed: () {
+                              setState(() {
+                                _isPasswordVisible = !_isPasswordVisible;
+                              });
+                            },
+                          ),
+                        ),
+                        validator: (v) {
+                          if (v == null || v.isEmpty) {
+                            return 'Enter your password';
+                          }
+                          if (v.length < 6) {
+                            return 'Password must be at least 6 characters';
+                          }
+                          return null;
+                        },
+                      ),
+
+                      const SizedBox(height: 20),
+
+                      const Text(
+                        "Login as:",
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+
+                      Row(
+                        children: [
+                          Radio<String>(
+                            value: "Patient",
+                            groupValue: _selectedRole,
+                            onChanged: (v) {
+                              setState(() {
+                                _selectedRole = v!;
+                              });
+                            },
+                          ),
+                          const Text("Patient"),
+
+                          Radio<String>(
+                            value: "Doctor",
+                            groupValue: _selectedRole,
+                            onChanged: (v) {
+                              setState(() {
+                                _selectedRole = v!;
+                              });
+                            },
+                          ),
+                          const Text("Doctor"),
+                        ],
+                      ),
+
+                      const SizedBox(height: 20),
+
+                      PrimaryButton(text: "Login", onPressed: _handleLogin),
+
+                      const SizedBox(height: 15),
+
+                      Center(
+                        child: TextButton(
+                          onPressed: () => context.push('/signup'),
+                          child: const Text("Don't have an account? Sign up"),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ],
@@ -104,49 +196,4 @@ class _LoginScreenState extends State<LoginScreen> {
       ),
     );
   }
-
-  InputDecoration _inputDecoration(String hint, IconData icon) =>
-      InputDecoration(
-        hintText: hint,
-        prefixIcon: Icon(icon, color: Colors.grey),
-        filled: true,
-        fillColor: AppColors.cardGrey,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide.none,
-        ),
-        errorStyle: const TextStyle(color: AppColors.errorRed),
-      );
-
-  Widget _buildLabel(String label) => Padding(
-    padding: const EdgeInsets.only(bottom: 8.0),
-    child: Text(label, style: const TextStyle(fontWeight: FontWeight.w600)),
-  );
-
-  Widget _roleSelector() => Container(
-    decoration: BoxDecoration(
-      color: AppColors.cardGrey,
-      borderRadius: BorderRadius.circular(12),
-    ),
-    child: Row(
-      children: [
-        Expanded(
-          child: RadioListTile<String>(
-            title: const Text("Patient"),
-            value: 'Patient',
-            groupValue: _selectedRole,
-            onChanged: (v) => setState(() => _selectedRole = v!),
-          ),
-        ),
-        Expanded(
-          child: RadioListTile<String>(
-            title: const Text("Doctor"),
-            value: 'Doctor',
-            groupValue: _selectedRole,
-            onChanged: (v) => setState(() => _selectedRole = v!),
-          ),
-        ),
-      ],
-    ),
-  );
 }
