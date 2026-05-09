@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-// This import will now be used, so the yellow line will disappear!
 import 'package:med_line/core/constants/app_colors.dart';
 
 class PatientPortalScreen extends StatelessWidget {
@@ -9,13 +8,14 @@ class PatientPortalScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.scaffoldBg, // Used AppColors
+      backgroundColor: AppColors.scaffoldBg,
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 20),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // Header
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -44,16 +44,16 @@ class PatientPortalScreen extends StatelessWidget {
                         icon: const Icon(
                           Icons.delete_outline,
                           color: AppColors.errorRed,
-                          size: 35,
-                        ), // Used AppColors
+                          size: 32,
+                        ),
                         onPressed: () {},
                       ),
                       IconButton(
                         icon: const Icon(
                           Icons.logout,
                           color: AppColors.textBlack,
-                          size: 35,
-                        ), // Used AppColors
+                          size: 32,
+                        ),
                         onPressed: () => context.go('/login'),
                       ),
                     ],
@@ -62,11 +62,12 @@ class PatientPortalScreen extends StatelessWidget {
               ),
               const SizedBox(height: 25),
 
+              // Appointment Card
               Container(
                 width: double.infinity,
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
-                  color: AppColors.cardGrey, // Used AppColors
+                  color: AppColors.cardGrey,
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Column(
@@ -75,10 +76,10 @@ class PatientPortalScreen extends StatelessWidget {
                     const Row(
                       children: [
                         Icon(
-                          Icons.access_time,
+                          Icons.access_time_filled,
                           color: AppColors.secondaryPurple,
                           size: 28,
-                        ), // Used AppColors
+                        ),
                         SizedBox(width: 10),
                         Text(
                           "Next Appointment",
@@ -91,36 +92,24 @@ class PatientPortalScreen extends StatelessWidget {
                       ],
                     ),
                     const SizedBox(height: 15),
-                    _buildAppointmentDetail(
-                      Icons.calendar_today_outlined,
+                    _detailRow(
+                      Icons.calendar_today,
                       "Wednesday, April 15, 2026",
                     ),
-                    const SizedBox(height: 10),
-                    _buildAppointmentDetail(Icons.access_time, "10:00 PM"),
-                    const SizedBox(height: 10),
-                    _buildAppointmentDetail(
-                      Icons.group_outlined,
-                      "Queue Position : 1",
-                    ),
-                    const SizedBox(height: 20),
-
+                    _detailRow(Icons.access_time, "10:00 PM"),
+                    _detailRow(Icons.people_outline, "Queue Position : 1"),
+                    const SizedBox(height: 15),
                     Container(
                       width: double.infinity,
                       padding: const EdgeInsets.symmetric(vertical: 12),
                       decoration: BoxDecoration(
-                        color: AppColors.successGreen.withOpacity(
-                          0.2,
-                        ), // Used AppColors with low opacity
+                        color: AppColors.successGreen.withOpacity(0.25),
                         borderRadius: BorderRadius.circular(10),
-                        border: Border.all(color: AppColors.borderGrey),
                       ),
                       child: const Center(
                         child: Text(
                           "Your turn is coming up soon!",
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 15,
-                          ),
+                          style: TextStyle(fontWeight: FontWeight.bold),
                         ),
                       ),
                     ),
@@ -129,37 +118,38 @@ class PatientPortalScreen extends StatelessWidget {
               ),
               const SizedBox(height: 35),
 
+              // Grid Actions
               GridView.count(
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
                 crossAxisCount: 2,
-                mainAxisSpacing: 20,
-                crossAxisSpacing: 20,
-                childAspectRatio: 1.3,
+                mainAxisSpacing: 15,
+                crossAxisSpacing: 15,
+                childAspectRatio: 1.4,
                 children: [
-                  _actionCard(
+                  _actionTile(
                     "Book\nAppointment",
-                    Icons.calendar_month,
+                    Icons.calendar_today,
                     AppColors.primaryBlue,
-                    () => context.push('/patient-portal/appointment-booking'),
+                    () {},
                   ),
-                  _actionCard(
+                  _actionTile(
                     "My\nAppointments",
                     Icons.access_time,
                     AppColors.secondaryPurple,
-                    () => context.push('/patient-portal/my-appointments'),
+                    () {},
                   ),
-                  _actionCard(
+                  _actionTile(
                     "Check In",
-                    Icons.group_outlined,
+                    Icons.people_outline,
                     AppColors.successGreen,
-                    () => context.push('/patient-portal/check-in'),
+                    () {},
                   ),
-                  _actionCard(
+                  _actionTile(
                     "Visit\nHistory",
                     Icons.description_outlined,
                     AppColors.accentBlue,
-                    () => context.push('/patient-portal/visit-summary'),
+                    () => context.push('/visit-summary'),
                   ),
                 ],
               ),
@@ -170,33 +160,34 @@ class PatientPortalScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildAppointmentDetail(IconData icon, String text) {
-    return Row(
+  Widget _detailRow(IconData icon, String text) => Padding(
+    padding: const EdgeInsets.only(bottom: 8.0),
+    child: Row(
       children: [
-        Icon(icon, color: AppColors.textGrey, size: 22),
-        const SizedBox(width: 12),
+        Icon(icon, color: AppColors.textGrey, size: 20),
+        const SizedBox(width: 10),
         Text(
           text,
           style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
         ),
       ],
-    );
-  }
+    ),
+  );
 
-  Widget _actionCard(
+  Widget _actionTile(
     String title,
     IconData icon,
-    Color iconColor,
+    Color color,
     VoidCallback onTap,
   ) {
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(18),
+      borderRadius: BorderRadius.circular(15),
       child: Container(
-        padding: const EdgeInsets.all(15),
+        padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: AppColors.borderGrey.withOpacity(0.5),
-          borderRadius: BorderRadius.circular(18),
+          color: AppColors.borderGrey.withOpacity(0.4),
+          borderRadius: BorderRadius.circular(15),
         ),
         child: Stack(
           children: [
@@ -206,14 +197,13 @@ class PatientPortalScreen extends StatelessWidget {
                 title,
                 style: const TextStyle(
                   fontWeight: FontWeight.bold,
-                  fontSize: 15,
-                  height: 1.2,
+                  fontSize: 14,
                 ),
               ),
             ),
             Align(
               alignment: Alignment.topRight,
-              child: Icon(icon, color: iconColor, size: 35),
+              child: Icon(icon, color: color, size: 30),
             ),
           ],
         ),

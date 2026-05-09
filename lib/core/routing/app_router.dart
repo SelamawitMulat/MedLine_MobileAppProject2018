@@ -6,8 +6,6 @@ import 'package:med_line/features/home/presentation/screens/doctor_portal/doctor
 import 'package:med_line/features/home/presentation/screens/doctor_portal/queue_management.dart';
 import 'package:med_line/features/home/presentation/screens/doctor_portal/visit_summary_page.dart';
 import 'package:med_line/features/home/presentation/screens/doctor_portal/visit_summary_form.dart';
-
-// 1. ADD THE PATIENT PORTAL IMPORT
 import 'package:med_line/features/home/presentation/screens/patient_portal/patient_portal.dart';
 
 class AppRouter {
@@ -20,6 +18,8 @@ class AppRouter {
         builder: (context, state) => const SignupScreen(),
       ),
       GoRoute(path: '/login', builder: (context, state) => const LoginScreen()),
+
+      // Doctor Routes
       GoRoute(
         path: '/doctor-portal',
         builder: (context, state) => const DoctorPortalScreen(),
@@ -28,21 +28,21 @@ class AppRouter {
         path: '/queue-management',
         builder: (context, state) => const QueueManagementScreen(),
       ),
-
-      // New Summary Routes
-      GoRoute(
-        path: '/visit-summary',
-        builder: (context, state) => const VisitSummaryPage(),
-      ),
       GoRoute(
         path: '/create-summary',
         builder: (context, state) => const VisitSummaryForm(),
       ),
 
-      // 2. ADD THE PATIENT PORTAL ROUTE HERE
+      // Patient Routes
       GoRoute(
         path: '/patient-portal',
         builder: (context, state) => const PatientPortalScreen(),
+      ),
+
+      // Shared Summary View (Read-Only for Patient)
+      GoRoute(
+        path: '/visit-summary',
+        builder: (context, state) => const VisitSummaryPage(),
       ),
     ],
   );
