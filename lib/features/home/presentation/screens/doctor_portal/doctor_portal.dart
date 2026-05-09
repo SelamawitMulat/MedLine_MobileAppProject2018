@@ -47,11 +47,14 @@ class DoctorPortalScreen extends StatelessWidget {
                           color: Colors.red,
                           size: 30,
                         ),
-                        onPressed: () {},
+                        onPressed: () {
+                          // Placeholder for delete functionality
+                        },
                       ),
                       IconButton(
                         icon: const Icon(Icons.logout, size: 30),
-                        onPressed: () => context.go('/'),
+                        onPressed: () =>
+                            context.go('/'), // Navigate back to Landing Page
                       ),
                     ],
                   ),
@@ -105,7 +108,7 @@ class DoctorPortalScreen extends StatelessWidget {
                     const SizedBox(height: 10),
                     _buildPatientTile("Jane Wilson", "10:30", "#2"),
                     const SizedBox(height: 20),
-                    // Navigation trigger for the Manage Queue screen
+                    // Primary Navigation to Queue Management
                     PrimaryButton(
                       text: "Manage Queue",
                       onPressed: () => context.push('/queue-management'),
@@ -114,7 +117,7 @@ class DoctorPortalScreen extends StatelessWidget {
                 ),
               ),
 
-              // Reduced vertical space here
+              // Reduced vertical space as requested
               const SizedBox(height: 15),
 
               // --- BOTTOM DASHBOARD BUTTONS ---
@@ -134,9 +137,7 @@ class DoctorPortalScreen extends StatelessWidget {
                       context,
                       icon: Icons.description_outlined,
                       label: "Visit\nSummaries",
-                      onTap: () {
-                        // Navigate to summaries when ready
-                      },
+                      onTap: () => context.push('/visit-summary'),
                     ),
                   ),
                 ],
@@ -148,7 +149,7 @@ class DoctorPortalScreen extends StatelessWidget {
     );
   }
 
-  // Helper for Statistics (Appointments/Queue)
+  // Helper Widget for Stat Cards
   Widget _buildStatCard(String title, String count, {Color? countColor}) {
     return Expanded(
       child: Container(
@@ -178,7 +179,7 @@ class DoctorPortalScreen extends StatelessWidget {
     );
   }
 
-  // Helper for Patient Tiles in Overview
+  // Helper Widget for Patient Rows
   Widget _buildPatientTile(String name, String time, String queueNum) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 12),
@@ -213,7 +214,7 @@ class DoctorPortalScreen extends StatelessWidget {
     );
   }
 
-  // Helper for Bottom Action Cards
+  // Helper Widget for Bottom Dashboard Action Cards
   Widget _buildActionCard(
     BuildContext context, {
     required IconData icon,
