@@ -15,7 +15,7 @@ class PatientPortalScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Header
+              // Header with Welcome and Account Actions
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -46,7 +46,7 @@ class PatientPortalScreen extends StatelessWidget {
                           color: AppColors.errorRed,
                           size: 32,
                         ),
-                        onPressed: () {},
+                        onPressed: () {}, // Account deletion icon
                       ),
                       IconButton(
                         icon: const Icon(
@@ -62,7 +62,7 @@ class PatientPortalScreen extends StatelessWidget {
               ),
               const SizedBox(height: 25),
 
-              // Appointment Card
+              // Queue Status Card
               Container(
                 width: double.infinity,
                 padding: const EdgeInsets.all(20),
@@ -118,7 +118,7 @@ class PatientPortalScreen extends StatelessWidget {
               ),
               const SizedBox(height: 35),
 
-              // Grid Actions
+              // Action Grid
               GridView.count(
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),

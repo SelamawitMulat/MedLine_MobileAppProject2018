@@ -2,19 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:med_line/core/constants/app_colors.dart';
 
-class VisitSummaryPage extends StatelessWidget {
-  const VisitSummaryPage({super.key});
+class VisitHistoryPage extends StatelessWidget {
+  const VisitHistoryPage({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.scaffoldBg,
-      // Removed FloatingActionButton entirely to prevent adding new summaries
       appBar: AppBar(
         backgroundColor: AppColors.scaffoldBg,
         elevation: 0,
-        automaticallyImplyLeading: false, // Custom leading for better control
-        titleSpacing: 0,
+        automaticallyImplyLeading: false,
         title: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 10),
           child: Row(
@@ -44,14 +42,11 @@ class VisitSummaryPage extends StatelessWidget {
         child: Column(
           children: [
             const SizedBox(height: 10),
-            // Centered empty state card matching image_920b97.png
             Container(
               width: double.infinity,
               padding: const EdgeInsets.symmetric(vertical: 60, horizontal: 20),
               decoration: BoxDecoration(
-                color: const Color(
-                  0xFFF7F7F7,
-                ), // Light grey background from image
+                color: const Color(0xFFF7F7F7),
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(color: Colors.grey.shade300),
               ),

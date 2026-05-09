@@ -7,6 +7,7 @@ import 'package:med_line/features/home/presentation/screens/doctor_portal/queue_
 import 'package:med_line/features/home/presentation/screens/doctor_portal/visit_summary_page.dart';
 import 'package:med_line/features/home/presentation/screens/doctor_portal/visit_summary_form.dart';
 import 'package:med_line/features/home/presentation/screens/patient_portal/patient_portal.dart';
+import 'package:med_line/features/home/presentation/screens/patient_portal/visit_history_page.dart';
 
 class AppRouter {
   static final GoRouter router = GoRouter(
@@ -33,16 +34,16 @@ class AppRouter {
         builder: (context, state) => const VisitSummaryForm(),
       ),
 
-      // Patient Routes
+      // Patient Portal Main
       GoRoute(
         path: '/patient-portal',
         builder: (context, state) => const PatientPortalScreen(),
       ),
 
-      // Shared Summary View (Read-Only for Patient)
+      // Patient Visit History (Read-Only)
       GoRoute(
         path: '/visit-summary',
-        builder: (context, state) => const VisitSummaryPage(),
+        builder: (context, state) => const VisitHistoryPage(),
       ),
     ],
   );
