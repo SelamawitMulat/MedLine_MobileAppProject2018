@@ -22,27 +22,28 @@ class AppRouter {
   static final GoRouter router = GoRouter(
     initialLocation: '/',
     routes: [
-      // --- Initial Landing & Auth ---
       GoRoute(path: '/', builder: (context, state) => const LandingScreen()),
       GoRoute(
           path: '/signup', builder: (context, state) => const SignupScreen()),
       GoRoute(path: '/login', builder: (context, state) => const LoginScreen()),
 
-      // --- Doctor Portal Section ---
+      // --- Doctor Portal ---
       GoRoute(
           path: '/doctor-portal',
           builder: (context, state) => const DoctorPortalScreen()),
       GoRoute(
           path: '/queue-management',
           builder: (context, state) => const QueueManagementScreen()),
-      GoRoute(
-          path: '/create-summary',
-          builder: (context, state) => const VisitSummaryForm()),
+
+      // DOCTOR ONLY PATHS
       GoRoute(
           path: '/doctor-visit-summary',
           builder: (context, state) => const VisitSummaryPage()),
+      GoRoute(
+          path: '/create-summary',
+          builder: (context, state) => const VisitSummaryForm()),
 
-      // --- Patient Portal Section ---
+      // --- Patient Portal ---
       GoRoute(
           path: '/patient-portal',
           builder: (context, state) => const PatientPortalScreen()),
@@ -55,12 +56,9 @@ class AppRouter {
       GoRoute(
           path: '/my-appointments',
           builder: (context, state) => const MyAppointmentsScreen()),
-
-      // New Booking Route
       GoRoute(
-        path: '/book-appointment',
-        builder: (context, state) => const BookAppointmentScreen(),
-      ),
+          path: '/book-appointment',
+          builder: (context, state) => const BookAppointmentScreen()),
     ],
   );
 }

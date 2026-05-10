@@ -8,28 +8,31 @@ class VisitSummaryPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.scaffoldBg,
+      backgroundColor: Colors.white,
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(20.0),
           child: Column(
             children: [
-              // --- CUSTOM APP BAR AREA ---
+              // Custom Header matching your screenshot
               Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  IconButton(
-                    icon: const Icon(Icons.arrow_back, size: 30),
-                    onPressed: () => context.pop(),
-                    padding: EdgeInsets.zero,
-                    constraints: const BoxConstraints(),
+                  Row(
+                    children: [
+                      IconButton(
+                        icon: const Icon(Icons.arrow_back,
+                            color: Colors.black, size: 28),
+                        onPressed: () => context.pop(),
+                      ),
+                      const Text(
+                        "Visit History",
+                        style: TextStyle(
+                            fontSize: 24, fontWeight: FontWeight.bold),
+                      ),
+                    ],
                   ),
-                  const SizedBox(width: 15),
-                  const Text(
-                    "Visit History",
-                    style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
-                  ),
-                  const Spacer(),
-                  // The Square Blue + Button
+                  // THE BLUE PLUS BUTTON
                   GestureDetector(
                     onTap: () => context.push('/create-summary'),
                     child: Container(
@@ -39,39 +42,29 @@ class VisitSummaryPage extends StatelessWidget {
                         color: AppColors.primaryBlue,
                         borderRadius: BorderRadius.circular(10),
                       ),
-                      child: const Icon(
-                        Icons.add,
-                        color: Colors.white,
-                        size: 30,
-                      ),
+                      child:
+                          const Icon(Icons.add, color: Colors.white, size: 30),
                     ),
                   ),
                 ],
               ),
-              const SizedBox(height: 30),
-
-              //  EMPTY STATE CARD
+              const SizedBox(height: 50),
+              // Grey Placeholder Box
               Container(
                 width: double.infinity,
                 padding: const EdgeInsets.symmetric(vertical: 60),
                 decoration: BoxDecoration(
-                  color: AppColors.cardGrey,
-                  borderRadius: BorderRadius.circular(15),
+                  color: const Color(0xFFF9FAFB),
+                  borderRadius: BorderRadius.circular(20),
                   border: Border.all(color: Colors.grey.shade200),
                 ),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
+                child: const Column(
                   children: [
-                    Icon(
-                      Icons.description_outlined,
-                      size: 60,
-                      color: Colors.grey.shade400,
-                    ),
-                    const SizedBox(height: 15),
-                    const Text(
-                      "No visit summaries yet",
-                      style: TextStyle(fontSize: 18, color: AppColors.textGrey),
-                    ),
+                    Icon(Icons.description_outlined,
+                        color: Colors.grey, size: 55),
+                    SizedBox(height: 10),
+                    Text("No visit summaries yet",
+                        style: TextStyle(color: Colors.grey, fontSize: 16)),
                   ],
                 ),
               ),

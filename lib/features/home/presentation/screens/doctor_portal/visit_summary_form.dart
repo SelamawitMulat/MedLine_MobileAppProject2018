@@ -10,170 +10,128 @@ class VisitSummaryForm extends StatefulWidget {
 }
 
 class _VisitSummaryFormState extends State<VisitSummaryForm> {
+  // Key to manage the form validation state
   final _formKey = GlobalKey<FormState>();
 
-  // State variable for the dropdown
   String? _selectedPatient;
+  final List<String> _patients = ["John Doe", "Jane Smith", "Alice Wilson"];
 
-  // Mock list of patients
-  final List<String> _patients = [
-    "John Doe",
-    "Jane Wilson",
-    "Robert Brown",
-    "Emily Davis",
-  ];
-
+  // Controllers to clear text or handle logic if needed
   final _diagnosisController = TextEditingController();
   final _prescriptionController = TextEditingController();
   final _notesController = TextEditingController();
 
   void _submitForm() {
+    // Check if all fields (except notes) are valid
     if (_formKey.currentState!.validate()) {
-      // Logic to save the summary using _selectedPatient
-      context.pop();
+      // Logic for when the form is valid
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Summary Created Successfully!")),
+      );
+      context.pop(); // Returns to Visit History
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.scaffoldBg,
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(25.0),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // --- HEADER ---
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const Text(
-                      "Create Visit Summary",
-                      style: TextStyle(
-                        fontSize: 22,
-                        fontWeight: FontWeight.bold,
+      backgroundColor: Colors.black.withOpacity(0.8),
+      body: Center(
+        child: Container(
+          width: MediaQuery.of(context).size.width * 0.9,
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(20),
+          ),
+          child: SingleChildScrollView(
+            child: Form(
+              key: _formKey, // Assigning the key here
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Header with Back Arrow
+                  Row(
+                    children: [
+                      IconButton(
+                        icon: const Icon(Icons.arrow_back, color: Colors.black),
+                        onPressed: () => context.pop(),
+                      ),
+                      const Text(
+                        "Create Visit Summary",
+                        style: TextStyle(
+                            fontSize: 18, fontWeight: FontWeight.bold),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 20),
+
+                  _label("Select Patient"),
+                  DropdownButtonFormField<String>(
+                    value: _selectedPatient,
+                    hint: const Text("Choose a patient"),
+                    decoration: _inputDecoration(),
+                    items: _patients
+                        .map((p) => DropdownMenuItem(value: p, child: Text(p)))
+                        .toList(),
+                    onChanged: (val) => setState(() => _selectedPatient = val),
+                    // Validation for Dropdown
+                    validator: (value) =>
+                        value == null ? "Please select a patient" : null,
+                  ),
+
+                  const SizedBox(height: 15),
+                  _label("Diagnosis"),
+                  TextFormField(
+                    controller: _diagnosisController,
+                    decoration: _inputDecoration(hint: "Enter Diagnosis"),
+                    validator: (value) =>
+                        (value == null || value.isEmpty)
+                            ? "Diagnosis is required"
+                            : null,
+                  ),
+
+                  TextFormField(
+                    controller: _prescriptionController,
+                    decoration: _inputDecoration(hint: "Enter prescription"),
+                    validator: (value) =>
+                        (value == null || value.isEmpty)
+                            ? "Prescription is required"
+                            : null,
+                  ),
+                    const SizedBox(height: 15),
+                  _label("Notes (Optional)"),
+                  TextFormField(
+                    controller: _notesController,
+                    maxLines: 2,
+                    decoration: _inputDecoration(hint: "Additional notes"),
+                    // No validator here because it is optional
+                  ),
+
+                  const SizedBox(height: 30),
+
+                  // Submit Button
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton.icon(
+                      onPressed: _submitForm, // Call the validation logic
+                      icon: const Icon(Icons.check, color: Colors.white),
+                      label: const Text(
+                        "Create Summary",
+                        style: TextStyle(
+                            color: Colors.white, fontWeight: FontWeight.bold),
+                      ),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF5C6BC0),
+                        padding: const EdgeInsets.symmetric(vertical: 15),
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12)),
                       ),
                     ),
-                    IconButton(
-                      icon: const Icon(Icons.close, size: 30),
-                      onPressed: () => context.pop(),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 25),
-
-                // --- SELECT PATIENT (DROPDOWN) ---
-                const Text(
-                  "Select Patient",
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                ),
-                const SizedBox(height: 8),
-                DropdownButtonFormField<String>(
-                  value: _selectedPatient,
-                  hint: const Text(
-                    "Choose a patient",
-                    style: TextStyle(color: Colors.grey),
                   ),
-                  isExpanded: true,
-                  decoration: InputDecoration(
-                    filled: true,
-                    fillColor: AppColors.cardGrey, // Matching image_9ddd1c.png
-                    contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 15,
-                      vertical: 5,
-                    ),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                      borderSide: BorderSide.none,
-                    ),
-                  ),
-                  items: _patients.map((String patient) {
-                    return DropdownMenuItem<String>(
-                      value: patient,
-                      child: Text(patient),
-                    );
-                  }).toList(),
-                  onChanged: (newValue) {
-                    setState(() {
-                      _selectedPatient = newValue;
-                    });
-                  },
-                  validator: (value) =>
-                      value == null ? "Please select a patient" : null,
-                ),
-                const SizedBox(height: 20),
-
-                // --- DIAGNOSIS ---
-                const Text(
-                  "Diagnosis",
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                ),
-                const SizedBox(height: 8),
-                _buildInputField(
-                  controller: _diagnosisController,
-                  hintText: "Enter Diagnosis",
-                  validator: (v) => v!.isEmpty ? "Required" : null,
-                ),
-                const SizedBox(height: 20),
-                // --- PRESCRIPTION ---
-                const Text(
-                  "Prescription",
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                ),
-                const SizedBox(height: 8),
-                _buildInputField(
-                  controller: _prescriptionController,
-                  hintText: "Enter prescription",
-                  validator: (v) => v!.isEmpty ? "Required" : null,
-                ),
-                const SizedBox(height: 20),
-
-                // --- NOTES (OPTIONAL) ---
-                const Text(
-                  "Notes (Optional)",
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                ),
-                const SizedBox(height: 8),
-                _buildInputField(
-                  controller: _notesController,
-                  hintText: "Additionl notes",
-                  maxLines: 3,
-                ),
-                const SizedBox(height: 40),
-
-                //  create summery button
-                SizedBox(
-                  width: double.infinity,
-                  height: 55,
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primaryBlue,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
-                    onPressed: _submitForm,
-                    child: const Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(Icons.check, color: Colors.white, size: 28),
-                        SizedBox(width: 10),
-                        Text(
-                          "Create Summary",
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),
@@ -181,30 +139,31 @@ class _VisitSummaryFormState extends State<VisitSummaryForm> {
     );
   }
 
-  Widget _buildInputField({
-    required TextEditingController controller,
-    required String hintText,
-    String? Function(String?)? validator,
-    int maxLines = 1,
-  }) {
-    return TextFormField(
-      controller: controller,
-      maxLines: maxLines,
-      validator: validator,
-      decoration: InputDecoration(
-        hintText: hintText,
-        hintStyle: const TextStyle(color: Colors.grey),
-        filled: true,
-        fillColor: AppColors.cardGrey,
-        contentPadding: const EdgeInsets.symmetric(
-          horizontal: 15,
-          vertical: 15,
-        ),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
-          borderSide: BorderSide.none,
-        ),
+  Widget _label(String text) => Padding(
+        padding: const EdgeInsets.only(bottom: 8.0),
+        child: Text(text, style: const TextStyle(fontWeight: FontWeight.bold)),
+      );
+
+  InputDecoration _inputDecoration({String? hint}) {
+    return InputDecoration(
+      hintText: hint,
+      filled: true,
+      fillColor: const Color(0xFFF8F9FB),
+      errorStyle:
+          const TextStyle(height: 0.8), // Keeps the card from jumping too much
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(10),
+        borderSide: BorderSide.none,
       ),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 15, vertical: 12),
     );
+  }
+
+  @override
+  void dispose() {
+    _diagnosisController.dispose();
+    _prescriptionController.dispose();
+    _notesController.dispose();
+    super.dispose();
   }
 }
