@@ -4,6 +4,74 @@ import 'package:go_router/go_router.dart';
 class DoctorPortalScreen extends StatelessWidget {
   const DoctorPortalScreen({super.key});
 
+  void _showDeleteDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        child: Container(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Expanded(
+                    child: Text(
+                      "Are you sure to delete this account?",
+                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.close),
+                    onPressed: () => Navigator.pop(context),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 30),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  // NO Button
+                  SizedBox(
+                    width: 100,
+                    child: ElevatedButton(
+                      onPressed: () => Navigator.pop(context),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFFF0F0F0),
+                        elevation: 0,
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                            side: BorderSide(color: Colors.grey.shade300)),
+                      ),
+                      child: const Text("NO", style: TextStyle(color: Colors.black)),
+                    ),
+                  ),
+                  // YES Button
+                  SizedBox(
+                    width: 100,
+                    child: ElevatedButton(
+                      onPressed: () => context.go('/'), // Returns to Landing Page
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.white,
+                        elevation: 0,
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                            side: const BorderSide(color: Colors.red)),
+                      ),
+                      child: const Text("Yes", style: TextStyle(color: Colors.red)),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -14,33 +82,31 @@ class DoctorPortalScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Header
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   const Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text("Doctor Portal",
-                          style: TextStyle(
-                              fontSize: 24, fontWeight: FontWeight.bold)),
-                      Text("Dr. Sarah Smith",
-                          style: TextStyle(color: Colors.black54)),
+                      Text("Doctor Portal", style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+                      Text("Dr. Sarah Smith", style: TextStyle(color: Colors.black54)),
                     ],
                   ),
                   Row(
                     children: [
-                      Icon(Icons.delete_outline,
-                          color: Colors.red.shade400, size: 28),
-                      const SizedBox(width: 15),
-                      const Icon(Icons.logout, color: Colors.black, size: 28),
+                      IconButton(
+                        icon: const Icon(Icons.delete_outline, color: Colors.red, size: 28),
+                        onPressed: () => _showDeleteDialog(context),
+                        ),
+                      IconButton(
+                        icon: const Icon(Icons.logout, color: Colors.black, size: 28),
+                        onPressed: () => context.go('/login'),
+                      ),
                     ],
                   )
                 ],
               ),
               const SizedBox(height: 25),
-
-              // Stats Row
               Row(
                 children: [
                   _buildStatCard("Total\nAppointments", "2", Colors.blue),
@@ -49,8 +115,6 @@ class DoctorPortalScreen extends StatelessWidget {
                 ],
               ),
               const SizedBox(height: 25),
-
-              // Queue Overview Section
               Container(
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
@@ -61,14 +125,9 @@ class DoctorPortalScreen extends StatelessWidget {
                   children: [
                     const Row(
                       children: [
-                        Icon(Icons.groups_outlined,
-                            color: Colors.blue, size: 30),
+                        Icon(Icons.groups_outlined, color: Colors.blue, size: 30),
                         SizedBox(width: 10),
-                        Text("Queue Overview",
-                            style: TextStyle(
-                                color: Colors.blue,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 16)),
+                        Text("Queue Overview", style: TextStyle(color: Colors.blue, fontWeight: FontWeight.bold, fontSize: 16)),
                       ],
                     ),
                     const SizedBox(height: 20),
@@ -83,33 +142,20 @@ class DoctorPortalScreen extends StatelessWidget {
                         style: ElevatedButton.styleFrom(
                           backgroundColor: const Color(0xFF5C6BC0),
                           padding: const EdgeInsets.symmetric(vertical: 15),
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12)),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                         ),
-                        child: const Text("Manage Queue",
-                            style:
-                                TextStyle(color: Colors.white, fontSize: 16)),
+                        child: const Text("Manage Queue", style: TextStyle(color: Colors.white)),
                       ),
                     )
                   ],
                 ),
               ),
               const SizedBox(height: 20),
-              // Bottom Navigation Cards
               Row(
                 children: [
-                  _buildSmallMenuCard(
-                    icon: Icons.groups_outlined,
-                    label: "Queue\nManagement",
-                    onTap: () => context.push('/queue-management'),
-                  ),
+                  _buildMenuCard(context, Icons.groups_outlined, "Queue\nManagement", '/queue-management'),
                   const SizedBox(width: 15),
-                  _buildSmallMenuCard(
-                    icon: Icons.description_outlined,
-                    label: "Visit\nSummaries",
-                    // UPDATED ROUTE TO MATCH DOCTOR HISTORY
-                    onTap: () => context.push('/doctor-visit-summary'),
-                  ),
+                  _buildMenuCard(context, Icons.description_outlined, "Visit\nSummaries", '/doctor-visit-summary'),
                 ],
               ),
             ],
@@ -119,24 +165,16 @@ class DoctorPortalScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildStatCard(String title, String value, Color valueColor) {
+  Widget _buildStatCard(String title, String value, Color color) {
     return Expanded(
       child: Container(
         padding: const EdgeInsets.all(15),
-        decoration: BoxDecoration(
-          color: const Color(0xFFF8F9FB),
-          borderRadius: BorderRadius.circular(15),
-        ),
+        decoration: BoxDecoration(color: const Color(0xFFF8F9FB), borderRadius: BorderRadius.circular(15)),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
-            Text(title,
-                style: const TextStyle(fontSize: 12, color: Colors.black54)),
-            Text(value,
-                style: TextStyle(
-                    fontSize: 28,
-                    fontWeight: FontWeight.bold,
-                    color: valueColor)),
+            Text(title, style: const TextStyle(fontSize: 12, color: Colors.black54)),
+            Text(value, style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: color)),
           ],
         ),
       ),
@@ -145,54 +183,34 @@ class DoctorPortalScreen extends StatelessWidget {
 
   Widget _buildQueueItem(String name, String time, String rank) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey.shade200),
-      ),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12)),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(name, style: const TextStyle(fontWeight: FontWeight.bold)),
-              Text(time,
-                  style: const TextStyle(color: Colors.grey, fontSize: 12)),
-            ],
-          ),
-          Text(rank,
-              style: const TextStyle(
-                  color: Colors.blue,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 18)),
+          Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Text(name, style: const TextStyle(fontWeight: FontWeight.bold)),
+            Text(time, style: const TextStyle(color: Colors.grey, fontSize: 12)),
+          ]),
+          Text(rank, style: const TextStyle(color: Colors.blue, fontWeight: FontWeight.bold, fontSize: 18)),
         ],
       ),
     );
   }
 
-  Widget _buildSmallMenuCard(
-      {required IconData icon,
-      required String label,
-      required VoidCallback onTap}) {
+  Widget _buildMenuCard(BuildContext context, IconData icon, String label, String route) {
     return Expanded(
       child: InkWell(
-        onTap: onTap,
+        onTap: () => context.push(route),
         child: Container(
           padding: const EdgeInsets.all(15),
-          decoration: BoxDecoration(
-            color: const Color(0xFFE0E0E0).withOpacity(0.5),
-            borderRadius: BorderRadius.circular(15),
-          ),
+          decoration: BoxDecoration(color: const Color(0xFFE0E0E0).withOpacity(0.5), borderRadius: BorderRadius.circular(15)),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Icon(icon, color: Colors.blue.shade900),
               const SizedBox(height: 5),
-              Text(label,
-                  style: const TextStyle(
-                      fontSize: 12, fontWeight: FontWeight.bold)),
+              Text(label, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
             ],
           ),
         ),
