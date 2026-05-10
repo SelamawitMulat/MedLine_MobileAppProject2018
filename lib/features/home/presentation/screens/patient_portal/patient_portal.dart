@@ -34,12 +34,12 @@ class PatientPortalScreen extends StatelessWidget {
                     children: [
                       IconButton(
                         icon: const Icon(Icons.delete_outline,
-                            color: AppColors.errorRed, size: 32),
+                            color: AppColors.errorRed, size: 28),
                         onPressed: () {},
                       ),
                       IconButton(
                         icon: const Icon(Icons.logout,
-                            color: AppColors.textBlack, size: 32),
+                            color: AppColors.textBlack, size: 28),
                         onPressed: () => context.go('/login'),
                       ),
                     ],
@@ -49,35 +49,32 @@ class PatientPortalScreen extends StatelessWidget {
               const SizedBox(height: 25),
 
               _buildAppointmentCard(),
-              const SizedBox(height: 35),
+              const SizedBox(height: 25), // Slightly reduced spacing
 
               // Navigation Grid
               GridView.count(
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
                 crossAxisCount: 2,
-                mainAxisSpacing: 15,
-                crossAxisSpacing: 15,
-                childAspectRatio: 1.4,
+                mainAxisSpacing: 12,
+                crossAxisSpacing: 12,
+                // INCREASED Aspect Ratio makes the buttons shorter/smaller
+                childAspectRatio: 1.8,
                 children: [
-                  // --- FIXED: Added navigation logic here ---
                   _actionTile(
                     "Book\nAppointment",
                     Icons.calendar_today,
                     AppColors.primaryBlue,
                     () => context.push('/book-appointment'),
                   ),
-
                   _actionTile(
                     "My\nAppointments",
                     Icons.access_time,
                     AppColors.secondaryPurple,
                     () => context.push('/my-appointments'),
                   ),
-
                   _actionTile("Check In", Icons.people_outline,
                       AppColors.successGreen, () => context.push('/check-in')),
-
                   _actionTile(
                       "Visit\nHistory",
                       Icons.description_outlined,
@@ -91,7 +88,6 @@ class PatientPortalScreen extends StatelessWidget {
       ),
     );
   }
-
   Widget _buildAppointmentCard() {
     return Container(
       width: double.infinity,
@@ -106,12 +102,12 @@ class PatientPortalScreen extends StatelessWidget {
           const Row(
             children: [
               Icon(Icons.access_time_filled,
-                  color: AppColors.secondaryPurple, size: 28),
+                  color: AppColors.secondaryPurple, size: 24),
               SizedBox(width: 10),
               Text("Next Appointment",
                   style: TextStyle(
                       color: AppColors.secondaryPurple,
-                      fontSize: 18,
+                      fontSize: 16,
                       fontWeight: FontWeight.bold)),
             ],
           ),
@@ -125,14 +121,14 @@ class PatientPortalScreen extends StatelessWidget {
   }
 
   Widget _detailRow(IconData icon, String text) => Padding(
-        padding: const EdgeInsets.only(bottom: 8.0),
+        padding: const EdgeInsets.only(bottom: 6.0),
         child: Row(
           children: [
-            Icon(icon, color: AppColors.textGrey, size: 20),
+            Icon(icon, color: AppColors.textGrey, size: 18),
             const SizedBox(width: 10),
             Text(text,
                 style:
-                    const TextStyle(fontSize: 15, fontWeight: FontWeight.w500)),
+                    const TextStyle(fontSize: 14, fontWeight: FontWeight.w500)),
           ],
         ),
       );
@@ -143,9 +139,10 @@ class PatientPortalScreen extends StatelessWidget {
       onTap: onTap,
       borderRadius: BorderRadius.circular(15),
       child: Container(
+        // Reduced internal padding
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: AppColors.borderGrey.withOpacity(0.4),
+          color: AppColors.borderGrey.withOpacity(0.3),
           borderRadius: BorderRadius.circular(15),
         ),
         child: Stack(
@@ -154,10 +151,12 @@ class PatientPortalScreen extends StatelessWidget {
                 alignment: Alignment.bottomLeft,
                 child: Text(title,
                     style: const TextStyle(
-                        fontWeight: FontWeight.bold, fontSize: 14))),
+                        fontWeight: FontWeight.bold,
+                        fontSize: 13, // Reduced font size
+                        height: 1.1))),
             Align(
                 alignment: Alignment.topRight,
-                child: Icon(icon, color: color, size: 30)),
+                child: Icon(icon, color: color, size: 24)), // Reduced icon size
           ],
         ),
       ),
