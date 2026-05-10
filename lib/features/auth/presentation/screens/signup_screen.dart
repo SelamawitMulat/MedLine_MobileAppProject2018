@@ -36,15 +36,20 @@ class _SignupScreenState extends State<SignupScreen> {
         return;
       }
 
-      // 3. Success Logic
+      // 3. Success Logic Notification
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
             content: Text("Account Created Successfully!"),
             backgroundColor: Colors.green),
       );
 
-      // Navigate to login after signup
-      context.go('/login');
+      // 4. DYNAMIC NAVIGATION
+      // Redirects to specific portal based on selection
+      if (_selectedRole == 'Doctor') {
+        context.go('/doctor-portal');
+      } else {
+        context.go('/patient-portal');
+      }
     }
   }
 
@@ -52,27 +57,33 @@ class _SignupScreenState extends State<SignupScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
+      // AppBar added to provide the Back Arrow
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.black),
+          onPressed: () => context.pop(),
+        ),
+      ),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 30),
           child: Form(
-            key: _formKey, // Connects the form to our validation key
+            key: _formKey,
             child: Column(
               children: [
-                const SizedBox(height: 40),
+                const SizedBox(height: 10),
 
-                // Logo Section - Corrected Icon to avoid errors
+                // Logo Section
                 Container(
                   padding: const EdgeInsets.all(15),
                   decoration: BoxDecoration(
                     color: AppColors.primaryBlue,
                     borderRadius: BorderRadius.circular(20),
                   ),
-                  child: const Icon(
-                      Icons
-                          .show_chart, // Matches the pulse line in image_74963d.png
-                      color: Colors.white,
-                      size: 55),
+                  child: const Icon(Icons.show_chart,
+                      color: Colors.white, size: 55),
                 ),
 
                 const SizedBox(height: 15),
@@ -85,8 +96,7 @@ class _SignupScreenState extends State<SignupScreen> {
                   style: TextStyle(color: Colors.grey, fontSize: 14),
                 ),
                 const SizedBox(height: 35),
-
-                // Gray Form Container (Matches image_74963d.png)
+                // Gray Form Container
                 Container(
                   padding: const EdgeInsets.all(20),
                   decoration: BoxDecoration(
@@ -99,7 +109,6 @@ class _SignupScreenState extends State<SignupScreen> {
                     children: [
                       _inputLabel("Full Name"),
                       _buildTextField(_nameController, "Enter your name"),
-
                       const SizedBox(height: 15),
                       _inputLabel("Email"),
                       _buildTextField(_emailController, "Enter your email",
@@ -181,8 +190,6 @@ class _SignupScreenState extends State<SignupScreen> {
       ),
     );
   }
-
-  // Helper to build consistent labels
   Widget _inputLabel(String label) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 8.0),
@@ -191,7 +198,6 @@ class _SignupScreenState extends State<SignupScreen> {
     );
   }
 
-  // Helper to build consistent Text Fields with validation
   Widget _buildTextField(TextEditingController controller, String hint,
       {bool isPass = false, bool isEmail = false}) {
     return TextFormField(
@@ -201,7 +207,7 @@ class _SignupScreenState extends State<SignupScreen> {
         hintText: hint,
         hintStyle: const TextStyle(color: Colors.grey, fontSize: 14),
         filled: true,
-        fillColor: const Color(0xFFE5E7EB), // Light gray fill from design
+        fillColor: const Color(0xFFE5E7EB),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
           borderSide: BorderSide.none,
@@ -209,7 +215,6 @@ class _SignupScreenState extends State<SignupScreen> {
         contentPadding:
             const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       ),
-      // Validation Logic: Prevents empty submissions
       validator: (value) {
         if (value == null || value.trim().isEmpty) {
           return "Please fill out this field";
@@ -227,7 +232,6 @@ class _SignupScreenState extends State<SignupScreen> {
 
   @override
   void dispose() {
-    // Clean up controllers when the widget is removed
     _nameController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
