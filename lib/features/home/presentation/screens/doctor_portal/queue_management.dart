@@ -5,7 +5,6 @@ class QueueManagementScreen extends StatelessWidget {
   const QueueManagementScreen({super.key});
 
   // --- SKIP PATIENT MODAL ---
-  // All buttons (X, NO, Yes) return to the current page
   void _showSkipDialog(BuildContext context) {
     showDialog(
       context: context,
@@ -28,8 +27,7 @@ class QueueManagementScreen extends StatelessWidget {
                   ),
                   IconButton(
                     icon: const Icon(Icons.close),
-                    onPressed: () =>
-                        Navigator.pop(context), // X returns to page
+                    onPressed: () => Navigator.pop(context),
                   ),
                 ],
               ),
@@ -37,12 +35,10 @@ class QueueManagementScreen extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
-                  // NO Button
                   SizedBox(
                     width: 100,
                     child: ElevatedButton(
-                      onPressed: () =>
-                          Navigator.pop(context), // NO returns to page
+                      onPressed: () => Navigator.pop(context),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFFF0F0F0),
                         elevation: 0,
@@ -54,12 +50,10 @@ class QueueManagementScreen extends StatelessWidget {
                           style: TextStyle(color: Colors.black)),
                     ),
                   ),
-                  // YES Button
                   SizedBox(
                     width: 100,
                     child: ElevatedButton(
-                      onPressed: () =>
-                          Navigator.pop(context), // YES returns to page
+                      onPressed: () => Navigator.pop(context),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.white,
                         elevation: 0,
@@ -98,11 +92,8 @@ class QueueManagementScreen extends StatelessWidget {
         padding: const EdgeInsets.all(20),
         child: Column(
           children: [
-            // Current Patient Card
             _buildCurrentPatientCard(context),
             const SizedBox(height: 25),
-
-            // Patient Queue List
             _buildQueueItem(context, "John Doe", "10:00", "#1"),
             const SizedBox(height: 15),
             _buildQueueItem(context, "Jane Wilson", "10:30", "#2"),
@@ -111,6 +102,7 @@ class QueueManagementScreen extends StatelessWidget {
       ),
     );
   }
+
   Widget _buildCurrentPatientCard(BuildContext context) {
     return Container(
       width: double.infinity,
@@ -127,8 +119,6 @@ class QueueManagementScreen extends StatelessWidget {
               style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
           const Text("10:00", style: TextStyle(color: Colors.grey)),
           const SizedBox(height: 20),
-
-          // Call Patient Button
           SizedBox(
             width: double.infinity,
             child: ElevatedButton.icon(
@@ -191,7 +181,6 @@ class QueueManagementScreen extends StatelessWidget {
           const SizedBox(height: 15),
           Row(
             children: [
-              // Skip Button triggers the modal
               Expanded(
                 child: OutlinedButton.icon(
                   onPressed: () => _showSkipDialog(context),
@@ -205,9 +194,10 @@ class QueueManagementScreen extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 10),
+              // FIXED: Changed navigation path to '/create-summary' to match your existing router
               Expanded(
                 child: ElevatedButton.icon(
-                  onPressed: () {},
+                  onPressed: () => context.push('/create-summary'),
                   icon: const Icon(Icons.check_circle_outline,
                       size: 18, color: Colors.black),
                   label: const Text("Complete",
@@ -221,7 +211,7 @@ class QueueManagementScreen extends StatelessWidget {
                 ),
               ),
             ],
-            )
+          )
         ],
       ),
     );
