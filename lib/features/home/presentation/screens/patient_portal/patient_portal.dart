@@ -5,26 +5,90 @@ import 'package:med_line/core/constants/app_colors.dart';
 class PatientPortalScreen extends StatelessWidget {
   const PatientPortalScreen({super.key});
 
+  void _showDeleteDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        child: Container(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Expanded(
+                    child: Text("Are you sure to delete this account?",
+                        style: TextStyle(
+                            fontSize: 18, fontWeight: FontWeight.bold)),
+                  ),
+                  IconButton(
+                      icon: const Icon(Icons.close),
+                      onPressed: () => Navigator.pop(context)),
+                ],
+              ),
+              const SizedBox(height: 30),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  SizedBox(
+                    width: 100,
+                    child: ElevatedButton(
+                      onPressed: () => Navigator.pop(context),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFFF0F0F0),
+                        elevation: 0,
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                            side: BorderSide(color: Colors.grey.shade300)),
+                      ),
+                      child: const Text("NO",
+                          style: TextStyle(color: Colors.black)),
+                    ),
+                  ),
+                  SizedBox(
+                    width: 100,
+                    child: ElevatedButton(
+                      onPressed: () => context.go('/'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.white,
+                        elevation: 0,
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                            side: const BorderSide(color: Colors.red)),
+                      ),
+                      child: const Text("Yes",
+                          style: TextStyle(color: Colors.red)),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+  
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.scaffoldBg,
+      backgroundColor: Colors.white,
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 20),
+          padding: const EdgeInsets.all(25),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Header
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   const Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text("Welcome\nback,",
-                          style: TextStyle(
-                              fontSize: 18, fontWeight: FontWeight.bold)),
+                      Text("Welcome back,",
+                          style: TextStyle(fontSize: 18, color: Colors.grey)),
                       Text("John Doe",
                           style: TextStyle(
                               fontSize: 22, fontWeight: FontWeight.bold)),
@@ -34,12 +98,12 @@ class PatientPortalScreen extends StatelessWidget {
                     children: [
                       IconButton(
                         icon: const Icon(Icons.delete_outline,
-                            color: AppColors.errorRed, size: 28),
-                        onPressed: () {},
+                            color: Colors.red, size: 28),
+                        onPressed: () => _showDeleteDialog(context),
                       ),
                       IconButton(
                         icon: const Icon(Icons.logout,
-                            color: AppColors.textBlack, size: 28),
+                            color: Colors.black, size: 28),
                         onPressed: () => context.go('/login'),
                       ),
                     ],
@@ -47,39 +111,28 @@ class PatientPortalScreen extends StatelessWidget {
                 ],
               ),
               const SizedBox(height: 25),
-
               _buildAppointmentCard(),
-              const SizedBox(height: 25), // Slightly reduced spacing
-
-              // Navigation Grid
+              const SizedBox(height: 30),
               GridView.count(
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
                 crossAxisCount: 2,
-                mainAxisSpacing: 12,
-                crossAxisSpacing: 12,
-                // INCREASED Aspect Ratio makes the buttons shorter/smaller
-                childAspectRatio: 1.8,
+                mainAxisSpacing: 15,
+                crossAxisSpacing: 15,
+                childAspectRatio: 1.0,
                 children: [
+                  _actionTile(context, "Book\nAppointment",
+                      Icons.calendar_today, Colors.blue, '/book-appointment'),
+                  _actionTile(context, "My\nAppointments", Icons.access_time,
+                      Colors.purple, '/my-appointments'),
+                  _actionTile(context, "Check In", Icons.people_outline,
+                      Colors.green, '/check-in'),
                   _actionTile(
-                    "Book\nAppointment",
-                    Icons.calendar_today,
-                    AppColors.primaryBlue,
-                    () => context.push('/book-appointment'),
-                  ),
-                  _actionTile(
-                    "My\nAppointments",
-                    Icons.access_time,
-                    AppColors.secondaryPurple,
-                    () => context.push('/my-appointments'),
-                  ),
-                  _actionTile("Check In", Icons.people_outline,
-                      AppColors.successGreen, () => context.push('/check-in')),
-                  _actionTile(
+                      context,
                       "Visit\nHistory",
                       Icons.description_outlined,
-                      AppColors.accentBlue,
-                      () => context.push('/visit-summary')),
+                      Colors.blueAccent,
+                      '/visit-summary'),
                 ],
               ),
             ],
@@ -88,75 +141,53 @@ class PatientPortalScreen extends StatelessWidget {
       ),
     );
   }
+
   Widget _buildAppointmentCard() {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: AppColors.cardGrey,
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Column(
+          color: const Color(0xFFF8F9FB),
+          borderRadius: BorderRadius.circular(20)),
+      child: const Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Row(
-            children: [
-              Icon(Icons.access_time_filled,
-                  color: AppColors.secondaryPurple, size: 24),
-              SizedBox(width: 10),
-              Text("Next Appointment",
-                  style: TextStyle(
-                      color: AppColors.secondaryPurple,
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold)),
-            ],
-          ),
-          const SizedBox(height: 15),
-          _detailRow(Icons.calendar_today, "Wednesday, April 15, 2026"),
-          _detailRow(Icons.access_time, "10:00 PM"),
-          _detailRow(Icons.people_outline, "Queue Position : 1"),
+          Row(children: [
+            Icon(Icons.access_time_filled, color: Colors.purple, size: 24),
+            SizedBox(width: 10),
+            Text("Next Appointment",
+                style: TextStyle(
+                    color: Colors.purple, fontWeight: FontWeight.bold)),
+          ]),
+          SizedBox(height: 15),
+          Text("Wednesday, April 15, 2026",
+              style: TextStyle(fontWeight: FontWeight.w500)),
+          Text("10:00 PM", style: TextStyle(color: Colors.grey)),
         ],
       ),
     );
   }
 
-  Widget _detailRow(IconData icon, String text) => Padding(
-        padding: const EdgeInsets.only(bottom: 6.0),
-        child: Row(
-          children: [
-            Icon(icon, color: AppColors.textGrey, size: 18),
-            const SizedBox(width: 10),
-            Text(text,
-                style:
-                    const TextStyle(fontSize: 14, fontWeight: FontWeight.w500)),
-          ],
-        ),
-      );
-
-  Widget _actionTile(
-      String title, IconData icon, Color color, VoidCallback onTap) {
+  Widget _actionTile(BuildContext context, String title, IconData icon,
+      Color color, String route) {
     return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(15),
+      onTap: () => context.push(route),
       child: Container(
-        // Reduced internal padding
-        padding: const EdgeInsets.all(12),
+        padding: const EdgeInsets.all(15),
         decoration: BoxDecoration(
-          color: AppColors.borderGrey.withOpacity(0.3),
-          borderRadius: BorderRadius.circular(15),
+          color: const Color(0xFFF8F9FB),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: Colors.grey.shade200),
         ),
-        child: Stack(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Align(
-                alignment: Alignment.bottomLeft,
-                child: Text(title,
-                    style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 13, // Reduced font size
-                        height: 1.1))),
-            Align(
-                alignment: Alignment.topRight,
-                child: Icon(icon, color: color, size: 24)), // Reduced icon size
+            Icon(icon, color: color, size: 28),
+            const SizedBox(height: 12),
+            Text(title,
+                style:
+                    const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
           ],
         ),
       ),
