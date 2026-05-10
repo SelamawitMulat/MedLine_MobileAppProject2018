@@ -1,35 +1,81 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:med_line/core/constants/app_colors.dart';
 
-class QueueManagementScreen extends StatefulWidget {
+class QueueManagementScreen extends StatelessWidget {
   const QueueManagementScreen({super.key});
 
-  @override
-  State<QueueManagementScreen> createState() => _QueueManagementScreenState();
-}
-
-class _QueueManagementScreenState extends State<QueueManagementScreen> {
-  bool _isPatientInRoom = false;
-  final String _currentPatient = "John Doe";
-
-  // Using the ultra-soft coloring 
-  final Color _ultraSoftGreenBg = Colors.green.withOpacity(0.12);
-  final Color _deepGreenText = Colors.green.shade800;
-
-  void _handleCallIn() {
-    setState(() {
-      _isPatientInRoom = true;
-    });
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          "Notification sent to $_currentPatient.",
-          style: TextStyle(color: _deepGreenText),
+  // --- SKIP PATIENT MODAL ---
+  // All buttons (X, NO, Yes) return to the current page
+  void _showSkipDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        child: Container(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Expanded(
+                    child: Text(
+                      "Are you sure to skip this patient?",
+                      style:
+                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.close),
+                    onPressed: () =>
+                        Navigator.pop(context), // X returns to page
+                  ),
+                ],
+              ),
+              const SizedBox(height: 30),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  // NO Button
+                  SizedBox(
+                    width: 100,
+                    child: ElevatedButton(
+                      onPressed: () =>
+                          Navigator.pop(context), // NO returns to page
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFFF0F0F0),
+                        elevation: 0,
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                            side: BorderSide(color: Colors.grey.shade300)),
+                      ),
+                      child: const Text("NO",
+                          style: TextStyle(color: Colors.black)),
+                    ),
+                  ),
+                  // YES Button
+                  SizedBox(
+                    width: 100,
+                    child: ElevatedButton(
+                      onPressed: () =>
+                          Navigator.pop(context), // YES returns to page
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.white,
+                        elevation: 0,
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                            side: const BorderSide(color: Colors.red)),
+                      ),
+                      child: const Text("Yes",
+                          style: TextStyle(color: Colors.red)),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
-        backgroundColor: _ultraSoftGreenBg,
-        duration: const Duration(seconds: 2),
       ),
     );
   }
@@ -37,113 +83,87 @@ class _QueueManagementScreenState extends State<QueueManagementScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.scaffoldBg,
+      backgroundColor: Colors.white,
       appBar: AppBar(
-        backgroundColor: Colors.transparent,
+        backgroundColor: Colors.white,
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.black),
           onPressed: () => context.pop(),
         ),
-        title: const Text(
-          "Queue Management",
-          style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
-        ),
+        title: const Text("Queue Management",
+            style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // --- NEXT PATIENT SECTION ---
-            Container(
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(15),
-                border: Border.all(color: Colors.grey.shade100),
-              ),
-              child: Column(
-                children: [
-                  Text(
-                    _isPatientInRoom ? "Currently Serving" : "Next Patient",
-                    style: const TextStyle(color: Colors.grey),
-                  ),
-                  const SizedBox(height: 5),
-                  Text(
-                    _currentPatient,
-                    style: const TextStyle(
-                      fontSize: 26,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const Text("10:00", style: TextStyle(color: Colors.grey)),
-                  const SizedBox(height: 20),
+            // Current Patient Card
+            _buildCurrentPatientCard(context),
+            const SizedBox(height: 25),
 
-                  SizedBox(
-                    width: double.infinity,
-                    height: 55,
-                    child: ElevatedButton.icon(
-                      onPressed: _isPatientInRoom ? null : _handleCallIn,
-                      icon: Icon(
-                        Icons.call,
-                        color: _isPatientInRoom ? Colors.grey : _deepGreenText,
-                      ),
-                      label: Text(
-                        _isPatientInRoom
-                            ? "In Consultation"
-                            : "Call In Patient",
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: _isPatientInRoom
-                              ? Colors.grey
-                              : _deepGreenText,
-                        ),
-                      ),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: _isPatientInRoom
-                            ? Colors.grey.shade100
-                            : _ultraSoftGreenBg,
-                        elevation: 0,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
-            const SizedBox(height: 30),
-            const Text(
-              "Queue ( 2 Patients )",
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
-            ),
+            // Patient Queue List
+            _buildQueueItem(context, "John Doe", "10:00", "#1"),
             const SizedBox(height: 15),
-
-            _buildQueueItem("John Doe", "10:00", "#1", true),
-            const SizedBox(height: 12),
-            _buildQueueItem("Jane Wilson", "10:30", "#2", false),
+            _buildQueueItem(context, "Jane Wilson", "10:30", "#2"),
           ],
         ),
       ),
     );
   }
+  Widget _buildCurrentPatientCard(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF8F9FB),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: Colors.grey.shade200),
+      ),
+      child: Column(
+        children: [
+          const Text("Next Patient", style: TextStyle(color: Colors.grey)),
+          const Text("John Doe",
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+          const Text("10:00", style: TextStyle(color: Colors.grey)),
+          const SizedBox(height: 20),
+
+          // Call Patient Button
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton.icon(
+              onPressed: () {},
+              icon: const Icon(Icons.phone, color: Colors.white),
+              label: const Text("Call In Patient",
+                  style: TextStyle(
+                      color: Colors.white, fontWeight: FontWeight.bold)),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF388E3C),
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12)),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 
   Widget _buildQueueItem(
-    String name,
-    String time,
-    String queueNum,
-    bool isCheckedIn,
-  ) {
+      BuildContext context, String name, String time, String rank) {
     return Container(
       padding: const EdgeInsets.all(15),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey.shade200),
+        borderRadius: BorderRadius.circular(15),
+        border: Border.all(color: Colors.grey.shade100),
+        boxShadow: [
+          BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 5,
+              offset: const Offset(0, 2))
+        ],
       ),
       child: Column(
         children: [
@@ -153,88 +173,55 @@ class _QueueManagementScreenState extends State<QueueManagementScreen> {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    name,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                    ),
-                  ),
-                  Row(
-                    children: [
-                      Text(time, style: const TextStyle(color: Colors.grey)),
-                      const SizedBox(width: 8),
-                      Icon(
-                        Icons.circle,
-                        size: 8,
-                        color: isCheckedIn
-                            ? _deepGreenText.withOpacity(0.5)
-                            : Colors.orange.withOpacity(0.5),
-                      ),
-                      const SizedBox(width: 4),
-                      Text(
-                        isCheckedIn ? "Checked In" : "Waiting",
-                        style: TextStyle(
-                          color: isCheckedIn
-                              ? _deepGreenText
-                              : Colors.orange.shade800,
-                          fontSize: 12,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ],
-                  ),
+                  Text("$name  $rank",
+                      style: const TextStyle(
+                          fontWeight: FontWeight.bold, fontSize: 16)),
+                  Text(time, style: const TextStyle(color: Colors.grey)),
                 ],
               ),
-              Text(
-                queueNum,
-                style: const TextStyle(
-                  color: AppColors.primaryBlue,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 18,
-                ),
-              ),
+              const Row(
+                children: [
+                  CircleAvatar(radius: 4, backgroundColor: Colors.green),
+                  SizedBox(width: 5),
+                  Text("Checked In", style: TextStyle(fontSize: 12)),
+                ],
+              )
             ],
           ),
           const SizedBox(height: 15),
           Row(
             children: [
-              // --- SKIP BUTTON WITH ICON ---
+              // Skip Button triggers the modal
               Expanded(
                 child: OutlinedButton.icon(
-                  onPressed: () {},
-                  icon: const Icon(Icons.skip_next_outlined, size: 20),
+                  onPressed: () => _showSkipDialog(context),
+                  icon: const Icon(Icons.skip_next, size: 18),
                   label: const Text("Skip"),
                   style: OutlinedButton.styleFrom(
-                    foregroundColor: Colors.grey,
-                    side: BorderSide(color: Colors.grey.shade200),
-                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    foregroundColor: Colors.black,
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8)),
                   ),
                 ),
               ),
               const SizedBox(width: 10),
-              // --- COMPLETE BUTTON WITH ICON ---
               Expanded(
                 child: ElevatedButton.icon(
-                  onPressed: () => context.push('/create-summary'),
-                  icon: const Icon(Icons.check_circle_outline, size: 20),
-                  label: const Text(
-                    "Complete",
-                    style: TextStyle(fontWeight: FontWeight.bold),
-                  ),
+                  onPressed: () {},
+                  icon: const Icon(Icons.check_circle_outline,
+                      size: 18, color: Colors.black),
+                  label: const Text("Complete",
+                      style: TextStyle(color: Colors.black)),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: _ultraSoftGreenBg,
-                    foregroundColor: _deepGreenText,
+                    backgroundColor: const Color(0xFF81C784),
                     elevation: 0,
-                    padding: const EdgeInsets.symmetric(vertical: 12),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
+                        borderRadius: BorderRadius.circular(8)),
                   ),
                 ),
               ),
             ],
-          ),
+            )
         ],
       ),
     );
