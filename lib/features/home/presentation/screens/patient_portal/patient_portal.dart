@@ -60,17 +60,24 @@ class PatientPortalScreen extends StatelessWidget {
                 crossAxisSpacing: 15,
                 childAspectRatio: 1.4,
                 children: [
-                  _actionTile("Book\nAppointment", Icons.calendar_today,
-                      AppColors.primaryBlue, () {}),
-                  // TYPO FIXED: path is now '/my-appointments'
+                  // --- FIXED: Added navigation logic here ---
+                  _actionTile(
+                    "Book\nAppointment",
+                    Icons.calendar_today,
+                    AppColors.primaryBlue,
+                    () => context.push('/book-appointment'),
+                  ),
+
                   _actionTile(
                     "My\nAppointments",
                     Icons.access_time,
                     AppColors.secondaryPurple,
                     () => context.push('/my-appointments'),
                   ),
+
                   _actionTile("Check In", Icons.people_outline,
                       AppColors.successGreen, () => context.push('/check-in')),
+
                   _actionTile(
                       "Visit\nHistory",
                       Icons.description_outlined,
