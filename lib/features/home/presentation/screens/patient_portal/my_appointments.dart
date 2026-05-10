@@ -14,7 +14,7 @@ class _MyAppointmentsScreenState extends State<MyAppointmentsScreen> {
   // Toggle for the Reschedule UI visibility
   bool isRescheduling = false;
 
-  // Calendar and Time state
+  // Calendar and Time 
   DateTime _focusedDay = DateTime.now();
   DateTime? _selectedDay;
   String? _selectedTime;
