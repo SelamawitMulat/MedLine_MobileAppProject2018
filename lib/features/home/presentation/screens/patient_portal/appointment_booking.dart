@@ -167,7 +167,7 @@ class _BookAppointmentScreenState extends State<BookAppointmentScreen> {
 
             const SizedBox(height: 40),
 
-            // Confirm Button (Matches image_756f74.png)
+            // Confirm Button (Matches image_756f74)
             SizedBox(
               width: double.infinity,
               child: ElevatedButton.icon(
