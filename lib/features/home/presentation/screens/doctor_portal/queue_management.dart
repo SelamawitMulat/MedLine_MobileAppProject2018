@@ -13,7 +13,7 @@ class _QueueManagementScreenState extends State<QueueManagementScreen> {
   bool _isPatientInRoom = false;
   final String _currentPatient = "John Doe";
 
-  // Using the ultra-soft coloring we defined
+  // Using the ultra-soft coloring 
   final Color _ultraSoftGreenBg = Colors.green.withOpacity(0.12);
   final Color _deepGreenText = Colors.green.shade800;
 
