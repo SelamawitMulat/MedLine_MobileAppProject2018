@@ -1,3 +1,5 @@
+// ignore_for_file: unused_import
+
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:med_line/core/constants/app_colors.dart';
@@ -105,6 +107,7 @@ class MyAppointmentsScreen extends StatelessWidget {
       ),
     );
   }
+
   Widget _buildAppointmentItem(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(20),

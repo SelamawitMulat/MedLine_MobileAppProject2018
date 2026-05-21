@@ -1,3 +1,5 @@
+// ignore_for_file: unused_import
+
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:med_line/core/constants/app_colors.dart';
@@ -86,21 +88,19 @@ class _VisitSummaryFormState extends State<VisitSummaryForm> {
                   TextFormField(
                     controller: _diagnosisController,
                     decoration: _inputDecoration(hint: "Enter Diagnosis"),
-                    validator: (value) =>
-                        (value == null || value.isEmpty)
-                            ? "Diagnosis is required"
-                            : null,
+                    validator: (value) => (value == null || value.isEmpty)
+                        ? "Diagnosis is required"
+                        : null,
                   ),
 
                   TextFormField(
                     controller: _prescriptionController,
                     decoration: _inputDecoration(hint: "Enter prescription"),
-                    validator: (value) =>
-                        (value == null || value.isEmpty)
-                            ? "Prescription is required"
-                            : null,
+                    validator: (value) => (value == null || value.isEmpty)
+                        ? "Prescription is required"
+                        : null,
                   ),
-                    const SizedBox(height: 15),
+                  const SizedBox(height: 15),
                   _label("Notes (Optional)"),
                   TextFormField(
                     controller: _notesController,
