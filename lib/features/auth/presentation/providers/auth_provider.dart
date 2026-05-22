@@ -7,6 +7,7 @@ import 'package:med_line/features/auth/domain/user_model.dart';
 import 'package:med_line/core/network/api_client.dart';
 import 'package:med_line/core/database/app_database.dart';
 
+// Data Layer Providers
 final apiClientProvider = Provider<ApiClient>((ref) => ApiClient());
 final appDatabaseProvider = Provider<AppDatabase>((ref) => AppDatabase());
 
@@ -25,16 +26,19 @@ final authRepositoryProvider = Provider<AuthRepository>((ref) {
   );
 });
 
+// Presentation Layer AuthNotifier
 class AuthNotifier extends AsyncNotifier<User?> {
   @override
   FutureOr<User?> build() async {
     return await ref.watch(authRepositoryProvider).getCurrentUser();
   }
 
-  Future<void> login(String identifier, String password, String selectedRole) async {
+  // UPDATED: Completely removed the String selectedRole parameter
+  Future<void> login(String identifier, String password) async {
     state = const AsyncValue.loading();
     state = await AsyncValue.guard(() async {
-      return await ref.read(authRepositoryProvider).login(identifier, password, selectedRole);
+      // Passes just identifier and password to your repository layer
+      return await ref.read(authRepositoryProvider).login(identifier, password);
     });
   }
 
@@ -48,12 +52,12 @@ class AuthNotifier extends AsyncNotifier<User?> {
     state = const AsyncValue.loading();
     state = await AsyncValue.guard(() async {
       return await ref.read(authRepositoryProvider).signup(
-        username: username,
-        password: password,
-        role: role,
-        name: name,
-        email: email,
-      );
+            username: username,
+            password: password,
+            role: role,
+            name: name,
+            email: email,
+          );
     });
   }
 
@@ -73,6 +77,7 @@ class AuthNotifier extends AsyncNotifier<User?> {
   }
 }
 
+// Global UI-consumed Authentication State Provider
 final authProvider = AsyncNotifierProvider<AuthNotifier, User?>(() {
   return AuthNotifier();
 });

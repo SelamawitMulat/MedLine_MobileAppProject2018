@@ -11,16 +11,17 @@ class AuthRepository {
     required this.remoteDataSource,
   });
 
-  Future<User?> login(String identifier, String password, String selectedRole) async {
-    final user = await remoteDataSource.findUserByCredentials(identifier, password);
+  // UPDATED: Completely removed 'String selectedRole' from the parameters
+  Future<User?> login(String identifier, String password) async {
+    final user =
+        await remoteDataSource.findUserByCredentials(identifier, password);
 
     if (user == null) {
       throw Exception('Invalid credentials');
     }
 
-    if (user.role != selectedRole) {
-      throw Exception('This account is registered as ${user.role}. You selected $selectedRole.');
-    }
+    // REMOVED: The strict role mismatch check is gone, so users bypass manual selection.
+    // The app will now automatically read user.role in the UI to navigate.
 
     await localDataSource.saveUserSession(user);
     return user;
@@ -34,7 +35,8 @@ class AuthRepository {
     required String email,
   }) async {
     final existingUsers = await remoteDataSource.getAllUsers();
-    final userExists = existingUsers.any((u) => u.email == email || u.username == username);
+    final userExists =
+        existingUsers.any((u) => u.email == email || u.username == username);
 
     if (userExists) {
       throw Exception('User already exists');
