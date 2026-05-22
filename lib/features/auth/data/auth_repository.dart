@@ -12,13 +12,6 @@ class AuthRepository {
   });
 
   Future<User?> login(String username, String password, String role) async {
-    final localUser = await localDataSource.getUserSession();
-    if (localUser != null &&
-        localUser.username == username &&
-        localUser.password == password &&
-        localUser.role == role) {
-      return localUser;
-    }
     final remoteUser = await remoteDataSource.login(username, password);
     if (remoteUser != null && remoteUser.role == role) {
       await localDataSource.saveUserSession(remoteUser);
@@ -31,9 +24,16 @@ class AuthRepository {
     required String username,
     required String password,
     required String role,
-    String? name,
-    String? email,
+    required String name,
+    required String email,
   }) async {
+    final existingUsers = await remoteDataSource.getAllUsers();
+    final userExists = existingUsers.any((u) => u.email == email || u.username == username);
+
+    if (userExists) {
+      throw Exception('User already exists');
+    }
+
     final user = await remoteDataSource.signup(
       username: username,
       password: password,
@@ -41,6 +41,7 @@ class AuthRepository {
       name: name,
       email: email,
     );
+
     await localDataSource.saveUserSession(user);
     return user;
   }

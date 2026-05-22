@@ -1,28 +1,30 @@
-class User {
+import 'package:equatable/equatable.dart';
+
+class User extends Equatable {
   final String id;
   final String username;
   final String password;
   final String role;
-  final String? name;
-  final String? email;
+  final String name;
+  final String email;
 
-  User({
+  const User({
     required this.id,
     required this.username,
     required this.password,
     required this.role,
-    this.name,
-    this.email,
+    required this.name,
+    required this.email,
   });
 
   factory User.fromJson(Map<String, dynamic> json) {
     return User(
-      id: json['id'] ?? '',
+      id: json['id']?.toString() ?? '',
       username: json['username'] ?? '',
       password: json['password'] ?? '',
       role: json['role'] ?? '',
-      name: json['name'],
-      email: json['email'],
+      name: json['name'] ?? '',
+      email: json['email'] ?? '',
     );
   }
 
@@ -37,21 +39,6 @@ class User {
     };
   }
 
-  User copyWith({
-    String? id,
-    String? username,
-    String? password,
-    String? role,
-    String? name,
-    String? email,
-  }) {
-    return User(
-      id: id ?? this.id,
-      username: username ?? this.username,
-      password: password ?? this.password,
-      role: role ?? this.role,
-      name: name ?? this.name,
-      email: email ?? this.email,
-    );
-  }
+  @override
+  List<Object?> get props => [id, username, password, role, name, email];
 }

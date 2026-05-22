@@ -7,7 +7,7 @@ class ApiClient {
     if (response.statusCode >= 200 && response.statusCode < 300) {
       return jsonDecode(response.body);
     }
-    throw Exception('GET request failed: ${response.statusCode}');
+    throw Exception('GET ${response.statusCode}: ${response.body}');
   }
 
   Future<dynamic> post(String url, {Map<String, dynamic>? data}) async {
@@ -16,10 +16,11 @@ class ApiClient {
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode(data ?? {}),
     );
+    print('POST URL: $url | Status: ${response.statusCode} | Body: ${response.body}');
     if (response.statusCode >= 200 && response.statusCode < 300) {
       return jsonDecode(response.body);
     }
-    throw Exception('POST request failed: ${response.statusCode}');
+    throw Exception('POST ${response.statusCode}: ${response.body}');
   }
 
   Future<dynamic> put(String url, {Map<String, dynamic>? data}) async {
@@ -31,7 +32,7 @@ class ApiClient {
     if (response.statusCode >= 200 && response.statusCode < 300) {
       return jsonDecode(response.body);
     }
-    throw Exception('PUT request failed: ${response.statusCode}');
+    throw Exception('PUT ${response.statusCode}: ${response.body}');
   }
 
   Future<dynamic> delete(String url) async {
@@ -39,6 +40,6 @@ class ApiClient {
     if (response.statusCode >= 200 && response.statusCode < 300) {
       return jsonDecode(response.body);
     }
-    throw Exception('DELETE request failed: ${response.statusCode}');
+    throw Exception('DELETE ${response.statusCode}: ${response.body}');
   }
 }

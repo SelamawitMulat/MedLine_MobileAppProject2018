@@ -1,4 +1,5 @@
-const String userSessionTable = 'user_session';
-const String appointmentsTable = 'appointments';
-const String doctorsTable = 'doctors';
-const String visitSummariesTable = 'visit_summaries';
+class Tables {
+  static const String userSession = 'user_session';
+  static const String appointmentsCache = 'appointments_cache';
+  static const String visitSummariesCache = 'visit_summaries_cache';
+}
