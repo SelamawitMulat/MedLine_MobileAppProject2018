@@ -1,39 +1,37 @@
-import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:med_line/features/home/data/home_repository.dart';
-import 'package:med_line/features/home/domain/appointment_model.dart';
+import '../../domain/appointment_model.dart';
 
-final appointmentProvider = AsyncNotifierProvider<AppointmentNotifier, List<Appointment>>(() => AppointmentNotifier());
+class AppointmentNotifier extends StateNotifier<List<Appointment>> {
+  // CORRECTED: Set the initial state to a completely empty list
+  // This removes the mock data so ghost appointments don't show up on startup
+  AppointmentNotifier() : super([]);
 
-class AppointmentNotifier extends AsyncNotifier<List<Appointment>> {
-  @override
-  FutureOr<List<Appointment>> build() async {
-    return await ref.read(homeRepositoryProvider).getAppointments();
+  // Method to add a new appointment to the list
+  void bookAppointment(Appointment appointment) {
+    state = [...state, appointment];
   }
 
-  Future<void> addAppointment(Appointment app) async {
-    final previousState = state;
-    state = const AsyncValue.loading();
-    try {
-      final newApp = await ref.read(homeRepositoryProvider).addAppointment(app);
-      state = AsyncValue.data([...(previousState.value ?? []), newApp]);
-    } catch (e, stack) {
-      state = AsyncValue.error(e, stack);
-    }
-  }
-
-  Appointment? getNextAppointment(String userId) {
-    final all = state.value ?? [];
-    final now = DateTime.now();
-    final userApps = all.where((a) => a.patientId == userId).toList();
-    final upcoming = userApps.where((a) => a.dateTime.isAfter(now)).toList()
-      ..sort((a, b) => a.dateTime.compareTo(b.dateTime));
-    return upcoming.isNotEmpty ? upcoming.first : null;
-  }
-
-  int getQueuePosition(String id) {
-    final all = List<Appointment>.from(state.value ?? [])
-      ..sort((a, b) => a.bookingTimestamp.compareTo(b.bookingTimestamp));
-    return all.indexWhere((a) => a.id == id) + 1;
+  // Status updates without relying on copyWith
+  void updateAppointmentStatus(String id, String newStatus) {
+    state = [
+      for (final app in state)
+        if (app.id == id)
+          Appointment(
+            id: app.id,
+            patientName: app.patientName,
+            doctorName: app.doctorName,
+            date: app.date,
+            timeSlot: app.timeSlot,
+            status: newStatus, // Injects the updated status cleanly
+          )
+        else
+          app,
+    ];
   }
 }
+
+// The global provider your UI screens will read and watch
+final appointmentProvider =
+    StateNotifierProvider<AppointmentNotifier, List<Appointment>>((ref) {
+  return AppointmentNotifier();
+});

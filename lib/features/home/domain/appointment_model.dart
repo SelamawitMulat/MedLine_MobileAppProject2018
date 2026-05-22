@@ -1,40 +1,36 @@
 class Appointment {
   final String id;
-  final String patientId;
-  final String? doctorName;
-  final DateTime dateTime;
-  final DateTime bookingTimestamp;
+  final String patientName;
+  final DateTime date;
+  final String timeSlot;
+  final String doctorName;
+  final String status; // 'Upcoming', 'Completed', 'Cancelled', 'Checked In'
 
   Appointment({
     required this.id,
-    required this.patientId,
-    this.doctorName,
-    required this.dateTime,
-    required this.bookingTimestamp,
+    required this.patientName,
+    required this.date,
+    required this.timeSlot,
+    this.doctorName = "Dr. Selam Mulat", // Corrected default parameter syntax
+    this.status = "Upcoming",
   });
 
-  factory Appointment.fromJson(Map<String, dynamic> json) {
+  // Fully implemented copyWith to let both patient and doctor update fields smoothly
+  Appointment copyWith({
+    String? id,
+    String? patientName,
+    DateTime? date,
+    String? timeSlot,
+    String? doctorName,
+    String? status,
+  }) {
     return Appointment(
-      id: json['id']?.toString() ?? '',
-      patientId: json['patientId']?.toString() ?? '',
-      doctorName: json['doctorName']?.toString(),
-      dateTime: DateTime.parse(json['dateTime'] as String),
-      bookingTimestamp: DateTime.parse(json['bookingTimestamp'] as String),
+      id: id ?? this.id,
+      patientName: patientName ?? this.patientName,
+      date: date ?? this.date,
+      timeSlot: timeSlot ?? this.timeSlot,
+      doctorName: doctorName ?? this.doctorName,
+      status: status ?? this.status,
     );
   }
-
-  Map<String, dynamic> toApiJson() => {
-    'patientId': patientId,
-    'doctorName': doctorName ?? 'General Practitioner',
-    'dateTime': dateTime.toIso8601String(),
-    'bookingTimestamp': bookingTimestamp.toIso8601String(),
-  };
-
-  Map<String, dynamic> toLocalJson() => {
-    'id': id,
-    'patientId': patientId,
-    'doctorName': doctorName,
-    'dateTime': dateTime.toIso8601String(),
-    'bookingTimestamp': bookingTimestamp.toIso8601String(),
-  };
 }
