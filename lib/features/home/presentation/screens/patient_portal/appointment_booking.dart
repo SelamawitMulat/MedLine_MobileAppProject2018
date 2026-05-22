@@ -1,21 +1,26 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:table_calendar/table_calendar.dart';
-import 'package:med_line/core/constants/app_colors.dart';
+import '../../../domain/appointment_model.dart';
+import '../../providers/appointment_provider.dart';
 
-class BookAppointmentScreen extends StatefulWidget {
+class BookAppointmentScreen extends ConsumerStatefulWidget {
   const BookAppointmentScreen({super.key});
 
   @override
-  State<BookAppointmentScreen> createState() => _BookAppointmentScreenState();
+  ConsumerState<BookAppointmentScreen> createState() =>
+      _BookAppointmentScreenState();
 }
 
-class _BookAppointmentScreenState extends State<BookAppointmentScreen> {
+class _BookAppointmentScreenState extends ConsumerState<BookAppointmentScreen> {
   DateTime _focusedDay = DateTime.now();
   DateTime? _selectedDay;
   String? _selectedTime;
 
-  // Time slots matching the layout in image_756f74.png
+  // FIXED: Hardcoded to you as the single practitioner
+  final String _soleDoctor = "Dr. Selam Mulat";
+
   final List<String> _timeSlots = [
     "09:00",
     "09:30",
@@ -32,6 +37,7 @@ class _BookAppointmentScreenState extends State<BookAppointmentScreen> {
   ];
 
   void _handleConfirmAppointment() {
+    // FIXED: Form validation only checks for Date and Time layout picks now
     if (_selectedDay == null || _selectedTime == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -42,17 +48,26 @@ class _BookAppointmentScreenState extends State<BookAppointmentScreen> {
       return;
     }
 
-    // Success feedback
+    final newAppointment = Appointment(
+      id: DateTime.now().millisecondsSinceEpoch.toString(),
+      patientName: "Patient User",
+      doctorName: _soleDoctor, // Injects your name automatically
+      date: _selectedDay!,
+      timeSlot: _selectedTime!,
+      status: "Upcoming",
+    );
+
+    ref.read(appointmentProvider.notifier).bookAppointment(newAppointment);
+
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
         content: Text("Appointment Booked Successfully!"),
         backgroundColor: Colors.green,
-        duration: Duration(seconds: 3),
+        duration: Duration(seconds: 2),
       ),
     );
 
-    // Navigate back to the portal after a short delay
-    Future.delayed(const Duration(seconds: 1), () {
+    Future.delayed(const Duration(milliseconds: 500), () {
       if (mounted) context.pop();
     });
   }
@@ -79,7 +94,6 @@ class _BookAppointmentScreenState extends State<BookAppointmentScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Calendar Section (Select Date)
             const Text("Select Date",
                 style: TextStyle(fontSize: 19, fontWeight: FontWeight.bold)),
             const SizedBox(height: 15),
@@ -90,7 +104,9 @@ class _BookAppointmentScreenState extends State<BookAppointmentScreen> {
                 borderRadius: BorderRadius.circular(15),
                 boxShadow: [
                   BoxShadow(
-                      color: Colors.black.withOpacity(0.05), blurRadius: 10)
+                    color: Colors.black.withAlpha(12),
+                    blurRadius: 10,
+                  )
                 ],
               ),
               child: TableCalendar(
@@ -112,21 +128,20 @@ class _BookAppointmentScreenState extends State<BookAppointmentScreen> {
                 ),
                 calendarStyle: CalendarStyle(
                   selectedDecoration: const BoxDecoration(
-                      color: AppColors.primaryBlue, shape: BoxShape.circle),
+                      color: Color(0xFF2563EB), shape: BoxShape.circle),
                   todayDecoration: BoxDecoration(
-                    color: AppColors.primaryBlue.withOpacity(0.2),
+                    color: const Color(0xFF2563EB).withAlpha(50),
                     shape: BoxShape.circle,
                   ),
                   todayTextStyle: const TextStyle(
-                      color: AppColors.primaryBlue,
-                      fontWeight: FontWeight.bold),
+                      color: Color(0xFF2563EB), fontWeight: FontWeight.bold),
                 ),
               ),
             ),
-
             const SizedBox(height: 35),
 
-            // Time Slot Section
+            // FIXED: "Select Medical Professional" Dropdown element block completely removed
+
             const Text("Available Time Slots",
                 style: TextStyle(fontSize: 19, fontWeight: FontWeight.bold)),
             const SizedBox(height: 15),
@@ -148,7 +163,7 @@ class _BookAppointmentScreenState extends State<BookAppointmentScreen> {
                   child: Container(
                     decoration: BoxDecoration(
                       color: isSelected
-                          ? AppColors.primaryBlue
+                          ? const Color(0xFF2563EB)
                           : const Color(0xFFF2F2F2),
                       borderRadius: BorderRadius.circular(10),
                     ),
@@ -164,10 +179,7 @@ class _BookAppointmentScreenState extends State<BookAppointmentScreen> {
                 );
               },
             ),
-
             const SizedBox(height: 40),
-
-            // Confirm Button (Matches image_756f74)
             SizedBox(
               width: double.infinity,
               child: ElevatedButton.icon(
@@ -179,7 +191,7 @@ class _BookAppointmentScreenState extends State<BookAppointmentScreen> {
                         fontSize: 17,
                         fontWeight: FontWeight.bold)),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primaryBlue,
+                  backgroundColor: const Color(0xFF2563EB),
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(15)),

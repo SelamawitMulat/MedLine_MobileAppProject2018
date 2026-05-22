@@ -1,15 +1,20 @@
 // ignore_for_file: unused_import
 
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
 import 'package:med_line/core/constants/app_colors.dart';
 
-class MyAppointmentsScreen extends StatelessWidget {
+// FIXED: Converted relative backsteps to absolute package paths
+import 'package:med_line/features/home/presentation/providers/appointment_provider.dart';
+import 'package:med_line/features/home/domain/appointment_model.dart';
+
+class MyAppointmentsScreen extends ConsumerWidget {
   const MyAppointmentsScreen({super.key});
 
-  // --- CANCEL APPOINTMENT MODAL ---
-  // All buttons (X, NO, Yes) return the user to the current page
-  void _showCancelDialog(BuildContext context) {
+  void _showCancelDialog(
+      BuildContext context, WidgetRef ref, String appointmentId) {
     showDialog(
       context: context,
       builder: (context) => Dialog(
@@ -31,8 +36,7 @@ class MyAppointmentsScreen extends StatelessWidget {
                   ),
                   IconButton(
                     icon: const Icon(Icons.close),
-                    onPressed: () =>
-                        Navigator.pop(context), // X returns to page
+                    onPressed: () => Navigator.pop(context),
                   ),
                 ],
               ),
@@ -40,12 +44,10 @@ class MyAppointmentsScreen extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
-                  // NO Button
                   SizedBox(
                     width: 100,
                     child: ElevatedButton(
-                      onPressed: () =>
-                          Navigator.pop(context), // NO returns to page
+                      onPressed: () => Navigator.pop(context),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFFF0F0F0),
                         elevation: 0,
@@ -57,12 +59,16 @@ class MyAppointmentsScreen extends StatelessWidget {
                           style: TextStyle(color: Colors.black)),
                     ),
                   ),
-                  // YES Button
                   SizedBox(
                     width: 100,
                     child: ElevatedButton(
-                      onPressed: () =>
-                          Navigator.pop(context), // YES returns to page
+                      onPressed: () {
+                        ref
+                            .read(appointmentProvider.notifier)
+                            .updateAppointmentStatus(
+                                appointmentId, "Cancelled");
+                        Navigator.pop(context);
+                      },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.white,
                         elevation: 0,
@@ -84,7 +90,11 @@ class MyAppointmentsScreen extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final appointments = ref.watch(appointmentProvider);
+    final upcomingAppointments =
+        appointments.where((app) => app.status == "Upcoming").toList();
+
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -97,18 +107,30 @@ class MyAppointmentsScreen extends StatelessWidget {
         title: const Text("My Appointments",
             style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(25),
-        child: Column(
-          children: [
-            _buildAppointmentItem(context),
-          ],
-        ),
-      ),
+      body: upcomingAppointments.isEmpty
+          ? const Center(
+              child: Text(
+                "No active appointments found.\nGo back to book a new one!",
+                textAlign: TextAlign.center,
+                style: TextStyle(color: Colors.grey, fontSize: 16, height: 1.4),
+              ),
+            )
+          : ListView.builder(
+              padding: const EdgeInsets.all(25),
+              itemCount: upcomingAppointments.length,
+              itemBuilder: (context, index) {
+                final app = upcomingAppointments[index];
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 20),
+                  child: _buildAppointmentItem(context, ref, app, index + 1),
+                );
+              },
+            ),
     );
   }
 
-  Widget _buildAppointmentItem(BuildContext context) {
+  Widget _buildAppointmentItem(
+      BuildContext context, WidgetRef ref, Appointment app, int queueNumber) {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -125,38 +147,45 @@ class MyAppointmentsScreen extends StatelessWidget {
                 padding:
                     const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                 decoration: BoxDecoration(
-                  color: Colors.blue.withOpacity(0.1),
+                  color: Colors.blue.withAlpha(25),
                   borderRadius: BorderRadius.circular(10),
                 ),
-                child: const Text("Upcoming",
-                    style: TextStyle(
-                        color: Colors.blue, fontWeight: FontWeight.bold)),
+                child: Text(
+                  app.status,
+                  style: const TextStyle(
+                      color: Colors.blue, fontWeight: FontWeight.bold),
+                ),
               ),
-              const Row(
+              Row(
                 children: [
-                  Icon(Icons.people_outline, color: Colors.grey, size: 20),
-                  SizedBox(width: 5),
-                  Text("Queue: 1",
-                      style: TextStyle(fontWeight: FontWeight.bold)),
+                  const Icon(Icons.people_outline,
+                      color: Colors.grey, size: 20),
+                  const SizedBox(width: 5),
+                  Text(
+                    "Queue: $queueNumber",
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
                 ],
               ),
             ],
           ),
           const SizedBox(height: 20),
-          const Row(
+          Row(
             children: [
-              Icon(Icons.calendar_today, color: Colors.black, size: 20),
-              SizedBox(width: 10),
-              Text("Wednesday, April 15, 2026",
-                  style: TextStyle(fontWeight: FontWeight.w500)),
+              const Icon(Icons.calendar_today, color: Colors.black, size: 20),
+              const SizedBox(width: 10),
+              Text(
+                DateFormat('EEEE, MMMM d, yyyy').format(app.date),
+                style: const TextStyle(fontWeight: FontWeight.w500),
+              ),
             ],
           ),
           const SizedBox(height: 10),
-          const Row(
+          Row(
             children: [
-              Icon(Icons.access_time, color: Colors.black, size: 20),
-              SizedBox(width: 10),
-              Text("10:00 PM"),
+              const Icon(Icons.access_time, color: Colors.black, size: 20),
+              const SizedBox(width: 10),
+              Text(app.timeSlot),
             ],
           ),
           const SizedBox(height: 25),
@@ -177,7 +206,7 @@ class MyAppointmentsScreen extends StatelessWidget {
               const SizedBox(width: 15),
               Expanded(
                 child: OutlinedButton.icon(
-                  onPressed: () => _showCancelDialog(context),
+                  onPressed: () => _showCancelDialog(context, ref, app.id),
                   icon: const Icon(Icons.cancel_outlined,
                       color: Colors.red, size: 20),
                   label:
