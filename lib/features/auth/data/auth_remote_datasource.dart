@@ -12,11 +12,11 @@ class AuthRemoteDataSource {
     return response.map((json) => User.fromJson(json)).toList();
   }
 
-  Future<User?> login(String username, String password) async {
+  Future<User?> findUserByCredentials(String identifier, String password) async {
     final users = await getAllUsers();
     try {
       return users.firstWhere(
-            (user) => user.username == username && user.password == password,
+            (user) => (user.email == identifier || user.username == identifier) && user.password == password,
       );
     } catch (_) {
       return null;

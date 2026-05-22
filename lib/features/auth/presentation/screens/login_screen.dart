@@ -1,4 +1,4 @@
- import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:med_line/core/constants/app_colors.dart';
@@ -16,7 +16,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 final _formKey = GlobalKey<FormState>();
 final _emailController = TextEditingController();
 final _passwordController = TextEditingController();
-
 String _selectedRole = "Patient";
 bool _isPasswordVisible = false;
 
@@ -29,15 +28,16 @@ _selectedRole,
 );
 
 final authState = ref.read(authProvider);
+
 if (authState.hasValue && authState.value != null) {
-if (_selectedRole == "Doctor") {
+if (authState.value!.role == "Doctor") {
 context.go('/doctor-portal');
 } else {
 context.go('/patient-portal');
 }
 } else if (authState.hasError) {
 ScaffoldMessenger.of(context).showSnackBar(
-SnackBar(content: Text(authState.error.toString())),
+SnackBar(content: Text(authState.error.toString().replaceAll('Exception: ', ''))),
 );
 }
 }
@@ -49,11 +49,7 @@ final authState = ref.watch(authProvider);
 
 return Scaffold(
 backgroundColor: AppColors.scaffoldBg,
-appBar: AppBar(
-backgroundColor: AppColors.scaffoldBg,
-elevation: 0,
-iconTheme: const IconThemeData(color: Colors.black),
-),
+appBar: AppBar(backgroundColor: AppColors.scaffoldBg, elevation: 0, iconTheme: const IconThemeData(color: Colors.black)),
 body: SafeArea(
 child: SingleChildScrollView(
 padding: const EdgeInsets.all(30),
@@ -61,49 +57,25 @@ child: Form(
 key: _formKey,
 child: Column(
 children: [
-const Icon(
-Icons.stacked_line_chart,
-color: AppColors.primaryBlue,
-size: 80,
-),
-const Text(
-"MedLine",
-style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
-),
-const Text(
-"Clinical Appointment Management",
-style: TextStyle(color: AppColors.textGrey),
-),
+const Icon(Icons.stacked_line_chart, color: AppColors.primaryBlue, size: 80),
+const Text("MedLine", style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold)),
+const Text("Clinical Appointment Management", style: TextStyle(color: AppColors.textGrey)),
 const SizedBox(height: 40),
 Container(
 padding: const EdgeInsets.all(20),
-decoration: BoxDecoration(
-color: AppColors.cardGrey,
-borderRadius: BorderRadius.circular(20),
-),
+decoration: BoxDecoration(color: AppColors.cardGrey, borderRadius: BorderRadius.circular(20)),
 child: Column(
 crossAxisAlignment: CrossAxisAlignment.start,
 children: [
-const Text(
-"Email",
-style: TextStyle(fontWeight: FontWeight.bold),
-),
+const Text("Email or Username", style: TextStyle(fontWeight: FontWeight.bold)),
 const SizedBox(height: 8),
 TextFormField(
 controller: _emailController,
-decoration: const InputDecoration(
-hintText: "Enter your email",
-filled: true,
-fillColor: Colors.white,
-border: OutlineInputBorder(borderSide: BorderSide.none),
-),
-validator: (v) => (v == null || !v.contains('@')) ? 'Enter a valid email' : null,
+decoration: const InputDecoration(hintText: "Enter email or username", filled: true, fillColor: Colors.white, border: OutlineInputBorder(borderSide: BorderSide.none)),
+validator: (v) => (v == null || v.isEmpty) ? 'Required' : null,
 ),
 const SizedBox(height: 20),
-const Text(
-"Password",
-style: TextStyle(fontWeight: FontWeight.bold),
-),
+const Text("Password", style: TextStyle(fontWeight: FontWeight.bold)),
 const SizedBox(height: 8),
 TextFormField(
 controller: _passwordController,
@@ -118,7 +90,7 @@ icon: Icon(_isPasswordVisible ? Icons.visibility : Icons.visibility_off),
 onPressed: () => setState(() => _isPasswordVisible = !_isPasswordVisible),
 ),
 ),
-validator: (v) => (v == null || v.length < 6) ? 'Password must be at least 6 characters' : null,
+validator: (v) => (v == null || v.length < 6) ? 'Password too short' : null,
 ),
 const SizedBox(height: 20),
 const Text("Login as:", style: TextStyle(fontWeight: FontWeight.bold)),
@@ -135,12 +107,7 @@ authState.isLoading
 ? const Center(child: CircularProgressIndicator())
     : PrimaryButton(text: "Login", onPressed: _handleLogin),
 const SizedBox(height: 15),
-Center(
-child: TextButton(
-onPressed: () => context.push('/signup'),
-child: const Text("Don't have an account? Sign up"),
-),
-),
+Center(child: TextButton(onPressed: () => context.push('/signup'), child: const Text("Don't have an account? Sign up"))),
 ],
 ),
 ),

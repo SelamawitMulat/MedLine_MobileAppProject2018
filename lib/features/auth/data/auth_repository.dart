@@ -11,13 +11,19 @@ class AuthRepository {
     required this.remoteDataSource,
   });
 
-  Future<User?> login(String username, String password, String role) async {
-    final remoteUser = await remoteDataSource.login(username, password);
-    if (remoteUser != null && remoteUser.role == role) {
-      await localDataSource.saveUserSession(remoteUser);
-      return remoteUser;
+  Future<User?> login(String identifier, String password, String selectedRole) async {
+    final user = await remoteDataSource.findUserByCredentials(identifier, password);
+
+    if (user == null) {
+      throw Exception('Invalid credentials');
     }
-    return null;
+
+    if (user.role != selectedRole) {
+      throw Exception('This account is registered as ${user.role}. You selected $selectedRole.');
+    }
+
+    await localDataSource.saveUserSession(user);
+    return user;
   }
 
   Future<User?> signup({

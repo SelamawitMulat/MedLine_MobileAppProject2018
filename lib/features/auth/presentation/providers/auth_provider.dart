@@ -31,12 +31,10 @@ class AuthNotifier extends AsyncNotifier<User?> {
     return await ref.watch(authRepositoryProvider).getCurrentUser();
   }
 
-  Future<void> login(String username, String password, String role) async {
+  Future<void> login(String identifier, String password, String selectedRole) async {
     state = const AsyncValue.loading();
     state = await AsyncValue.guard(() async {
-      final user = await ref.read(authRepositoryProvider).login(username, password, role);
-      if (user == null) throw Exception('Invalid credentials');
-      return user;
+      return await ref.read(authRepositoryProvider).login(identifier, password, selectedRole);
     });
   }
 
@@ -49,14 +47,13 @@ class AuthNotifier extends AsyncNotifier<User?> {
   }) async {
     state = const AsyncValue.loading();
     state = await AsyncValue.guard(() async {
-      final user = await ref.read(authRepositoryProvider).signup(
+      return await ref.read(authRepositoryProvider).signup(
         username: username,
         password: password,
         role: role,
         name: name,
         email: email,
       );
-      return user;
     });
   }
 
