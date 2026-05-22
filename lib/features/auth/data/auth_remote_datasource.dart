@@ -39,4 +39,8 @@ class AuthRemoteDataSource {
     });
     return User.fromJson(response);
   }
+
+  Future<void> deleteUser(String id) async {
+    await apiClient.delete('${ApiEndpoints.users}/$id');
+  }
 }

@@ -56,6 +56,14 @@ class AuthRepository {
     await localDataSource.clearSession();
   }
 
+  Future<void> deleteAccount() async {
+    final user = await localDataSource.getUserSession();
+    if (user != null && user.id != null) {
+      await remoteDataSource.deleteUser(user.id!);
+      await localDataSource.clearSession();
+    }
+  }
+
   Future<User?> getCurrentUser() async {
     return await localDataSource.getUserSession();
   }
