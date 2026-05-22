@@ -11,6 +11,24 @@ class AppointmentNotifier extends StateNotifier<List<Appointment>> {
     state = [...state, appointment];
   }
 
+  // Reschedules an existing appointment with a new date/time slot
+  void rescheduleAppointment(String id, DateTime newDate, String newTimeSlot) {
+    state = [
+      for (final app in state)
+        if (app.id == id)
+          Appointment(
+            id: app.id,
+            patientName: app.patientName,
+            doctorName: app.doctorName,
+            date: newDate,
+            timeSlot: newTimeSlot,
+            status: app.status,
+          )
+        else
+          app,
+    ];
+  }
+
   // Status updates without relying on copyWith
   void updateAppointmentStatus(String id, String newStatus) {
     state = [

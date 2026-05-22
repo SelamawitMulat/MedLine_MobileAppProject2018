@@ -3,8 +3,10 @@ import 'package:med_line/core/network/api_endpoints.dart';
 import 'package:med_line/features/home/domain/appointment_model.dart';
 
 class HomeRemoteDataSource {
-  final ApiClient _api = ApiClient();
+  final ApiClient _api;
   final String _url = ApiEndpoints.appointments;
+
+  HomeRemoteDataSource(this._api);
 
   Future<List<Appointment>> fetchAllAppointments() async {
     final List<dynamic> data = await _api.get(_url);

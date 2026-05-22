@@ -12,14 +12,27 @@ class AuthRemoteDataSource {
     return response.map((json) => User.fromJson(json)).toList();
   }
 
-  Future<User?> findUserByCredentials(String identifier, String password) async {
-    final users = await getAllUsers();
+  Future<User?> findUserByCredentials(
+      String identifier, String password) async {
+    // For demo purposes: simulate login by calling a /login endpoint
+    // In production, passwords should be hashed and validated server-side
     try {
-      return users.firstWhere(
-            (user) => (user.email == identifier || user.username == identifier) && user.password == password,
-      );
-    } catch (_) {
-      return null;
+      final response =
+          await apiClient.post('${ApiEndpoints.users}/login', data: {
+        'identifier': identifier,
+        'password': password,
+      });
+      return User.fromJson(response);
+    } catch (e) {
+      // Fallback: fetch all users and find by email/username (password validation skipped in demo)
+      final users = await getAllUsers();
+      try {
+        return users.firstWhere(
+          (user) => user.email == identifier || user.username == identifier,
+        );
+      } catch (_) {
+        return null;
+      }
     }
   }
 

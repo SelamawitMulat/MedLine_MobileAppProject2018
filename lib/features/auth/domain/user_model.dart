@@ -3,7 +3,6 @@ import 'package:equatable/equatable.dart';
 class User extends Equatable {
   final String id;
   final String username;
-  final String password;
   final String role;
   final String name;
   final String email;
@@ -11,7 +10,6 @@ class User extends Equatable {
   const User({
     required this.id,
     required this.username,
-    required this.password,
     required this.role,
     required this.name,
     required this.email,
@@ -21,7 +19,6 @@ class User extends Equatable {
     return User(
       id: json['id']?.toString() ?? '',
       username: json['username'] ?? '',
-      password: json['password'] ?? '',
       role: json['role'] ?? '',
       name: json['name'] ?? '',
       email: json['email'] ?? '',
@@ -32,7 +29,6 @@ class User extends Equatable {
     return {
       'id': id,
       'username': username,
-      'password': password,
       'role': role,
       'name': name,
       'email': email,
@@ -40,5 +36,5 @@ class User extends Equatable {
   }
 
   @override
-  List<Object?> get props => [id, username, password, role, name, email];
+  List<Object?> get props => [id, username, role, name, email];
 }

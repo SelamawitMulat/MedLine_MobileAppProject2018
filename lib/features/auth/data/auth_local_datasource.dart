@@ -1,65 +1,42 @@
-import 'package:sqflite/sqflite.dart';
-import 'package:path/path.dart';
+import 'package:med_line/core/database/app_database.dart';
+import 'package:med_line/features/auth/domain/user_model.dart';
 
-class AppDatabase {
-  static Database? _database;
+class AuthLocalDataSource {
+  final AppDatabase _db;
 
-  Future<Database> get database async {
-    _database ??= await _initDatabase();
-    return _database!;
+  AuthLocalDataSource(this._db);
+
+  /// Saves the user data to the local SQLite database
+  Future<void> saveUser(User user) async {
+    final userData = user.toJson();
+    // Add isLoggedIn flag for local session tracking
+    userData['isLoggedIn'] = 1;
+    await _db.insert('users', userData);
   }
 
-  Future<Database> _initDatabase() async {
-    final path = join(await getDatabasesPath(), 'medline.db');
-    return await openDatabase(
-      path,
-      version: 1,
-      onCreate: (db, version) async {
-        await db.execute('''
-          CREATE TABLE appointments_cache (
-            id TEXT PRIMARY KEY,
-            patientId TEXT,
-            doctorName TEXT,
-            dateTime TEXT,
-            bookingTimestamp TEXT
-          )
-        ''');
-        await db.execute('''
-          CREATE TABLE IF NOT EXISTS users (
-            id TEXT PRIMARY KEY,
-            name TEXT,
-            email TEXT,
-            isLoggedIn INTEGER
-          )
-        ''');
-      },
+  /// Retrieves the currently logged-in user from the database
+  Future<User?> getCurrentUser() async {
+    final results = await _db.getAll('users');
+    // Finds the user marked as logged in, if any exists
+    final loggedInUser = results.cast<Map<String, dynamic>?>().firstWhere(
+      (user) => user?['isLoggedIn'] == 1,
+      orElse: () => null,
     );
+    return loggedInUser != null ? User.fromJson(loggedInUser) : null;
   }
 
-  Future<void> clearTable(String table) async {
-    final db = await database;
-    await db.delete(table);
+  /// Clears the user authentication session data
+  Future<void> clearAuth() async {
+    await _db.clearTable('users');
   }
 
-  Future<void> insert(String table, Map<String, dynamic> data) async {
-    final db = await database;
-    await db.insert(table, data, conflictAlgorithm: ConflictAlgorithm.replace);
+  /// Alias for clearAuth to match repository usage
+  Future<void> clearAll() async {
+    await clearAuth();
   }
 
-  Future<List<Map<String, dynamic>>> getAll(String table) async {
-    final db = await database;
-    return await db.query(table);
-  }
-
-  // Ensure this method is defined exactly like this
-  Future<Map<String, dynamic>?> getSingle(String table, {String? where, List<dynamic>? whereArgs}) async {
-    final db = await database;
-    final results = await db.query(table, where: where, whereArgs: whereArgs, limit: 1);
-    return results.isNotEmpty ? results.first : null;
-  }
-
-  Future<void> delete(String table, {String? where, List<dynamic>? whereArgs}) async {
-    final db = await database;
-    await db.delete(table, where: where, whereArgs: whereArgs);
+  /// Deletes a specific user
+  Future<void> deleteUser(String id) async {
+    await _db.delete('users', where: 'id = ?', whereArgs: [id]);
   }
 }

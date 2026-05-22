@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
-import 'package:med_line/core/constants/app_colors.dart';
 
 // FIXED: Converted relative backsteps to absolute package paths
 import 'package:med_line/features/home/presentation/providers/appointment_provider.dart';
@@ -98,9 +97,12 @@ class MyAppointmentsScreen extends ConsumerWidget {
       appBar: AppBar(
           backgroundColor: Colors.white,
           elevation: 0,
-          leading: IconButton(icon: const Icon(Icons.arrow_back, color: Colors.black), onPressed: () => context.pop()),
-          title: const Text("My Appointments", style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold))
-      ),
+          leading: IconButton(
+              icon: const Icon(Icons.arrow_back, color: Colors.black),
+              onPressed: () => context.pop()),
+          title: const Text("My Appointments",
+              style:
+                  TextStyle(color: Colors.black, fontWeight: FontWeight.bold))),
       body: upcomingAppointments.isEmpty
           ? const Center(
               child: Text(
@@ -128,7 +130,10 @@ class MyAppointmentsScreen extends ConsumerWidget {
     return Container(
       margin: const EdgeInsets.only(bottom: 15),
       padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(color: const Color(0xFFF8F9FB), borderRadius: BorderRadius.circular(20), border: Border.all(color: Colors.grey.shade100)),
+      decoration: BoxDecoration(
+          color: const Color(0xFFF8F9FB),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: Colors.grey.shade100)),
       child: Column(
         children: [
           Row(
@@ -184,7 +189,10 @@ class MyAppointmentsScreen extends ConsumerWidget {
             children: [
               Expanded(
                 child: OutlinedButton(
-                  onPressed: () {},
+                  onPressed: () {
+                    // Navigate to booking screen, passing the appointment as extra
+                    context.push('/book-appointment', extra: app);
+                  },
                   style: OutlinedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 12),
                     shape: RoundedRectangleBorder(

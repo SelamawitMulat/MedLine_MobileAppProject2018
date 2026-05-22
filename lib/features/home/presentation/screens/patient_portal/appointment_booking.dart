@@ -6,7 +6,9 @@ import '../../../domain/appointment_model.dart';
 import '../../providers/appointment_provider.dart';
 
 class BookAppointmentScreen extends ConsumerStatefulWidget {
-  const BookAppointmentScreen({super.key});
+  final Appointment? rescheduleAppointment;
+
+  const BookAppointmentScreen({super.key, this.rescheduleAppointment});
 
   @override
   ConsumerState<BookAppointmentScreen> createState() =>
@@ -48,24 +50,42 @@ class _BookAppointmentScreenState extends ConsumerState<BookAppointmentScreen> {
       return;
     }
 
-    final newAppointment = Appointment(
-      id: DateTime.now().millisecondsSinceEpoch.toString(),
-      patientName: "Patient User",
-      doctorName: _soleDoctor, // Injects your name automatically
-      date: _selectedDay!,
-      timeSlot: _selectedTime!,
-      status: "Upcoming",
-    );
+    final isReschedule = widget.rescheduleAppointment != null;
 
-    ref.read(appointmentProvider.notifier).bookAppointment(newAppointment);
+    if (isReschedule) {
+      ref.read(appointmentProvider.notifier).rescheduleAppointment(
+            widget.rescheduleAppointment!.id,
+            _selectedDay!,
+            _selectedTime!,
+          );
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text("Appointment Booked Successfully!"),
-        backgroundColor: Colors.green,
-        duration: Duration(seconds: 2),
-      ),
-    );
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Appointment rescheduled successfully!"),
+          backgroundColor: Colors.green,
+          duration: Duration(seconds: 2),
+        ),
+      );
+    } else {
+      final newAppointment = Appointment(
+        id: DateTime.now().millisecondsSinceEpoch.toString(),
+        patientName: "Patient User",
+        doctorName: _soleDoctor, // Injects your name automatically
+        date: _selectedDay!,
+        timeSlot: _selectedTime!,
+        status: "Upcoming",
+      );
+
+      ref.read(appointmentProvider.notifier).bookAppointment(newAppointment);
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Appointment Booked Successfully!"),
+          backgroundColor: Colors.green,
+          duration: Duration(seconds: 2),
+        ),
+      );
+    }
 
     Future.delayed(const Duration(milliseconds: 500), () {
       if (mounted) context.pop();
@@ -73,7 +93,18 @@ class _BookAppointmentScreenState extends ConsumerState<BookAppointmentScreen> {
   }
 
   @override
+  void initState() {
+    super.initState();
+    if (widget.rescheduleAppointment != null) {
+      _selectedDay = widget.rescheduleAppointment!.date;
+      _focusedDay = widget.rescheduleAppointment!.date;
+      _selectedTime = widget.rescheduleAppointment!.timeSlot;
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final isReschedule = widget.rescheduleAppointment != null;
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -83,9 +114,9 @@ class _BookAppointmentScreenState extends ConsumerState<BookAppointmentScreen> {
           icon: const Icon(Icons.arrow_back, color: Colors.black, size: 28),
           onPressed: () => context.pop(),
         ),
-        title: const Text(
-          "Book Appointment",
-          style: TextStyle(
+        title: Text(
+          isReschedule ? "Reschedule Appointment" : "Book Appointment",
+          style: const TextStyle(
               color: Colors.black, fontSize: 22, fontWeight: FontWeight.bold),
         ),
       ),
@@ -204,5 +235,4 @@ class _BookAppointmentScreenState extends ConsumerState<BookAppointmentScreen> {
       ),
     );
   }
-}
 }

@@ -3,7 +3,10 @@ import 'package:med_line/core/database/tables.dart';
 import 'package:med_line/features/home/domain/appointment_model.dart';
 
 class HomeLocalDataSource {
-  final AppDatabase db = AppDatabase();
+  // Pass the instance in instead of creating a raw duplicate instance
+  final AppDatabase db;
+
+  HomeLocalDataSource(this.db);
 
   Future<void> cacheAppointments(List<Appointment> apps) async {
     await db.clearTable(Tables.appointmentsCache);

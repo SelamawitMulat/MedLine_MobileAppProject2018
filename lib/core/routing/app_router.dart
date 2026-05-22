@@ -1,4 +1,5 @@
 import 'package:go_router/go_router.dart';
+import 'package:med_line/features/home/domain/appointment_model.dart';
 
 // Landing & Auth Imports
 import 'package:med_line/features/home/presentation/screens/landing_page.dart';
@@ -58,7 +59,11 @@ class AppRouter {
           builder: (context, state) => const MyAppointmentsScreen()),
       GoRoute(
           path: '/book-appointment',
-          builder: (context, state) => const BookAppointmentScreen()),
+          builder: (context, state) => BookAppointmentScreen(
+                rescheduleAppointment: state.extra is Appointment
+                    ? state.extra as Appointment
+                    : null,
+              )),
     ],
   );
 }

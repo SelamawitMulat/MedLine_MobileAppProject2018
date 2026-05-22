@@ -60,9 +60,9 @@ class AuthRepository {
 
   Future<void> deleteAccount() async {
     final user = await localDataSource.getCurrentUser();
-    if (user != null && user.id != null) {
-      await remoteDataSource.deleteUser(user.id!);
-      await localDataSource.deleteUser(user.id!);
+    if (user != null) {
+      await remoteDataSource.deleteUser(user.id);
+      await localDataSource.deleteUser(user.id);
     }
   }
 
