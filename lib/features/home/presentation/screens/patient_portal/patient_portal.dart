@@ -1,7 +1,9 @@
-import 'package:flutter/material.dart';
+ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:med_line/features/auth/presentation/providers/auth_provider.dart';
+import 'package:med_line/features/home/presentation/providers/appointment_provider.dart';
+import 'package:intl/intl.dart';
 
 class PatientPortalScreen extends ConsumerWidget {
 const PatientPortalScreen({super.key});
@@ -72,19 +74,20 @@ await ref.read(authProvider.notifier).deleteAccount();
 ),
 );
 }
- @override
+
+@override
 Widget build(BuildContext context, WidgetRef ref) {
 final authState = ref.watch(authProvider);
+final appointmentState = ref.watch(appointmentProvider);
+final user = authState.value;
 
 if (authState.hasValue && authState.value == null) {
-WidgetsBinding.instance.addPostFrameCallback((_) {
-context.go('/');
-});
+WidgetsBinding.instance.addPostFrameCallback((_) => context.go('/'));
 return const Scaffold(body: Center(child: CircularProgressIndicator()));
 }
 
-final user = authState.value;
 final displayName = user?.name?.isNotEmpty == true ? user!.name! : (user?.username ?? "User");
+final nextApp = user != null ? ref.read(appointmentProvider.notifier).getNextAppointment(user.id!) : null;
 
 return Scaffold(
 backgroundColor: Colors.white,
@@ -117,18 +120,24 @@ Container(
 width: double.infinity,
 padding: const EdgeInsets.all(20),
 decoration: BoxDecoration(color: const Color(0xFFF8F9FB), borderRadius: BorderRadius.circular(20)),
-child: Column(
+child: appointmentState.when(
+loading: () => const Center(child: CircularProgressIndicator()),
+error: (e, s) => const Text("Error loading appointment"),
+data: (appointments) => nextApp == null
+? const Text("No upcoming appointment", style: TextStyle(fontWeight: FontWeight.bold))
+    : Column(
 crossAxisAlignment: CrossAxisAlignment.start,
 children: [
 const Row(children: [Icon(Icons.access_time_filled, color: Colors.purple, size: 24), SizedBox(width: 10), Text("Next Appointment", style: TextStyle(color: Colors.purple, fontWeight: FontWeight.bold))]),
 const SizedBox(height: 15),
-const Text("Wednesday, April 15, 2026", style: TextStyle(fontWeight: FontWeight.w500)),
-const Text("10:00 PM", style: TextStyle(color: Colors.grey)),
+Text(DateFormat('EEEE, MMMM d, yyyy').format(nextApp.dateTime), style: const TextStyle(fontWeight: FontWeight.w500)),
+Text(DateFormat('h:mm a').format(nextApp.dateTime), style: const TextStyle(color: Colors.grey)),
 const SizedBox(height: 10),
-const Row(children: [Icon(Icons.people_outline, color: Colors.grey, size: 20), SizedBox(width: 5), Text("Queue Position : 1", style: TextStyle(fontWeight: FontWeight.bold))]),
+Row(children: [const Icon(Icons.people_outline, color: Colors.grey, size: 20), SizedBox(width: 5), Text("Queue Position : ${ref.read(appointmentProvider.notifier).getQueuePosition(nextApp.id)}", style: const TextStyle(fontWeight: FontWeight.bold))]),
 const SizedBox(height: 15),
 Container(padding: const EdgeInsets.all(12), decoration: BoxDecoration(color: const Color(0xFFDCEDC8), borderRadius: BorderRadius.circular(10)), child: const Center(child: Text("Your turn is coming up soon!", style: TextStyle(color: Color(0xFF33691E), fontWeight: FontWeight.bold)))),
-],
+ ],
+),
 ),
 ),
 const SizedBox(height: 30),

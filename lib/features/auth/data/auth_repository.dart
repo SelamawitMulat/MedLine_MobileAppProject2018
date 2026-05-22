@@ -23,7 +23,7 @@ class AuthRepository {
     // REMOVED: The strict role mismatch check is gone, so users bypass manual selection.
     // The app will now automatically read user.role in the UI to navigate.
 
-    await localDataSource.saveUserSession(user);
+    await localDataSource.saveUser(user);
     return user;
   }
 
@@ -50,23 +50,23 @@ class AuthRepository {
       email: email,
     );
 
-    await localDataSource.saveUserSession(user);
+    await localDataSource.saveUser(user);
     return user;
   }
 
   Future<void> logout() async {
-    await localDataSource.clearSession();
+    await localDataSource.clearAll();
   }
 
   Future<void> deleteAccount() async {
-    final user = await localDataSource.getUserSession();
+    final user = await localDataSource.getCurrentUser();
     if (user != null && user.id != null) {
       await remoteDataSource.deleteUser(user.id!);
-      await localDataSource.clearSession();
+      await localDataSource.deleteUser(user.id!);
     }
   }
 
   Future<User?> getCurrentUser() async {
-    return await localDataSource.getUserSession();
+    return await localDataSource.getCurrentUser();
   }
 }
