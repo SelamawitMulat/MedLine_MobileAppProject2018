@@ -1,11 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-class QueueManagementScreen extends StatelessWidget {
+class QueueManagementScreen extends StatefulWidget {
   const QueueManagementScreen({super.key});
 
+  @override
+  State<QueueManagementScreen> createState() => _QueueManagementScreenState();
+}
+
+class _QueueManagementScreenState extends State<QueueManagementScreen> {
+  final List<_QueuePatient> _queuePatients = [
+    _QueuePatient(name: 'John Doe', time: '10:00', rank: '#1'),
+    _QueuePatient(name: 'Jane Wilson', time: '10:30', rank: '#2'),
+  ];
+
   // --- SKIP PATIENT MODAL ---
-  void _showSkipDialog(BuildContext context) {
+  void _showSkipDialog(BuildContext context, int index) {
     showDialog(
       context: context,
       builder: (context) => Dialog(
@@ -53,7 +63,12 @@ class QueueManagementScreen extends StatelessWidget {
                   SizedBox(
                     width: 100,
                     child: ElevatedButton(
-                      onPressed: () => Navigator.pop(context),
+                      onPressed: () {
+                        setState(() {
+                          _queuePatients[index].isSkipped = true;
+                        });
+                        Navigator.pop(context);
+                      },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.white,
                         elevation: 0,
@@ -94,9 +109,10 @@ class QueueManagementScreen extends StatelessWidget {
           children: [
             _buildCurrentPatientCard(context),
             const SizedBox(height: 25),
-            _buildQueueItem(context, "John Doe", "10:00", "#1"),
-            const SizedBox(height: 15),
-            _buildQueueItem(context, "Jane Wilson", "10:30", "#2"),
+            for (var i = 0; i < _queuePatients.length; i++) ...[
+              _buildQueueItem(context, i, _queuePatients[i]),
+              if (i < _queuePatients.length - 1) const SizedBox(height: 15),
+            ],
           ],
         ),
       ),
@@ -141,7 +157,12 @@ class QueueManagementScreen extends StatelessWidget {
   }
 
   Widget _buildQueueItem(
-      BuildContext context, String name, String time, String rank) {
+      BuildContext context, int index, _QueuePatient patient) {
+    final skipLabel = patient.isSkipped ? 'Skipped' : 'Skip';
+    final completeLabel = patient.isCompleted ? 'Completed' : 'Complete';
+    final canSkip = !patient.isSkipped && !patient.isCompleted;
+    final canComplete = !patient.isCompleted && !patient.isSkipped;
+
     return Container(
       padding: const EdgeInsets.all(15),
       decoration: BoxDecoration(
@@ -150,7 +171,7 @@ class QueueManagementScreen extends StatelessWidget {
         border: Border.all(color: Colors.grey.shade100),
         boxShadow: [
           BoxShadow(
-              color: Colors.black.withOpacity(0.05),
+              color: Colors.black.withAlpha(13),
               blurRadius: 5,
               offset: const Offset(0, 2))
         ],
@@ -163,10 +184,11 @@ class QueueManagementScreen extends StatelessWidget {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text("$name  $rank",
+                  Text("${patient.name}  ${patient.rank}",
                       style: const TextStyle(
                           fontWeight: FontWeight.bold, fontSize: 16)),
-                  Text(time, style: const TextStyle(color: Colors.grey)),
+                  Text(patient.time,
+                      style: const TextStyle(color: Colors.grey)),
                 ],
               ),
               const Row(
@@ -183,9 +205,10 @@ class QueueManagementScreen extends StatelessWidget {
             children: [
               Expanded(
                 child: OutlinedButton.icon(
-                  onPressed: () => _showSkipDialog(context),
+                  onPressed:
+                      canSkip ? () => _showSkipDialog(context, index) : null,
                   icon: const Icon(Icons.skip_next, size: 18),
-                  label: const Text("Skip"),
+                  label: Text(skipLabel),
                   style: OutlinedButton.styleFrom(
                     foregroundColor: Colors.black,
                     shape: RoundedRectangleBorder(
@@ -194,16 +217,27 @@ class QueueManagementScreen extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 10),
-              // FIXED: Changed navigation path to '/create-summary' to match your existing router
               Expanded(
                 child: ElevatedButton.icon(
-                  onPressed: () => context.push('/create-summary'),
+                  onPressed: canComplete
+                      ? () async {
+                          final result =
+                              await context.push<bool>('/create-summary');
+                          if (result == true) {
+                            setState(() {
+                              _queuePatients[index].isCompleted = true;
+                            });
+                          }
+                        }
+                      : null,
                   icon: const Icon(Icons.check_circle_outline,
                       size: 18, color: Colors.black),
-                  label: const Text("Complete",
-                      style: TextStyle(color: Colors.black)),
+                  label: Text(completeLabel,
+                      style: const TextStyle(color: Colors.black)),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF81C784),
+                    backgroundColor: patient.isCompleted
+                        ? Colors.grey.shade300
+                        : const Color(0xFF81C784),
                     elevation: 0,
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(8)),
@@ -216,4 +250,18 @@ class QueueManagementScreen extends StatelessWidget {
       ),
     );
   }
+}
+
+class _QueuePatient {
+  final String name;
+  final String time;
+  final String rank;
+  bool isSkipped = false;
+  bool isCompleted = false;
+
+  _QueuePatient({
+    required this.name,
+    required this.time,
+    required this.rank,
+  });
 }

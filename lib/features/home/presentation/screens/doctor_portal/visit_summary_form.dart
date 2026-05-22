@@ -82,7 +82,7 @@ class _VisitSummaryFormState extends State<VisitSummaryForm> {
                           content: Text("Visit Summary Saved Successfully!"),
                           backgroundColor: Colors.green),
                     );
-                    context.pop();
+                    context.pop(true);
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF2563EB),
