@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:med_line/features/home/domain/appointment_model.dart';
 import 'package:med_line/features/home/presentation/providers/appointment_provider.dart';
+import 'package:med_line/features/home/presentation/providers/doctor_provider.dart';
 
 class BookAppointmentScreen extends ConsumerStatefulWidget {
   final Appointment? rescheduleAppointment;
@@ -64,8 +65,10 @@ class _BookAppointmentScreenState extends ConsumerState<BookAppointmentScreen> {
           ),
         );
       } else {
+        final doctorId = ref.read(doctorIdProvider);
         await ref.read(appointmentProvider.notifier).bookAppointment(
               doctorName: _soleDoctor,
+              doctorId: doctorId,
               date: _selectedDay!,
               timeSlot: _selectedTime!,
             );

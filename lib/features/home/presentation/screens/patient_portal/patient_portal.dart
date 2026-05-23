@@ -4,7 +4,6 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:med_line/features/auth/presentation/providers/auth_provider.dart';
 import '../../providers/appointment_provider.dart';
-import '../../../domain/appointment_model.dart';
 
 class PatientPortalScreen extends ConsumerWidget {
   const PatientPortalScreen({super.key});
@@ -92,12 +91,16 @@ class PatientPortalScreen extends ConsumerWidget {
     final user = authState.value;
     final displayName =
         user?.name.isNotEmpty == true ? user!.name : (user?.username ?? "User");
+    final currentPatientId = user?.id ?? '';
+    final currentPatientName = user?.name.toLowerCase() ?? '';
 
-    // 1. Filter out only upcoming appointments
-    final upcomingAppointments =
-        appointments.where((app) => app.status == "Upcoming").toList();
+    final upcomingAppointments = appointments
+        .where((app) =>
+            app.status == "Upcoming" &&
+            (app.patientId == currentPatientId ||
+                app.patientName.toLowerCase() == currentPatientName))
+        .toList();
 
-    // 2. FIX: Sort them chronologically by date so the closest deadline/date is first
     upcomingAppointments.sort((a, b) => a.date.compareTo(b.date));
 
     final hasAppointment = upcomingAppointments.isNotEmpty;

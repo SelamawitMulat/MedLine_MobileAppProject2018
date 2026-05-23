@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
+import 'package:med_line/features/auth/presentation/providers/auth_provider.dart';
 import 'package:med_line/features/home/presentation/providers/appointment_provider.dart';
-import 'package:med_line/features/home/domain/appointment_model.dart'; // Foolproof absolute import
 
 class CheckInScreen extends ConsumerWidget {
   const CheckInScreen({super.key});
@@ -11,8 +11,15 @@ class CheckInScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final appointments = ref.watch(appointmentProvider);
-    final upcomingAppointments =
-        appointments.where((app) => app.status == "Upcoming").toList();
+    final currentUser = ref.watch(authProvider).value;
+    final currentPatientId = currentUser?.id ?? '';
+    final currentPatientName = currentUser?.name.toLowerCase() ?? '';
+    final upcomingAppointments = appointments
+        .where((app) =>
+            app.status == "Upcoming" &&
+            (app.patientId == currentPatientId ||
+                app.patientName.toLowerCase() == currentPatientName))
+        .toList();
 
     return Scaffold(
       backgroundColor: Colors.white,

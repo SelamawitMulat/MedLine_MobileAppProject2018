@@ -70,6 +70,7 @@ class AppointmentNotifier extends StateNotifier<List<Appointment>> {
 
   Future<void> bookAppointment({
     required String doctorName,
+    required String doctorId,
     required DateTime date,
     required String timeSlot,
   }) async {
@@ -98,7 +99,7 @@ class AppointmentNotifier extends StateNotifier<List<Appointment>> {
       timeSlot: timeSlot,
       status: 'Upcoming',
       patientId: currentUser.id,
-      doctorId: 'default-doctor',
+      doctorId: doctorId,
     );
 
     final created = await _repository.addAppointment(appointment);

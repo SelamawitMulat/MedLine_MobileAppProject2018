@@ -1,4 +1,7 @@
+import 'package:flutter/widgets.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:med_line/features/auth/presentation/providers/auth_provider.dart';
 import 'package:med_line/features/home/domain/appointment_model.dart';
 import 'package:med_line/features/home/domain/visit_summary_model.dart';
 
@@ -73,5 +76,49 @@ class AppRouter {
                     : null,
               )),
     ],
+    redirect: (BuildContext context, GoRouterState state) {
+      final container = ProviderScope.containerOf(context, listen: false);
+      final authState = container.read(authProvider);
+      final user = authState.hasValue ? authState.value : null;
+      final isLoggedIn = user != null;
+      final location = state.uri.path;
+
+      final authPaths = {'/', '/login', '/signup'};
+      final doctorPaths = {
+        '/doctor-portal',
+        '/queue-management',
+        '/doctor-visit-summary',
+        '/create-summary'
+      };
+      final patientPaths = {
+        '/patient-portal',
+        '/visit-summary',
+        '/check-in',
+        '/my-appointments',
+        '/book-appointment'
+      };
+
+      if (!isLoggedIn && !authPaths.contains(location)) {
+        return '/login';
+      }
+
+      if (isLoggedIn) {
+        final isDoctor = user.role.toLowerCase() == 'doctor';
+
+        if (authPaths.contains(location)) {
+          return isDoctor ? '/doctor-portal' : '/patient-portal';
+        }
+
+        if (isDoctor && patientPaths.contains(location)) {
+          return '/doctor-portal';
+        }
+
+        if (!isDoctor && doctorPaths.contains(location)) {
+          return '/patient-portal';
+        }
+      }
+
+      return null;
+    },
   );
 }

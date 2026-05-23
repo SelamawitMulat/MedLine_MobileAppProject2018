@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:table_calendar/table_calendar.dart';
+import 'package:med_line/features/auth/presentation/providers/auth_provider.dart';
 
 // FIXED: Converted relative backsteps to absolute package paths
 import 'package:med_line/features/home/presentation/providers/appointment_provider.dart';
@@ -184,15 +185,16 @@ class MyAppointmentsScreen extends ConsumerWidget {
                         selectedDay,
                         selectedTime,
                       );
-                  if (context.mounted) {
-                    Navigator.pop(context);
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Appointment rescheduled.'),
-                        backgroundColor: Colors.green,
-                      ),
-                    );
+                  if (!context.mounted) {
+                    return;
                   }
+                  Navigator.pop(context);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Appointment rescheduled.'),
+                      backgroundColor: Colors.green,
+                    ),
+                  );
                 } catch (e) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
@@ -220,8 +222,15 @@ class MyAppointmentsScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final appointments = ref.watch(appointmentProvider);
-    final upcomingAppointments =
-        appointments.where((app) => app.status == "Upcoming").toList();
+    final currentUser = ref.watch(authProvider).value;
+    final currentPatientId = currentUser?.id ?? '';
+    final currentPatientName = currentUser?.name.toLowerCase() ?? '';
+    final upcomingAppointments = appointments
+        .where((app) =>
+            app.status == "Upcoming" &&
+            (app.patientId == currentPatientId ||
+                app.patientName.toLowerCase() == currentPatientName))
+        .toList();
 
     return Scaffold(
       backgroundColor: Colors.white,
