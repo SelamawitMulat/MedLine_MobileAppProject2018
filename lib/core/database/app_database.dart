@@ -22,6 +22,7 @@ class AppDatabase {
   }
 
   Future<void> _onCreate(Database db, int version) async {
+    // Creating tables
     await db.execute('''
       CREATE TABLE appointments_cache (
         id TEXT PRIMARY KEY,
@@ -37,18 +38,16 @@ class AppDatabase {
   }
 
   Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
-    if (oldVersion < 2) {
-      await _ensureUsersTable(db);
-    }
-    if (oldVersion < 3) {
-      await _ensureVisitSummariesTable(db);
-    }
+    // This will run the table checks if migrating from version 1 or 2
+    await _ensureUsersTable(db);
+    await _ensureVisitSummariesTable(db);
   }
 
   Future<void> _ensureUsersTable(Database db) async {
     final tableInfo = await db.rawQuery('PRAGMA table_info(users)');
+    final existingColumns = tableInfo.map((c) => c['name'] as String).toSet();
 
-    if (tableInfo.isEmpty) {
+    if (existingColumns.isEmpty) {
       await db.execute('''
         CREATE TABLE users (
           id TEXT PRIMARY KEY,
@@ -59,36 +58,22 @@ class AppDatabase {
           isLoggedIn INTEGER
         )
       ''');
-      return;
-    }
-
-    final existingColumns = tableInfo
-        .map((column) => column['name']?.toString() ?? '')
-        .where((name) => name.isNotEmpty)
-        .toSet();
-
-    if (!existingColumns.contains('username')) {
-      await db.execute('ALTER TABLE users ADD COLUMN username TEXT');
-    }
-    if (!existingColumns.contains('role')) {
-      await db.execute('ALTER TABLE users ADD COLUMN role TEXT');
-    }
-    if (!existingColumns.contains('name')) {
-      await db.execute('ALTER TABLE users ADD COLUMN name TEXT');
-    }
-    if (!existingColumns.contains('email')) {
-      await db.execute('ALTER TABLE users ADD COLUMN email TEXT');
-    }
-    if (!existingColumns.contains('isLoggedIn')) {
-      await db.execute('ALTER TABLE users ADD COLUMN isLoggedIn INTEGER');
+    } else {
+      final needed = {'username', 'role', 'name', 'email', 'isLoggedIn'};
+      for (var col in needed) {
+        if (!existingColumns.contains(col)) {
+          await db.execute('ALTER TABLE users ADD COLUMN $col TEXT');
+        }
+      }
     }
   }
 
   Future<void> _ensureVisitSummariesTable(Database db) async {
     final tableInfo =
         await db.rawQuery('PRAGMA table_info(visit_summaries_cache)');
+    final existingColumns = tableInfo.map((c) => c['name'] as String).toSet();
 
-    if (tableInfo.isEmpty) {
+    if (existingColumns.isEmpty) {
       await db.execute('''
         CREATE TABLE visit_summaries_cache (
           appointmentId TEXT PRIMARY KEY,
@@ -100,44 +85,25 @@ class AppDatabase {
           prescription TEXT
         )
       ''');
-      return;
-    }
-
-    final existingColumns = tableInfo
-        .map((column) => column['name']?.toString() ?? '')
-        .where((name) => name.isNotEmpty)
-        .toSet();
-
-    if (!existingColumns.contains('patientName')) {
-      await db.execute(
-          'ALTER TABLE visit_summaries_cache ADD COLUMN patientName TEXT');
-    }
-    if (!existingColumns.contains('doctorName')) {
-      await db.execute(
-          'ALTER TABLE visit_summaries_cache ADD COLUMN doctorName TEXT');
-    }
-    if (!existingColumns.contains('date')) {
-      await db
-          .execute('ALTER TABLE visit_summaries_cache ADD COLUMN date TEXT');
-    }
-    if (!existingColumns.contains('timeSlot')) {
-      await db.execute(
-          'ALTER TABLE visit_summaries_cache ADD COLUMN timeSlot TEXT');
-    }
-    if (!existingColumns.contains('diagnosis')) {
-      await db.execute(
-          'ALTER TABLE visit_summaries_cache ADD COLUMN diagnosis TEXT');
-    }
-    if (!existingColumns.contains('prescription')) {
-      await db.execute(
-          'ALTER TABLE visit_summaries_cache ADD COLUMN prescription TEXT');
+    } else {
+      final needed = {
+        'patientName',
+        'doctorName',
+        'date',
+        'timeSlot',
+        'diagnosis',
+        'prescription'
+      };
+      for (var col in needed) {
+        if (!existingColumns.contains(col)) {
+          await db.execute(
+              'ALTER TABLE visit_summaries_cache ADD COLUMN $col TEXT');
+        }
+      }
     }
   }
 
-  Future<void> clearTable(String table) async {
-    final db = await database;
-    await db.delete(table);
-  }
+  // --- Helper Methods ---
 
   Future<void> insert(String table, Map<String, dynamic> data) async {
     final db = await database;
@@ -149,13 +115,17 @@ class AppDatabase {
     return await db.query(table);
   }
 
-  // Added helper to look up a single record directly
   Future<Map<String, dynamic>?> getSingle(String table,
       {String? where, List<dynamic>? whereArgs}) async {
     final db = await database;
     final results =
         await db.query(table, where: where, whereArgs: whereArgs, limit: 1);
     return results.isNotEmpty ? results.first : null;
+  }
+
+  Future<void> clearTable(String table) async {
+    final db = await database;
+    await db.delete(table);
   }
 
   Future<void> delete(String table,
