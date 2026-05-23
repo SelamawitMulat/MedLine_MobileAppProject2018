@@ -1,17 +1,34 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:med_line/features/home/domain/appointment_model.dart';
+import 'package:med_line/features/home/domain/visit_summary_model.dart';
+import 'package:med_line/features/home/presentation/providers/visit_summary_provider.dart';
 
-class QueueManagementScreen extends StatefulWidget {
+class QueueManagementScreen extends ConsumerStatefulWidget {
   const QueueManagementScreen({super.key});
 
   @override
-  State<QueueManagementScreen> createState() => _QueueManagementScreenState();
+  ConsumerState<QueueManagementScreen> createState() =>
+      _QueueManagementScreenState();
 }
 
-class _QueueManagementScreenState extends State<QueueManagementScreen> {
+class _QueueManagementScreenState extends ConsumerState<QueueManagementScreen> {
   final List<_QueuePatient> _queuePatients = [
-    _QueuePatient(name: 'John Doe', time: '10:00', rank: '#1'),
-    _QueuePatient(name: 'Jane Wilson', time: '10:30', rank: '#2'),
+    _QueuePatient(
+      id: 'patient-1',
+      name: 'John Doe',
+      time: '10:00',
+      rank: '#1',
+      doctorName: 'Dr. Selam Mulat',
+    ),
+    _QueuePatient(
+      id: 'patient-2',
+      name: 'Jane Wilson',
+      time: '10:30',
+      rank: '#2',
+      doctorName: 'Dr. Selam Mulat',
+    ),
   ];
 
   // --- SKIP PATIENT MODAL ---
@@ -91,6 +108,8 @@ class _QueueManagementScreenState extends State<QueueManagementScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final summaries = ref.watch(visitSummaryProvider);
+
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -110,7 +129,7 @@ class _QueueManagementScreenState extends State<QueueManagementScreen> {
             _buildCurrentPatientCard(context),
             const SizedBox(height: 25),
             for (var i = 0; i < _queuePatients.length; i++) ...[
-              _buildQueueItem(context, i, _queuePatients[i]),
+              _buildQueueItem(context, i, _queuePatients[i], summaries),
               if (i < _queuePatients.length - 1) const SizedBox(height: 15),
             ],
           ],
@@ -156,12 +175,21 @@ class _QueueManagementScreenState extends State<QueueManagementScreen> {
     );
   }
 
-  Widget _buildQueueItem(
-      BuildContext context, int index, _QueuePatient patient) {
+  Widget _buildQueueItem(BuildContext context, int index, _QueuePatient patient,
+      List<VisitSummary> summaries) {
+    final hasSummary =
+        summaries.any((summary) => summary.appointmentId == patient.id);
     final skipLabel = patient.isSkipped ? 'Skipped' : 'Skip';
-    final completeLabel = patient.isCompleted ? 'Completed' : 'Complete';
-    final canSkip = !patient.isSkipped && !patient.isCompleted;
-    final canComplete = !patient.isCompleted && !patient.isSkipped;
+    final completeLabel = hasSummary ? 'Completed' : 'Complete';
+    final canSkip = !patient.isSkipped && !hasSummary;
+    final canComplete = !hasSummary && !patient.isSkipped;
+    final appointment = Appointment(
+      id: patient.id,
+      patientName: patient.name,
+      date: DateTime.now(),
+      timeSlot: patient.time,
+      doctorName: patient.doctorName,
+    );
 
     return Container(
       padding: const EdgeInsets.all(15),
@@ -221,12 +249,12 @@ class _QueueManagementScreenState extends State<QueueManagementScreen> {
                 child: ElevatedButton.icon(
                   onPressed: canComplete
                       ? () async {
-                          final result =
-                              await context.push<bool>('/create-summary');
+                          final result = await context.push<bool>(
+                            '/create-summary',
+                            extra: appointment,
+                          );
                           if (result == true) {
-                            setState(() {
-                              _queuePatients[index].isCompleted = true;
-                            });
+                            setState(() {});
                           }
                         }
                       : null,
@@ -235,7 +263,7 @@ class _QueueManagementScreenState extends State<QueueManagementScreen> {
                   label: Text(completeLabel,
                       style: const TextStyle(color: Colors.black)),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: patient.isCompleted
+                    backgroundColor: hasSummary
                         ? Colors.grey.shade300
                         : const Color(0xFF81C784),
                     elevation: 0,
@@ -253,15 +281,19 @@ class _QueueManagementScreenState extends State<QueueManagementScreen> {
 }
 
 class _QueuePatient {
+  final String id;
   final String name;
   final String time;
   final String rank;
+  final String doctorName;
   bool isSkipped = false;
   bool isCompleted = false;
 
   _QueuePatient({
+    required this.id,
     required this.name,
     required this.time,
     required this.rank,
+    required this.doctorName,
   });
 }

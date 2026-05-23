@@ -3,7 +3,7 @@ import 'package:path/path.dart';
 
 class AppDatabase {
   static const _dbName = 'medline.db';
-  static const _dbVersion = 2;
+  static const _dbVersion = 3;
   static Database? _database;
 
   Future<Database> get database async {
@@ -33,11 +33,15 @@ class AppDatabase {
     ''');
 
     await _ensureUsersTable(db);
+    await _ensureVisitSummariesTable(db);
   }
 
   Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
     if (oldVersion < 2) {
       await _ensureUsersTable(db);
+    }
+    if (oldVersion < 3) {
+      await _ensureVisitSummariesTable(db);
     }
   }
 
@@ -77,6 +81,56 @@ class AppDatabase {
     }
     if (!existingColumns.contains('isLoggedIn')) {
       await db.execute('ALTER TABLE users ADD COLUMN isLoggedIn INTEGER');
+    }
+  }
+
+  Future<void> _ensureVisitSummariesTable(Database db) async {
+    final tableInfo =
+        await db.rawQuery('PRAGMA table_info(visit_summaries_cache)');
+
+    if (tableInfo.isEmpty) {
+      await db.execute('''
+        CREATE TABLE visit_summaries_cache (
+          appointmentId TEXT PRIMARY KEY,
+          patientName TEXT,
+          doctorName TEXT,
+          date TEXT,
+          timeSlot TEXT,
+          diagnosis TEXT,
+          prescription TEXT
+        )
+      ''');
+      return;
+    }
+
+    final existingColumns = tableInfo
+        .map((column) => column['name']?.toString() ?? '')
+        .where((name) => name.isNotEmpty)
+        .toSet();
+
+    if (!existingColumns.contains('patientName')) {
+      await db.execute(
+          'ALTER TABLE visit_summaries_cache ADD COLUMN patientName TEXT');
+    }
+    if (!existingColumns.contains('doctorName')) {
+      await db.execute(
+          'ALTER TABLE visit_summaries_cache ADD COLUMN doctorName TEXT');
+    }
+    if (!existingColumns.contains('date')) {
+      await db
+          .execute('ALTER TABLE visit_summaries_cache ADD COLUMN date TEXT');
+    }
+    if (!existingColumns.contains('timeSlot')) {
+      await db.execute(
+          'ALTER TABLE visit_summaries_cache ADD COLUMN timeSlot TEXT');
+    }
+    if (!existingColumns.contains('diagnosis')) {
+      await db.execute(
+          'ALTER TABLE visit_summaries_cache ADD COLUMN diagnosis TEXT');
+    }
+    if (!existingColumns.contains('prescription')) {
+      await db.execute(
+          'ALTER TABLE visit_summaries_cache ADD COLUMN prescription TEXT');
     }
   }
 

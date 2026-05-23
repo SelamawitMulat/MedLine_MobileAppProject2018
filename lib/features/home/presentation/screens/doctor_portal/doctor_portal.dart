@@ -137,7 +137,7 @@ class DoctorPortalScreen extends StatelessWidget {
                       context,
                       icon: Icons.description_outlined,
                       label: "Visit\nSummaries",
-                      onTap: () => context.push('/visit-summary'),
+                      onTap: () => context.push('/doctor-visit-summary'),
                     ),
                   ),
                 ],

@@ -42,7 +42,11 @@ class AppRouter {
           builder: (context, state) => const VisitSummaryPage()),
       GoRoute(
           path: '/create-summary',
-          builder: (context, state) => const VisitSummaryForm()),
+          builder: (context, state) => VisitSummaryForm(
+                appointment: state.extra is Appointment
+                    ? state.extra as Appointment
+                    : null,
+              )),
 
       // --- Patient Portal ---
       GoRoute(
