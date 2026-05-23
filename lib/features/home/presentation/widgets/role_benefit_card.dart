@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-// Changed to package import to fix yellow/red lines
+
 import 'package:med_line/core/constants/app_colors.dart';
 
 class RoleBenefitCard extends StatelessWidget {
@@ -23,7 +23,7 @@ class RoleBenefitCard extends StatelessWidget {
       padding: const EdgeInsets.all(20),
       margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
       decoration: BoxDecoration(
-        color: AppColors.cardWhite, // Now defined in AppColors
+        color: AppColors.cardWhite,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: Colors.grey.shade300),
       ),
