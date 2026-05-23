@@ -29,8 +29,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       final authState = ref.read(authProvider);
 
       if (authState.hasValue && authState.value != null) {
-        // 2. Read the role directly returned by the system to decide navigation
-        if (authState.value!.role == "Doctor") {
+        final role = authState.value!.role.toLowerCase();
+        if (role == "doctor") {
           context.go('/doctor-portal');
         } else {
           context.go('/patient-portal');

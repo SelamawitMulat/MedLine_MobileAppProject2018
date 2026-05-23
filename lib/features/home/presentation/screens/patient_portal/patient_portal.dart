@@ -1,4 +1,4 @@
- import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
@@ -77,74 +77,6 @@ class PatientPortalScreen extends ConsumerWidget {
     );
   }
 
-  void _showDeleteDialog(BuildContext context, WidgetRef ref) {
-    showDialog(
-      context: context,
-      builder: (context) => Dialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        child: Container(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Expanded(
-                      child: Text("Are you sure to delete this account?",
-                          style: TextStyle(
-                              fontSize: 18, fontWeight: FontWeight.bold))),
-                  IconButton(
-                      icon: const Icon(Icons.close),
-                      onPressed: () => Navigator.pop(context)),
-                ],
-              ),
-              const SizedBox(height: 30),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  SizedBox(
-                    width: 100,
-                    child: ElevatedButton(
-                      onPressed: () => Navigator.pop(context),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFFF0F0F0),
-                        elevation: 0,
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
-                            side: BorderSide(color: Colors.grey.shade300)),
-                      ),
-                      child: const Text("NO",
-                          style: TextStyle(color: Colors.black)),
-                    ),
-                  ),
-                  SizedBox(
-                    width: 100,
-                    child: ElevatedButton(
-                      onPressed: () async {
-                        Navigator.pop(context);
-                        await ref.read(authProvider.notifier).deleteAccount();
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.white,
-                        elevation: 0,
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
-                            side: const BorderSide(color: Colors.red)),
-                      ),
-                      child: const Text("Yes",
-                          style: TextStyle(color: Colors.red)),
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final authState = ref.watch(authProvider);
@@ -158,9 +90,8 @@ class PatientPortalScreen extends ConsumerWidget {
     }
 
     final user = authState.value;
-    final displayName = user?.name?.isNotEmpty == true
-        ? user!.name!
-        : (user?.username ?? "User");
+    final displayName =
+        user?.name.isNotEmpty == true ? user!.name : (user?.username ?? "User");
 
     // 1. Filter out only upcoming appointments
     final upcomingAppointments =
@@ -195,18 +126,10 @@ class PatientPortalScreen extends ConsumerWidget {
                               fontSize: 22, fontWeight: FontWeight.bold)),
                     ],
                   ),
-                  Row(
-                    children: [
-                      IconButton(
-                          icon: const Icon(Icons.delete_outline,
-                              color: Colors.red, size: 28),
-                          onPressed: () => _showDeleteDialog(context, ref)),
-                      IconButton(
-                          icon: const Icon(Icons.logout,
-                              color: Colors.black, size: 28),
-                          onPressed: () => _showLogoutDialog(context, ref)),
-                    ],
-                  ),
+                  IconButton(
+                      icon: const Icon(Icons.logout,
+                          color: Colors.black, size: 28),
+                      onPressed: () => _showLogoutDialog(context, ref)),
                 ],
               ),
               const SizedBox(height: 25),

@@ -27,6 +27,13 @@ class VisitSummaryNotifier extends StateNotifier<List<VisitSummary>> {
       summary,
     ];
   }
+
+  Future<void> deleteVisitSummary(String appointmentId) async {
+    await _local.deleteVisitSummary(appointmentId);
+    state = state
+        .where((summary) => summary.appointmentId != appointmentId)
+        .toList();
+  }
 }
 
 final visitSummaryProvider =

@@ -18,29 +18,70 @@ class AppDatabase {
       version: _dbVersion,
       onCreate: _onCreate,
       onUpgrade: _onUpgrade,
+      onOpen: _onOpen,
     );
   }
 
-  Future<void> _onCreate(Database db, int version) async {
-    // Creating tables
-    await db.execute('''
-      CREATE TABLE appointments_cache (
-        id TEXT PRIMARY KEY,
-        patientId TEXT,
-        doctorName TEXT,
-        dateTime TEXT,
-        bookingTimestamp TEXT
-      )
-    ''');
+  Future<void> _onOpen(Database db) async {
+    await _ensureAppointmentsTable(db);
+    await _ensureUsersTable(db);
+    await _ensureVisitSummariesTable(db);
+  }
 
+  Future<void> _onCreate(Database db, int version) async {
+    await _ensureAppointmentsTable(db);
     await _ensureUsersTable(db);
     await _ensureVisitSummariesTable(db);
   }
 
   Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
-    // This will run the table checks if migrating from version 1 or 2
+    await _ensureAppointmentsTable(db);
     await _ensureUsersTable(db);
     await _ensureVisitSummariesTable(db);
+  }
+
+  Future<void> _ensureAppointmentsTable(Database db) async {
+    final tableInfo =
+        await db.rawQuery('PRAGMA table_info(appointments_cache)');
+    final existingColumns = tableInfo.map((c) => c['name'] as String).toSet();
+
+    if (existingColumns.isEmpty) {
+      await db.execute('''
+        CREATE TABLE appointments_cache (
+          id TEXT PRIMARY KEY,
+          patientName TEXT,
+          doctorName TEXT,
+          date TEXT,
+          timeSlot TEXT,
+          status TEXT,
+          patientId TEXT,
+          doctorId TEXT,
+          isCheckedIn INTEGER,
+          createdAt TEXT,
+          updatedAt TEXT
+        )
+      ''');
+    } else {
+      final neededColumns = {
+        'patientName',
+        'doctorName',
+        'date',
+        'timeSlot',
+        'status',
+        'patientId',
+        'doctorId',
+        'isCheckedIn',
+        'createdAt',
+        'updatedAt'
+      };
+      for (var column in neededColumns) {
+        if (!existingColumns.contains(column)) {
+          final sqlType = column == 'isCheckedIn' ? 'INTEGER' : 'TEXT';
+          await db.execute(
+              'ALTER TABLE appointments_cache ADD COLUMN $column $sqlType');
+        }
+      }
+    }
   }
 
   Future<void> _ensureUsersTable(Database db) async {
@@ -55,14 +96,23 @@ class AppDatabase {
           name TEXT,
           email TEXT,
           role TEXT,
+          passwordHash TEXT,
           isLoggedIn INTEGER
         )
       ''');
     } else {
-      final needed = {'username', 'role', 'name', 'email', 'isLoggedIn'};
+      final needed = {
+        'username',
+        'role',
+        'name',
+        'email',
+        'passwordHash',
+        'isLoggedIn'
+      };
       for (var col in needed) {
         if (!existingColumns.contains(col)) {
-          await db.execute('ALTER TABLE users ADD COLUMN $col TEXT');
+          final sqlType = col == 'isLoggedIn' ? 'INTEGER' : 'TEXT';
+          await db.execute('ALTER TABLE users ADD COLUMN $col $sqlType');
         }
       }
     }
@@ -77,6 +127,8 @@ class AppDatabase {
       await db.execute('''
         CREATE TABLE visit_summaries_cache (
           appointmentId TEXT PRIMARY KEY,
+          patientId TEXT,
+          doctorId TEXT,
           patientName TEXT,
           doctorName TEXT,
           date TEXT,
@@ -87,6 +139,8 @@ class AppDatabase {
       ''');
     } else {
       final needed = {
+        'patientId',
+        'doctorId',
         'patientName',
         'doctorName',
         'date',
@@ -102,8 +156,6 @@ class AppDatabase {
       }
     }
   }
-
-  // --- Helper Methods ---
 
   Future<void> insert(String table, Map<String, dynamic> data) async {
     final db = await database;
@@ -132,5 +184,17 @@ class AppDatabase {
       {String? where, List<dynamic>? whereArgs}) async {
     final db = await database;
     await db.delete(table, where: where, whereArgs: whereArgs);
+  }
+
+  Future<int> update(String table, Map<String, dynamic> data,
+      {String? where, List<dynamic>? whereArgs}) async {
+    final db = await database;
+    return await db.update(
+      table,
+      data,
+      where: where,
+      whereArgs: whereArgs,
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
   }
 }

@@ -1,54 +1,95 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:med_line/core/constants/app_colors.dart';
+import 'package:med_line/features/auth/presentation/providers/auth_provider.dart';
 
-class SignupScreen extends StatefulWidget {
+class SignupScreen extends ConsumerStatefulWidget {
   const SignupScreen({super.key});
 
   @override
-  State<SignupScreen> createState() => _SignupScreenState();
+  ConsumerState<SignupScreen> createState() => _SignupScreenState();
 }
 
-class _SignupScreenState extends State<SignupScreen> {
+class _SignupScreenState extends ConsumerState<SignupScreen> {
   final _formKey = GlobalKey<FormState>();
 
-  // Controllers to capture input
   final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _confirmPasswordController =
       TextEditingController();
 
-  // State for Role and Password Visibility toggles
   String _selectedRole = 'Patient';
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
+  bool _isLoading = false;
 
-  void _handleSignUp() {
-    // 1. Validate that all fields are filled
-    if (_formKey.currentState!.validate()) {
-      // 2. Validate that passwords match
-      if (_passwordController.text != _confirmPasswordController.text) {
+  String _generateUsername() {
+    final email = _emailController.text.trim();
+    if (email.contains('@')) {
+      return email.split('@').first;
+    }
+    return _nameController.text
+        .trim()
+        .replaceAll(RegExp(r'\s+'), '')
+        .toLowerCase();
+  }
+
+  Future<void> _handleSignUp() async {
+    if (!_formKey.currentState!.validate()) return;
+
+    if (_passwordController.text != _confirmPasswordController.text) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Passwords do not match"),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    setState(() => _isLoading = true);
+
+    try {
+      await ref.read(authProvider.notifier).signup(
+            username: _usernameController.text.trim().isNotEmpty
+                ? _usernameController.text.trim().toLowerCase()
+                : _generateUsername(),
+            password: _passwordController.text.trim(),
+            role: _selectedRole.toLowerCase(),
+            name: _nameController.text.trim(),
+            email: _emailController.text.trim(),
+          );
+
+      final authState = ref.read(authProvider);
+      if (authState.hasValue && authState.value != null) {
+        final role = authState.value!.role.toLowerCase();
+        if (role == 'doctor') {
+          context.go('/doctor-portal');
+        } else {
+          context.go('/patient-portal');
+        }
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-              content: Text("Passwords do not match"),
-              backgroundColor: Colors.red),
+            content: Text("Account Created Successfully!"),
+            backgroundColor: Colors.green,
+          ),
         );
         return;
       }
 
-      // 3. Navigate to the specific portal based on selection
-      if (_selectedRole == 'Doctor') {
-        context.go('/doctor-portal');
-      } else {
-        context.go('/patient-portal');
-      }
-
+      throw Exception('Failed to create account');
+    } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-            content: Text("Account Created Successfully!"),
-            backgroundColor: Colors.green),
+        SnackBar(
+          content: Text(e.toString().replaceAll('Exception: ', '')),
+          backgroundColor: Colors.red,
+        ),
       );
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 
@@ -56,13 +97,12 @@ class _SignupScreenState extends State<SignupScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      // AppBar provides the backward arrow to the landing page
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.black, size: 28),
-          onPressed: () => context.pop(), // Returns to Landing Page
+          onPressed: () => context.pop(),
         ),
       ),
       body: SafeArea(
@@ -72,7 +112,6 @@ class _SignupScreenState extends State<SignupScreen> {
             key: _formKey,
             child: Column(
               children: [
-                // Logo Section (Matching image_74963d.png)
                 Container(
                   padding: const EdgeInsets.all(15),
                   decoration: BoxDecoration(
@@ -89,8 +128,6 @@ class _SignupScreenState extends State<SignupScreen> {
                 const Text("Clinical Appointment Management",
                     style: TextStyle(color: Colors.grey, fontSize: 14)),
                 const SizedBox(height: 30),
-
-                // Form Container
                 Container(
                   padding: const EdgeInsets.all(20),
                   decoration: BoxDecoration(
@@ -103,12 +140,22 @@ class _SignupScreenState extends State<SignupScreen> {
                     children: [
                       _inputLabel("Full Name"),
                       _buildTextField(_nameController, "Enter your name"),
-
+                      const SizedBox(height: 15),
+                      _inputLabel("Username"),
+                      _buildTextField(
+                        _usernameController,
+                        "Optional: enter a username",
+                        allowEmpty: true,
+                      ),
+                      const SizedBox(height: 15),
+                      const Text(
+                        "Username is optional. If left blank, it will be generated from your email.",
+                        style: TextStyle(color: Colors.grey, fontSize: 12),
+                      ),
                       const SizedBox(height: 15),
                       _inputLabel("Email"),
                       _buildTextField(_emailController, "Enter your email",
                           isEmail: true),
-
                       const SizedBox(height: 15),
                       _inputLabel("Password"),
                       _buildPasswordField(
@@ -118,7 +165,6 @@ class _SignupScreenState extends State<SignupScreen> {
                         onToggle: () => setState(
                             () => _obscurePassword = !_obscurePassword),
                       ),
-
                       const SizedBox(height: 15),
                       _inputLabel("Confirm Password"),
                       _buildPasswordField(
@@ -128,12 +174,9 @@ class _SignupScreenState extends State<SignupScreen> {
                         onToggle: () => setState(() =>
                             _obscureConfirmPassword = !_obscureConfirmPassword),
                       ),
-
                       const SizedBox(height: 20),
                       const Text("I am a",
                           style: TextStyle(fontWeight: FontWeight.w600)),
-
-                      // Role Selection (Radio Buttons)
                       Row(
                         children: [
                           Radio<String>(
@@ -155,25 +198,31 @@ class _SignupScreenState extends State<SignupScreen> {
                           const Text("Doctor"),
                         ],
                       ),
-
                       const SizedBox(height: 25),
-
-                      // Sign Up Button
                       SizedBox(
                         width: double.infinity,
                         child: ElevatedButton(
-                          onPressed: _handleSignUp,
+                          onPressed: _isLoading ? null : _handleSignUp,
                           style: ElevatedButton.styleFrom(
                             backgroundColor: AppColors.primaryBlue,
                             padding: const EdgeInsets.symmetric(vertical: 16),
                             shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(12)),
                           ),
-                          child: const Text("Sign Up",
-                              style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold)),
+                          child: _isLoading
+                              ? const SizedBox(
+                                  height: 20,
+                                  width: 20,
+                                  child: CircularProgressIndicator(
+                                    color: Colors.white,
+                                    strokeWidth: 2,
+                                  ),
+                                )
+                              : const Text("Sign Up",
+                                  style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold)),
                         ),
                       ),
                     ],
@@ -188,34 +237,37 @@ class _SignupScreenState extends State<SignupScreen> {
     );
   }
 
-  // Label Helper
   Widget _inputLabel(String label) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 8.0),
       child: Text(label,
           style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
     );
-  } // General Input Helper
+  }
 
   Widget _buildTextField(TextEditingController controller, String hint,
-      {bool isEmail = false}) {
+      {bool isEmail = false, bool allowEmpty = false}) {
     return TextFormField(
       controller: controller,
       decoration: _inputDecoration(hint),
       validator: (value) {
-        if (value == null || value.trim().isEmpty) return "Field required";
-        if (isEmail && !value.contains('@')) return "Invalid email address";
+        if (!allowEmpty && (value == null || value.trim().isEmpty)) {
+          return "Field required";
+        }
+        if (isEmail && (value == null || !value.contains('@'))) {
+          return "Invalid email address";
+        }
         return null;
       },
     );
   }
 
-  // Password Input Helper with Eye Icon
-  Widget _buildPasswordField(
-      {required TextEditingController controller,
-      required String hint,
-      required bool isObscured,
-      required VoidCallback onToggle}) {
+  Widget _buildPasswordField({
+    required TextEditingController controller,
+    required String hint,
+    required bool isObscured,
+    required VoidCallback onToggle,
+  }) {
     return TextFormField(
       controller: controller,
       obscureText: isObscured,
@@ -231,12 +283,11 @@ class _SignupScreenState extends State<SignupScreen> {
     );
   }
 
-  // Shared Decoration
   InputDecoration _inputDecoration(String hint) {
     return InputDecoration(
       hintText: hint,
       filled: true,
-      fillColor: const Color(0xFFE5E7EB), // Grey fill from image_74963d.png
+      fillColor: const Color(0xFFE5E7EB),
       border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10), borderSide: BorderSide.none),
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
@@ -246,6 +297,7 @@ class _SignupScreenState extends State<SignupScreen> {
   @override
   void dispose() {
     _nameController.dispose();
+    _usernameController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
     _confirmPasswordController.dispose();

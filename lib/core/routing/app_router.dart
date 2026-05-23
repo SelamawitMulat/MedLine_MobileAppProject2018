@@ -1,5 +1,6 @@
 import 'package:go_router/go_router.dart';
 import 'package:med_line/features/home/domain/appointment_model.dart';
+import 'package:med_line/features/home/domain/visit_summary_model.dart';
 
 // Landing & Auth Imports
 import 'package:med_line/features/home/presentation/screens/landing_page.dart';
@@ -45,6 +46,9 @@ class AppRouter {
           builder: (context, state) => VisitSummaryForm(
                 appointment: state.extra is Appointment
                     ? state.extra as Appointment
+                    : null,
+                summary: state.extra is VisitSummary
+                    ? state.extra as VisitSummary
                     : null,
               )),
 

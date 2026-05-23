@@ -8,30 +8,64 @@ class HomeRepository {
 
   HomeRepository({required this.remote, required this.local});
 
-  /// Fetches from network, caches on success, falls back to cache on error.
   Future<List<Appointment>> getAppointments() async {
+    final cached = await local.getCachedAppointments();
+    if (cached.isNotEmpty) {
+      return cached;
+    }
+
     try {
       final remoteData = await remote.fetchAllAppointments();
-      // Only clear and replace cache if we actually got data from the server
       await local.cacheAppointments(remoteData);
       return remoteData;
-    } catch (e) {
-      // Return local cache even if it's empty (no internet + no history)
-      return await local.getCachedAppointments();
+    } catch (_) {
+      return cached;
     }
   }
 
-  /// Creates an appointment via API and persists it locally.
   Future<Appointment> addAppointment(Appointment app) async {
-    final createdApp = await remote.createAppointment(app);
-    // This ensures your local database is updated immediately
-    await local.addAppointment(createdApp);
-    return createdApp;
+    try {
+      final createdApp = await remote.createAppointment(app);
+      await local.addAppointment(createdApp);
+      return createdApp;
+    } catch (_) {
+      await local.addAppointment(app);
+      return app;
+    }
   }
 
-  /// Deletes an appointment from both API and local cache.
+  Future<Appointment> rescheduleAppointment(
+      Appointment appointment, DateTime newDate, String newTimeSlot) async {
+    final updated = appointment.copyWith(
+      date: newDate,
+      timeSlot: newTimeSlot,
+      status: 'Upcoming',
+    );
+    try {
+      await remote.updateAppointment(updated);
+    } catch (_) {
+      // Remote may be unavailable; keep working locally.
+    }
+    await local.updateAppointment(updated);
+    return updated;
+  }
+
+  Future<Appointment> updateAppointmentStatus(String id, String status) async {
+    final current = await local.getCachedAppointmentById(id);
+    if (current == null) {
+      throw Exception('Appointment not found');
+    }
+    final updated = current.copyWith(status: status);
+    try {
+      await remote.updateAppointment(updated);
+    } catch (_) {
+      // API may not exist; use local cache.
+    }
+    await local.updateAppointment(updated);
+    return updated;
+  }
+
   Future<void> cancelAppointment(String id) async {
-    await remote.deleteAppointment(id);
-    await local.removeAppointment(id);
+    await updateAppointmentStatus(id, 'Cancelled');
   }
 }

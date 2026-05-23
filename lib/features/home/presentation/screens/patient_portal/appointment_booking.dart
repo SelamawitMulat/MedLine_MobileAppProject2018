@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:table_calendar/table_calendar.dart';
-import '../../../domain/appointment_model.dart';
-import '../../providers/appointment_provider.dart';
+import 'package:med_line/features/home/domain/appointment_model.dart';
+import 'package:med_line/features/home/presentation/providers/appointment_provider.dart';
 
 class BookAppointmentScreen extends ConsumerStatefulWidget {
   final Appointment? rescheduleAppointment;
@@ -20,7 +20,6 @@ class _BookAppointmentScreenState extends ConsumerState<BookAppointmentScreen> {
   DateTime? _selectedDay;
   String? _selectedTime;
 
-  // FIXED: Hardcoded to you as the single practitioner
   final String _soleDoctor = "Dr. Selam Mulat";
 
   final List<String> _timeSlots = [
@@ -38,8 +37,7 @@ class _BookAppointmentScreenState extends ConsumerState<BookAppointmentScreen> {
     "16:30",
   ];
 
-  void _handleConfirmAppointment() {
-    // FIXED: Form validation only checks for Date and Time layout picks now
+  Future<void> _handleConfirmAppointment() async {
     if (_selectedDay == null || _selectedTime == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -50,46 +48,44 @@ class _BookAppointmentScreenState extends ConsumerState<BookAppointmentScreen> {
       return;
     }
 
-    final isReschedule = widget.rescheduleAppointment != null;
-
-    if (isReschedule) {
-      ref.read(appointmentProvider.notifier).rescheduleAppointment(
-            widget.rescheduleAppointment!.id,
-            _selectedDay!,
-            _selectedTime!,
-          );
-
+    try {
+      final isReschedule = widget.rescheduleAppointment != null;
+      if (isReschedule) {
+        await ref.read(appointmentProvider.notifier).rescheduleAppointment(
+              widget.rescheduleAppointment!.id,
+              _selectedDay!,
+              _selectedTime!,
+            );
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("Appointment rescheduled successfully!"),
+            backgroundColor: Colors.green,
+            duration: Duration(seconds: 2),
+          ),
+        );
+      } else {
+        await ref.read(appointmentProvider.notifier).bookAppointment(
+              doctorName: _soleDoctor,
+              date: _selectedDay!,
+              timeSlot: _selectedTime!,
+            );
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("Appointment booked successfully!"),
+            backgroundColor: Colors.green,
+            duration: Duration(seconds: 2),
+          ),
+        );
+      }
+      if (mounted) context.pop();
+    } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("Appointment rescheduled successfully!"),
-          backgroundColor: Colors.green,
-          duration: Duration(seconds: 2),
-        ),
-      );
-    } else {
-      final newAppointment = Appointment(
-        id: DateTime.now().millisecondsSinceEpoch.toString(),
-        patientName: "Patient User",
-        doctorName: _soleDoctor, // Injects your name automatically
-        date: _selectedDay!,
-        timeSlot: _selectedTime!,
-        status: "Upcoming",
-      );
-
-      ref.read(appointmentProvider.notifier).bookAppointment(newAppointment);
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("Appointment Booked Successfully!"),
-          backgroundColor: Colors.green,
-          duration: Duration(seconds: 2),
+        SnackBar(
+          content: Text(e.toString().replaceAll('Exception: ', '')),
+          backgroundColor: Colors.red,
         ),
       );
     }
-
-    Future.delayed(const Duration(milliseconds: 500), () {
-      if (mounted) context.pop();
-    });
   }
 
   @override
@@ -170,9 +166,6 @@ class _BookAppointmentScreenState extends ConsumerState<BookAppointmentScreen> {
               ),
             ),
             const SizedBox(height: 35),
-
-            // FIXED: "Select Medical Professional" Dropdown element block completely removed
-
             const Text("Available Time Slots",
                 style: TextStyle(fontSize: 19, fontWeight: FontWeight.bold)),
             const SizedBox(height: 15),
@@ -187,7 +180,7 @@ class _BookAppointmentScreenState extends ConsumerState<BookAppointmentScreen> {
               ),
               itemCount: _timeSlots.length,
               itemBuilder: (context, index) {
-                bool isSelected = _selectedTime == _timeSlots[index];
+                final isSelected = _selectedTime == _timeSlots[index];
                 return InkWell(
                   onTap: () =>
                       setState(() => _selectedTime = _timeSlots[index]),

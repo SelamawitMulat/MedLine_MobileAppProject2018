@@ -11,9 +11,16 @@ class VisitSummaryPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final currentDoctorName = ref.watch(doctorNameProvider);
+    String normalize(String n) => n
+        .replaceFirst(RegExp(r'^dr\.?\s*', caseSensitive: false), '')
+        .trim()
+        .toLowerCase();
+    final normDoctor = normalize(currentDoctorName);
     final summaries = ref
         .watch(visitSummaryProvider)
-        .where((s) => s.doctorName == currentDoctorName)
+        .where(
+          (s) => normalize(s.doctorName) == normDoctor,
+        )
         .toList();
 
     return Scaffold(
@@ -31,7 +38,7 @@ class VisitSummaryPage extends ConsumerWidget {
                       IconButton(
                         icon: const Icon(Icons.arrow_back,
                             color: Colors.black, size: 28),
-                        onPressed: () => context.pop(),
+                        onPressed: () => context.go('/doctor-portal'),
                       ),
                       Text(
                         "$currentDoctorName's Visit Summaries",
@@ -140,6 +147,62 @@ class VisitSummaryPage extends ConsumerWidget {
                                   const SizedBox(height: 8),
                                   Text(summary.prescription),
                                   const SizedBox(height: 16),
+                                  Align(
+                                    alignment: Alignment.centerRight,
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        TextButton(
+                                          onPressed: () => context.push(
+                                            '/create-summary',
+                                            extra: summary,
+                                          ),
+                                          child: const Text("Edit"),
+                                        ),
+                                        const SizedBox(width: 8),
+                                        TextButton(
+                                          onPressed: () async {
+                                            final confirmed =
+                                                await showDialog<bool>(
+                                              context: context,
+                                              builder: (context) => AlertDialog(
+                                                title: const Text(
+                                                    'Delete Summary'),
+                                                content: const Text(
+                                                  'Are you sure you want to delete this visit summary?',
+                                                ),
+                                                actions: [
+                                                  TextButton(
+                                                    onPressed: () =>
+                                                        Navigator.pop(
+                                                            context, false),
+                                                    child: const Text('Cancel'),
+                                                  ),
+                                                  TextButton(
+                                                    onPressed: () =>
+                                                        Navigator.pop(
+                                                            context, true),
+                                                    child: const Text('Delete'),
+                                                  ),
+                                                ],
+                                              ),
+                                            );
+                                            if (confirmed == true) {
+                                              await ref
+                                                  .read(visitSummaryProvider
+                                                      .notifier)
+                                                  .deleteVisitSummary(
+                                                      summary.appointmentId);
+                                            }
+                                          },
+                                          child: const Text(
+                                            "Delete",
+                                            style: TextStyle(color: Colors.red),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
                                 ],
                               ),
                             ),

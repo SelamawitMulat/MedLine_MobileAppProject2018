@@ -1,38 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:med_line/features/auth/presentation/providers/auth_provider.dart';
 import 'package:med_line/features/home/domain/appointment_model.dart';
-import 'package:med_line/features/home/domain/visit_summary_model.dart';
+import 'package:med_line/features/home/presentation/providers/appointment_provider.dart';
 import 'package:med_line/features/home/presentation/providers/visit_summary_provider.dart';
 
-class QueueManagementScreen extends ConsumerStatefulWidget {
+class QueueManagementScreen extends ConsumerWidget {
   const QueueManagementScreen({super.key});
 
-  @override
-  ConsumerState<QueueManagementScreen> createState() =>
-      _QueueManagementScreenState();
-}
-
-class _QueueManagementScreenState extends ConsumerState<QueueManagementScreen> {
-  final List<_QueuePatient> _queuePatients = [
-    _QueuePatient(
-      id: 'patient-1',
-      name: 'John Doe',
-      time: '10:00',
-      rank: '#1',
-      doctorName: 'Dr. Selam Mulat',
-    ),
-    _QueuePatient(
-      id: 'patient-2',
-      name: 'Jane Wilson',
-      time: '10:30',
-      rank: '#2',
-      doctorName: 'Dr. Selam Mulat',
-    ),
-  ];
-
-  // --- SKIP PATIENT MODAL ---
-  void _showSkipDialog(BuildContext context, int index) {
+  void _showSkipDialog(
+      BuildContext context, WidgetRef ref, String appointmentId) {
     showDialog(
       context: context,
       builder: (context) => Dialog(
@@ -81,9 +59,9 @@ class _QueueManagementScreenState extends ConsumerState<QueueManagementScreen> {
                     width: 100,
                     child: ElevatedButton(
                       onPressed: () {
-                        setState(() {
-                          _queuePatients[index].isSkipped = true;
-                        });
+                        ref
+                            .read(appointmentProvider.notifier)
+                            .updateAppointmentStatus(appointmentId, 'Skipped');
                         Navigator.pop(context);
                       },
                       style: ElevatedButton.styleFrom(
@@ -107,8 +85,26 @@ class _QueueManagementScreenState extends ConsumerState<QueueManagementScreen> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    final summaries = ref.watch(visitSummaryProvider);
+  Widget build(BuildContext context, WidgetRef ref) {
+    final authUser = ref.watch(authProvider).value;
+    final doctorName = authUser?.name.isNotEmpty == true
+        ? authUser!.name
+        : authUser?.username ?? 'Doctor';
+    final appointments = ref.watch(appointmentProvider);
+
+    String normalize(String n) => n
+        .replaceFirst(RegExp(r'^dr\.?\s*', caseSensitive: false), '')
+        .trim()
+        .toLowerCase();
+    final normDoctor = normalize(doctorName);
+
+    final queueAppointments = appointments
+        .where((app) =>
+            normalize(app.doctorName) == normDoctor &&
+            app.status != 'Cancelled' &&
+            app.status != 'Completed')
+        .toList()
+      ..sort((a, b) => a.date.compareTo(b.date));
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -122,178 +118,153 @@ class _QueueManagementScreenState extends ConsumerState<QueueManagementScreen> {
         title: const Text("Queue Management",
             style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          children: [
-            _buildCurrentPatientCard(context),
-            const SizedBox(height: 25),
-            for (var i = 0; i < _queuePatients.length; i++) ...[
-              _buildQueueItem(context, i, _queuePatients[i], summaries),
-              if (i < _queuePatients.length - 1) const SizedBox(height: 15),
-            ],
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildCurrentPatientCard(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: const Color(0xFFF8F9FB),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.grey.shade200),
-      ),
-      child: Column(
-        children: [
-          const Text("Next Patient", style: TextStyle(color: Colors.grey)),
-          const Text("John Doe",
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
-          const Text("10:00", style: TextStyle(color: Colors.grey)),
-          const SizedBox(height: 20),
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton.icon(
-              onPressed: () {},
-              icon: const Icon(Icons.phone, color: Colors.white),
-              label: const Text("Call In Patient",
-                  style: TextStyle(
-                      color: Colors.white, fontWeight: FontWeight.bold)),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF388E3C),
-                padding: const EdgeInsets.symmetric(vertical: 12),
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12)),
+      body: queueAppointments.isEmpty
+          ? Center(
+              child: Text(
+                'No queue appointments found for $doctorName.',
+                style: const TextStyle(color: Colors.grey, fontSize: 16),
+                textAlign: TextAlign.center,
               ),
+            )
+          : ListView.separated(
+              padding: const EdgeInsets.all(20),
+              itemCount: queueAppointments.length,
+              separatorBuilder: (_, __) => const SizedBox(height: 15),
+              itemBuilder: (context, index) {
+                final app = queueAppointments[index];
+                final hasSummary = ref
+                    .watch(visitSummaryProvider)
+                    .any((summary) => summary.appointmentId == app.id);
+                final isSkipped = app.status == 'Skipped';
+                final isCompleted = app.status == 'Completed';
+                final queueLabel = '#${index + 1}';
+
+                return Opacity(
+                  opacity: isSkipped ? 0.5 : 1,
+                  child: Container(
+                    padding: const EdgeInsets.all(15),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(15),
+                      border: Border.all(color: Colors.grey.shade100),
+                      boxShadow: [
+                        BoxShadow(
+                            color: Colors.black.withAlpha(13),
+                            blurRadius: 5,
+                            offset: const Offset(0, 2)),
+                      ],
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(app.patientName,
+                                    style: const TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 18)),
+                                const SizedBox(height: 6),
+                                Text(
+                                  '${app.date.toLocal().toString().split(' ').first} · ${app.timeSlot}',
+                                  style: const TextStyle(color: Colors.grey),
+                                ),
+                              ],
+                            ),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 12, vertical: 6),
+                              decoration: BoxDecoration(
+                                color: isCompleted
+                                    ? Colors.blue.withAlpha(30)
+                                    : isSkipped
+                                        ? Colors.red.withAlpha(30)
+                                        : Colors.green.withAlpha(30),
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child: Text(
+                                isCompleted
+                                    ? 'Completed'
+                                    : isSkipped
+                                        ? 'Skipped'
+                                        : app.status,
+                                style: TextStyle(
+                                  color: isCompleted
+                                      ? Colors.blue
+                                      : isSkipped
+                                          ? Colors.red
+                                          : Colors.green,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 15),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: OutlinedButton.icon(
+                                onPressed: isSkipped || isCompleted
+                                    ? null
+                                    : () => _showSkipDialog(
+                                          context,
+                                          ref,
+                                          app.id,
+                                        ),
+                                icon: const Icon(Icons.skip_next, size: 18),
+                                label: Text(
+                                  isSkipped ? 'Skipped' : 'Skip',
+                                ),
+                                style: OutlinedButton.styleFrom(
+                                  foregroundColor: Colors.black,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: ElevatedButton.icon(
+                                onPressed: isSkipped || hasSummary
+                                    ? null
+                                    : () async {
+                                        final result = await context.push<bool>(
+                                          '/create-summary',
+                                          extra: app,
+                                        );
+                                        if (result == true) {
+                                          // The form already updates the appointment status.
+                                        }
+                                      },
+                                icon: const Icon(Icons.check_circle_outline,
+                                    size: 18, color: Colors.black),
+                                label: Text(
+                                  hasSummary ? 'Completed' : 'Complete',
+                                  style: const TextStyle(color: Colors.black),
+                                ),
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: hasSummary
+                                      ? Colors.grey.shade300
+                                      : const Color(0xFF81C784),
+                                  elevation: 0,
+                                  shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(8)),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              },
             ),
-          ),
-        ],
-      ),
     );
   }
-
-  Widget _buildQueueItem(BuildContext context, int index, _QueuePatient patient,
-      List<VisitSummary> summaries) {
-    final hasSummary =
-        summaries.any((summary) => summary.appointmentId == patient.id);
-    final skipLabel = patient.isSkipped ? 'Skipped' : 'Skip';
-    final completeLabel = hasSummary ? 'Completed' : 'Complete';
-    final canSkip = !patient.isSkipped && !hasSummary;
-    final canComplete = !hasSummary && !patient.isSkipped;
-    final appointment = Appointment(
-      id: patient.id,
-      patientName: patient.name,
-      date: DateTime.now(),
-      timeSlot: patient.time,
-      doctorName: patient.doctorName,
-    );
-
-    return Container(
-      padding: const EdgeInsets.all(15),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(15),
-        border: Border.all(color: Colors.grey.shade100),
-        boxShadow: [
-          BoxShadow(
-              color: Colors.black.withAlpha(13),
-              blurRadius: 5,
-              offset: const Offset(0, 2))
-        ],
-      ),
-      child: Column(
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text("${patient.name}  ${patient.rank}",
-                      style: const TextStyle(
-                          fontWeight: FontWeight.bold, fontSize: 16)),
-                  Text(patient.time,
-                      style: const TextStyle(color: Colors.grey)),
-                ],
-              ),
-              const Row(
-                children: [
-                  CircleAvatar(radius: 4, backgroundColor: Colors.green),
-                  SizedBox(width: 5),
-                  Text("Checked In", style: TextStyle(fontSize: 12)),
-                ],
-              )
-            ],
-          ),
-          const SizedBox(height: 15),
-          Row(
-            children: [
-              Expanded(
-                child: OutlinedButton.icon(
-                  onPressed:
-                      canSkip ? () => _showSkipDialog(context, index) : null,
-                  icon: const Icon(Icons.skip_next, size: 18),
-                  label: Text(skipLabel),
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: Colors.black,
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8)),
-                  ),
-                ),
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: ElevatedButton.icon(
-                  onPressed: canComplete
-                      ? () async {
-                          final result = await context.push<bool>(
-                            '/create-summary',
-                            extra: appointment,
-                          );
-                          if (result == true) {
-                            setState(() {});
-                          }
-                        }
-                      : null,
-                  icon: const Icon(Icons.check_circle_outline,
-                      size: 18, color: Colors.black),
-                  label: Text(completeLabel,
-                      style: const TextStyle(color: Colors.black)),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: hasSummary
-                        ? Colors.grey.shade300
-                        : const Color(0xFF81C784),
-                    elevation: 0,
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8)),
-                  ),
-                ),
-              ),
-            ],
-          )
-        ],
-      ),
-    );
-  }
-}
-
-class _QueuePatient {
-  final String id;
-  final String name;
-  final String time;
-  final String rank;
-  final String doctorName;
-  bool isSkipped = false;
-  bool isCompleted = false;
-
-  _QueuePatient({
-    required this.id,
-    required this.name,
-    required this.time,
-    required this.rank,
-    required this.doctorName,
-  });
 }

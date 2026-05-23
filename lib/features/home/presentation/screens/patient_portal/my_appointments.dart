@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
+import 'package:table_calendar/table_calendar.dart';
 
 // FIXED: Converted relative backsteps to absolute package paths
 import 'package:med_line/features/home/presentation/providers/appointment_provider.dart';
@@ -81,6 +82,136 @@ class MyAppointmentsScreen extends ConsumerWidget {
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _showRescheduleModal(
+      BuildContext context, WidgetRef ref, Appointment appointment) async {
+    DateTime focusedDay = appointment.date;
+    DateTime selectedDay = appointment.date;
+    String selectedTime = appointment.timeSlot;
+
+    final timeSlots = [
+      "09:00",
+      "09:30",
+      "10:00",
+      "10:30",
+      "11:00",
+      "11:30",
+      "14:00",
+      "14:30",
+      "15:00",
+      "15:30",
+      "16:00",
+      "16:30",
+    ];
+
+    await showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) => Padding(
+        padding: EdgeInsets.only(
+          bottom: MediaQuery.of(context).viewInsets.bottom,
+          left: 20,
+          right: 20,
+          top: 20,
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            const Text(
+              'Reschedule Appointment',
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 20),
+            TableCalendar(
+              firstDay: DateTime.now(),
+              lastDay: DateTime.now().add(const Duration(days: 365)),
+              focusedDay: focusedDay,
+              selectedDayPredicate: (day) => isSameDay(day, selectedDay),
+              onDaySelected: (day, focus) {
+                selectedDay = day;
+                focusedDay = focus;
+              },
+              headerStyle: const HeaderStyle(
+                formatButtonVisible: false,
+                titleCentered: true,
+              ),
+            ),
+            const SizedBox(height: 20),
+            Wrap(
+              spacing: 10,
+              runSpacing: 10,
+              children: timeSlots.map((timeSlot) {
+                final isSelected = timeSlot == selectedTime;
+                return ChoiceChip(
+                  label: Text(timeSlot),
+                  selected: isSelected,
+                  onSelected: (_) {
+                    selectedTime = timeSlot;
+                  },
+                );
+              }).toList(),
+            ),
+            const SizedBox(height: 25),
+            ElevatedButton(
+              onPressed: () async {
+                if (selectedDay.isBefore(DateTime.now()) ||
+                    (selectedDay.isAtSameMomentAs(DateTime.now()) &&
+                        selectedTime == appointment.timeSlot &&
+                        selectedDay.isBefore(DateTime.now()))) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content:
+                          Text('Cannot reschedule into the past or same slot.'),
+                      backgroundColor: Colors.red,
+                    ),
+                  );
+                  return;
+                }
+
+                try {
+                  await ref
+                      .read(appointmentProvider.notifier)
+                      .rescheduleAppointment(
+                        appointment.id,
+                        selectedDay,
+                        selectedTime,
+                      );
+                  if (context.mounted) {
+                    Navigator.pop(context);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Appointment rescheduled.'),
+                        backgroundColor: Colors.green,
+                      ),
+                    );
+                  }
+                } catch (e) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(e.toString().replaceAll('Exception: ', '')),
+                      backgroundColor: Colors.red,
+                    ),
+                  );
+                }
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF2563EB),
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12)),
+              ),
+              child: const Text('Confirm Reschedule'),
+            ),
+            const SizedBox(height: 20),
+          ],
         ),
       ),
     );
@@ -189,10 +320,7 @@ class MyAppointmentsScreen extends ConsumerWidget {
             children: [
               Expanded(
                 child: OutlinedButton(
-                  onPressed: () {
-                    // Navigate to booking screen, passing the appointment as extra
-                    context.push('/book-appointment', extra: app);
-                  },
+                  onPressed: () => _showRescheduleModal(context, ref, app),
                   style: OutlinedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 12),
                     shape: RoundedRectangleBorder(

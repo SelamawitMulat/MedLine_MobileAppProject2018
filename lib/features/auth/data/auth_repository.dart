@@ -11,20 +11,61 @@ class AuthRepository {
     required this.remoteDataSource,
   });
 
-  // UPDATED: Completely removed 'String selectedRole' from the parameters
-  Future<User?> login(String identifier, String password) async {
-    final user =
-        await remoteDataSource.findUserByCredentials(identifier, password);
-
-    if (user == null) {
-      throw Exception('Invalid credentials');
+  Future<List<User>> getAllUsers() async {
+    final cachedUsers = await localDataSource.getCachedUsers();
+    if (cachedUsers.isNotEmpty) {
+      return cachedUsers;
     }
 
-    // REMOVED: The strict role mismatch check is gone, so users bypass manual selection.
-    // The app will now automatically read user.role in the UI to navigate.
+    final remoteUsers = await remoteDataSource.getAllUsers();
+    await localDataSource.cacheUsers(remoteUsers);
+    return remoteUsers;
+  }
 
-    await localDataSource.saveUser(user);
-    return user;
+  User? _findMatchingUser(
+      List<User> users, String identifier, String password) {
+    final cleanedIdentifier = identifier.trim().toLowerCase();
+    final cleanedPassword = password.trim();
+    final hashedPassword = User.hashPassword(cleanedPassword);
+
+    for (final u in users) {
+      final emailLower = u.email.toLowerCase();
+      final usernameLower = u.username.toLowerCase();
+      final emailPrefix =
+          emailLower.contains('@') ? emailLower.split('@').first : emailLower;
+      final matchesIdentifier = cleanedIdentifier == emailLower ||
+          cleanedIdentifier == usernameLower ||
+          cleanedIdentifier == emailPrefix;
+      if (!matchesIdentifier) continue;
+
+      final storedHash = u.passwordHash;
+      final matchesPassword = storedHash.isNotEmpty &&
+          (storedHash == cleanedPassword || storedHash == hashedPassword);
+      if (matchesPassword) {
+        return u;
+      }
+    }
+    return null;
+  }
+
+  Future<User?> login(String identifier, String password) async {
+    final cachedUsers = await localDataSource.getCachedUsers();
+    final cachedMatch = _findMatchingUser(cachedUsers, identifier, password);
+    if (cachedMatch != null) {
+      await localDataSource.saveUser(cachedMatch);
+      return cachedMatch;
+    }
+
+    final remoteUsers = await remoteDataSource.getAllUsers();
+    await localDataSource.cacheUsers(remoteUsers);
+
+    final remoteMatch = _findMatchingUser(remoteUsers, identifier, password);
+    if (remoteMatch != null) {
+      await localDataSource.saveUser(remoteMatch);
+      return remoteMatch;
+    }
+
+    throw Exception('Invalid credentials');
   }
 
   Future<User?> signup({
@@ -34,28 +75,43 @@ class AuthRepository {
     required String name,
     required String email,
   }) async {
-    final existingUsers = await remoteDataSource.getAllUsers();
-    final userExists =
-        existingUsers.any((u) => u.email == email || u.username == username);
+    final normalizedEmail = email.trim().toLowerCase();
+    final normalizedUsername = username.trim().toLowerCase();
+    final users = await getAllUsers();
+    final userExists = users.any((u) =>
+        u.email.toLowerCase() == normalizedEmail ||
+        u.username.toLowerCase() == normalizedUsername);
 
     if (userExists) {
       throw Exception('User already exists');
     }
 
-    final user = await remoteDataSource.signup(
-      username: username,
-      password: password,
-      role: role,
-      name: name,
-      email: email,
-    );
-
-    await localDataSource.saveUser(user);
-    return user;
+    try {
+      final user = await remoteDataSource.signup(
+        username: username,
+        password: password,
+        role: role,
+        name: name,
+        email: email,
+      );
+      await localDataSource.saveUser(user);
+      return user;
+    } catch (_) {
+      final localUser = User(
+        id: DateTime.now().microsecondsSinceEpoch.toString(),
+        username: normalizedUsername,
+        role: role,
+        name: name.trim(),
+        email: normalizedEmail,
+        passwordHash: User.hashPassword(password.trim()),
+      );
+      await localDataSource.saveUser(localUser);
+      return localUser;
+    }
   }
 
   Future<void> logout() async {
-    await localDataSource.clearAll();
+    await localDataSource.clearAuth();
   }
 
   Future<void> deleteAccount() async {

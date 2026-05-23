@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:med_line/core/constants/app_colors.dart';
+import 'package:med_line/features/auth/presentation/providers/auth_provider.dart';
 import 'package:med_line/features/home/presentation/providers/visit_summary_provider.dart';
 
 class VisitHistoryPage extends ConsumerWidget {
@@ -9,10 +10,13 @@ class VisitHistoryPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    const currentPatientName = 'Patient User';
+    final currentUser = ref.watch(authProvider).value;
+    final currentPatientId = currentUser?.id ?? '';
     final summaries = ref
         .watch(visitSummaryProvider)
-        .where((summary) => summary.patientName == currentPatientName)
+        .where(
+          (summary) => summary.patientId == currentPatientId,
+        )
         .toList();
 
     return Scaffold(

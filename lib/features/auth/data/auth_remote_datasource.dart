@@ -14,25 +14,22 @@ class AuthRemoteDataSource {
 
   Future<User?> findUserByCredentials(
       String identifier, String password) async {
-    // For demo purposes: simulate login by calling a /login endpoint
-    // In production, passwords should be hashed and validated server-side
+    final users = await getAllUsers();
+    final hashedPassword = User.hashPassword(password);
+
     try {
-      final response =
-          await apiClient.post('${ApiEndpoints.users}/login', data: {
-        'identifier': identifier,
-        'password': password,
+      return users.firstWhere((user) {
+        final matchesIdentifier =
+            user.email.toLowerCase() == identifier.toLowerCase() ||
+                user.username.toLowerCase() == identifier.toLowerCase();
+        final storedHash = user.passwordHash;
+        final matchesPassword = storedHash.isNotEmpty
+            ? storedHash == password || storedHash == hashedPassword
+            : false;
+        return matchesIdentifier && matchesPassword;
       });
-      return User.fromJson(response);
-    } catch (e) {
-      // Fallback: fetch all users and find by email/username (password validation skipped in demo)
-      final users = await getAllUsers();
-      try {
-        return users.firstWhere(
-          (user) => user.email == identifier || user.username == identifier,
-        );
-      } catch (_) {
-        return null;
-      }
+    } catch (_) {
+      return null;
     }
   }
 
@@ -43,14 +40,18 @@ class AuthRemoteDataSource {
     required String name,
     required String email,
   }) async {
+    final passwordHash = User.hashPassword(password);
+    final normalizedUsername = username.trim().toLowerCase();
+    final normalizedEmail = email.trim().toLowerCase();
     final response = await apiClient.post(ApiEndpoints.users, data: {
-      'username': username,
+      'username': normalizedUsername,
       'password': password,
+      'passwordHash': passwordHash,
       'role': role,
-      'name': name,
-      'email': email,
+      'name': name.trim(),
+      'email': normalizedEmail,
     });
-    return User.fromJson(response);
+    return User.fromJson(response as Map<String, dynamic>);
   }
 
   Future<void> deleteUser(String id) async {

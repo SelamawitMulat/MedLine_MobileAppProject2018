@@ -11,6 +11,14 @@ class VisitSummaryLocalDataSource {
     await db.insert(Tables.visitSummariesCache, summary.toJson());
   }
 
+  Future<void> deleteVisitSummary(String appointmentId) async {
+    await db.delete(
+      Tables.visitSummariesCache,
+      where: 'appointmentId = ?',
+      whereArgs: [appointmentId],
+    );
+  }
+
   Future<List<VisitSummary>> getVisitSummaries() async {
     final data = await db.getAll(Tables.visitSummariesCache);
     return data.map((json) => VisitSummary.fromJson(json)).toList();

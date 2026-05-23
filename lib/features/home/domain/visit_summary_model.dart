@@ -1,5 +1,7 @@
 class VisitSummary {
   final String appointmentId;
+  final String patientId;
+  final String doctorId;
   final String patientName;
   final String doctorName;
   final DateTime date;
@@ -9,6 +11,8 @@ class VisitSummary {
 
   VisitSummary({
     required this.appointmentId,
+    required this.patientId,
+    required this.doctorId,
     required this.patientName,
     required this.doctorName,
     required this.date,
@@ -20,6 +24,8 @@ class VisitSummary {
   factory VisitSummary.fromJson(Map<String, dynamic> json) {
     return VisitSummary(
       appointmentId: json['appointmentId']?.toString() ?? '',
+      patientId: json['patientId']?.toString() ?? '',
+      doctorId: json['doctorId']?.toString() ?? '',
       patientName: json['patientName']?.toString() ?? '',
       doctorName: json['doctorName']?.toString() ?? '',
       date: json['date'] != null
@@ -34,6 +40,8 @@ class VisitSummary {
   Map<String, dynamic> toJson() {
     return {
       'appointmentId': appointmentId,
+      'patientId': patientId,
+      'doctorId': doctorId,
       'patientName': patientName,
       'doctorName': doctorName,
       'date': date.toIso8601String(),

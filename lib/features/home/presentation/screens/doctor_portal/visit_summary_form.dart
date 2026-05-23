@@ -5,11 +5,13 @@ import 'package:med_line/features/home/domain/appointment_model.dart';
 import 'package:med_line/features/home/domain/visit_summary_model.dart';
 import 'package:med_line/features/home/presentation/providers/doctor_provider.dart';
 import 'package:med_line/features/home/presentation/providers/visit_summary_provider.dart';
+import 'package:med_line/features/home/presentation/providers/appointment_provider.dart';
 
 class VisitSummaryForm extends ConsumerStatefulWidget {
   final Appointment? appointment;
+  final VisitSummary? summary;
 
-  const VisitSummaryForm({super.key, this.appointment});
+  const VisitSummaryForm({super.key, this.appointment, this.summary});
 
   @override
   ConsumerState<VisitSummaryForm> createState() => _VisitSummaryFormState();
@@ -25,8 +27,12 @@ class _VisitSummaryFormState extends ConsumerState<VisitSummaryForm> {
   @override
   void initState() {
     super.initState();
-    _patientNameController.text = widget.appointment?.patientName ?? '';
-    _timeSlotController.text = widget.appointment?.timeSlot ?? '';
+    _patientNameController.text =
+        widget.summary?.patientName ?? widget.appointment?.patientName ?? '';
+    _timeSlotController.text =
+        widget.summary?.timeSlot ?? widget.appointment?.timeSlot ?? '';
+    _diagnosisController.text = widget.summary?.diagnosis ?? '';
+    _prescriptionController.text = widget.summary?.prescription ?? '';
   }
 
   @override
@@ -42,6 +48,15 @@ class _VisitSummaryFormState extends ConsumerState<VisitSummaryForm> {
   Widget build(BuildContext context) {
     final currentDoctorName = ref.watch(doctorNameProvider);
 
+    String normalize(String n) => n
+        .replaceFirst(RegExp(r'^dr\.?\s*', caseSensitive: false), '')
+        .trim()
+        .toLowerCase();
+    final normDoctor = normalize(currentDoctorName);
+
+    final pageTitle =
+        widget.summary != null ? 'Edit Visit Summary' : 'Create Visit Summary';
+
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -51,8 +66,9 @@ class _VisitSummaryFormState extends ConsumerState<VisitSummaryForm> {
           icon: const Icon(Icons.arrow_back, color: Colors.black),
           onPressed: () => context.pop(),
         ),
-        title: const Text("Create Visit Summary",
-            style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
+        title: Text(pageTitle,
+            style: const TextStyle(
+                color: Colors.black, fontWeight: FontWeight.bold)),
       ),
       body: Form(
         key: _formKey,
@@ -131,19 +147,55 @@ class _VisitSummaryFormState extends ConsumerState<VisitSummaryForm> {
                   onPressed: () async {
                     if (!_formKey.currentState!.validate()) return;
 
+                    final isEditing = widget.summary != null;
                     final appointment = widget.appointment;
-                    final timeSlot = (appointment?.timeSlot.isNotEmpty == true)
-                        ? appointment!.timeSlot
-                        : _timeSlotController.text.trim().isNotEmpty
-                            ? _timeSlotController.text.trim()
-                            : 'Now';
+                    Appointment? resolvedAppointment = appointment;
+
+                    if (!isEditing && resolvedAppointment == null) {
+                      final patientName = _patientNameController.text.trim();
+                      final appointments = ref.read(appointmentProvider);
+                      try {
+                        resolvedAppointment = appointments.firstWhere((app) =>
+                            app.patientName.toLowerCase() ==
+                                patientName.toLowerCase() &&
+                            normalize(app.doctorName) == normDoctor);
+                      } catch (_) {
+                        resolvedAppointment = null;
+                      }
+
+                      if (resolvedAppointment == null) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text(
+                              "Patient must already have an appointment.",
+                            ),
+                            backgroundColor: Colors.red,
+                          ),
+                        );
+                        return;
+                      }
+                    }
+
+                    final timeSlot =
+                        resolvedAppointment?.timeSlot.isNotEmpty == true
+                            ? resolvedAppointment!.timeSlot
+                            : _timeSlotController.text.trim().isNotEmpty
+                                ? _timeSlotController.text.trim()
+                                : 'Now';
 
                     final summary = VisitSummary(
-                      appointmentId: appointment?.id ??
+                      appointmentId: widget.summary?.appointmentId ??
+                          resolvedAppointment?.id ??
                           DateTime.now().millisecondsSinceEpoch.toString(),
+                      patientId: resolvedAppointment?.patientId ??
+                          widget.summary?.patientId ??
+                          '',
+                      doctorId: resolvedAppointment?.doctorId ??
+                          widget.summary?.doctorId ??
+                          '',
                       patientName: _patientNameController.text.trim(),
-                      doctorName: appointment?.doctorName ?? currentDoctorName,
-                      date: appointment?.date ?? DateTime.now(),
+                      doctorName: currentDoctorName,
+                      date: resolvedAppointment?.date ?? DateTime.now(),
                       timeSlot: timeSlot,
                       diagnosis: _diagnosisController.text.trim(),
                       prescription: _prescriptionController.text.trim(),
@@ -152,6 +204,14 @@ class _VisitSummaryFormState extends ConsumerState<VisitSummaryForm> {
                     await ref
                         .read(visitSummaryProvider.notifier)
                         .addVisitSummary(summary);
+
+                    if (resolvedAppointment != null) {
+                      await ref
+                          .read(appointmentProvider.notifier)
+                          .updateAppointmentStatus(
+                              resolvedAppointment.id, 'Completed');
+                    }
+
                     if (!mounted) return;
 
                     ScaffoldMessenger.of(context).showSnackBar(
@@ -159,7 +219,7 @@ class _VisitSummaryFormState extends ConsumerState<VisitSummaryForm> {
                           content: Text("Visit Summary Saved Successfully!"),
                           backgroundColor: Colors.green),
                     );
-                    context.pop(true);
+                    context.go('/doctor-visit-summary');
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF2563EB),

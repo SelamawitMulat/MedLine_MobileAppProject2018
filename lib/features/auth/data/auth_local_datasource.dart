@@ -6,10 +6,23 @@ class AuthLocalDataSource {
 
   AuthLocalDataSource(this._db);
 
-  /// Saves the user data to the local SQLite database
+  Future<void> cacheUsers(List<User> users) async {
+    for (final user in users) {
+      final json = user.toJson();
+      json['isLoggedIn'] = 0;
+      await _db.insert('users', json);
+    }
+  }
+
+  Future<List<User>> getCachedUsers() async {
+    final data = await _db.getAll('users');
+    return data.map((json) => User.fromJson(json)).toList();
+  }
+
+  /// Saves the user data to the local SQLite database and marks them as logged in
   Future<void> saveUser(User user) async {
+    await _db.update('users', {'isLoggedIn': 0});
     final userData = user.toJson();
-    // Add isLoggedIn flag for local session tracking
     userData['isLoggedIn'] = 1;
     await _db.insert('users', userData);
   }
@@ -17,7 +30,6 @@ class AuthLocalDataSource {
   /// Retrieves the currently logged-in user from the database
   Future<User?> getCurrentUser() async {
     final results = await _db.getAll('users');
-    // Finds the user marked as logged in, if any exists
     final loggedInUser = results.cast<Map<String, dynamic>?>().firstWhere(
       (user) => user?['isLoggedIn'] == 1,
       orElse: () => null,
@@ -25,9 +37,9 @@ class AuthLocalDataSource {
     return loggedInUser != null ? User.fromJson(loggedInUser) : null;
   }
 
-  /// Clears the user authentication session data
+  /// Clears only the logged-in flag for all cached users
   Future<void> clearAuth() async {
-    await _db.clearTable('users');
+    await _db.update('users', {'isLoggedIn': 0});
   }
 
   /// Alias for clearAuth to match repository usage
