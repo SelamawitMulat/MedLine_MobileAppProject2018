@@ -1,3 +1,5 @@
+// ignore_for_file: unused_import
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:med_line/core/providers.dart';
 import 'package:med_line/features/auth/domain/repositories/auth_repository.dart';
