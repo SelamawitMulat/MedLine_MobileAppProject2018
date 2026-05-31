@@ -2,6 +2,8 @@ import 'dart:convert';
 import 'package:crypto/crypto.dart';
 import 'package:equatable/equatable.dart';
 
+/// User entity - pure business object for the domain layer
+/// Contains only business logic and no API/database specifics
 class User extends Equatable {
   final String id;
   final String username;

@@ -4,7 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:med_line/core/constants/app_colors.dart';
 import 'package:med_line/core/widgets/primary_button.dart';
 import 'package:med_line/features/auth/presentation/providers/auth_provider.dart';
-import 'package:med_line/features/home/domain/appointment_model.dart';
+import 'package:med_line/features/home/domain/entities/appointment.dart';
 import 'package:med_line/features/home/presentation/providers/appointment_provider.dart';
 
 class DoctorPortalScreen extends ConsumerWidget {

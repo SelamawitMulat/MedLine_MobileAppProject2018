@@ -1,6 +1,7 @@
 import 'package:med_line/core/database/app_database.dart';
 import 'package:med_line/core/database/tables.dart';
-import 'package:med_line/features/home/domain/appointment_model.dart';
+import 'package:med_line/features/home/data/models/appointment_model.dart';
+import 'package:med_line/features/home/domain/entities/appointment.dart';
 
 class HomeLocalDataSource {
   final AppDatabase db;
@@ -16,13 +17,13 @@ class HomeLocalDataSource {
   Future<List<Appointment>> getCachedAppointments() async {
     final List<Map<String, dynamic>> data =
         await db.getAll(Tables.appointmentsCache);
-    return data.map((json) => Appointment.fromJson(json)).toList();
+    return data.map((json) => AppointmentModel.fromJson(json)).toList();
   }
 
   Future<Appointment?> getCachedAppointmentById(String id) async {
     final json = await db
         .getSingle(Tables.appointmentsCache, where: 'id = ?', whereArgs: [id]);
-    return json != null ? Appointment.fromJson(json) : null;
+    return json != null ? AppointmentModel.fromJson(json) : null;
   }
 
   Future<void> addAppointment(Appointment app) async {

@@ -1,71 +1,47 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:med_line/core/providers.dart';
+import 'package:med_line/features/auth/domain/repositories/auth_repository.dart';
 import 'package:med_line/features/auth/presentation/providers/auth_provider.dart';
-import 'package:med_line/features/home/data/home_local_datasource.dart';
-import 'package:med_line/features/home/data/home_remote_datasource.dart';
-import 'package:med_line/features/home/data/home_repository.dart';
-import 'package:med_line/features/home/domain/appointment_model.dart';
+import 'package:med_line/features/auth/data/providers.dart';
+import 'package:med_line/features/home/data/providers.dart';
+import 'package:med_line/features/home/domain/repositories/home_repository.dart';
+import 'package:med_line/features/home/domain/entities/appointment.dart';
+import 'package:med_line/features/home/domain/usecases/book_appointment.dart';
+import 'package:med_line/features/home/domain/usecases/cancel_appointment.dart';
+import 'package:med_line/features/home/domain/usecases/reschedule_appointment.dart';
+import 'package:med_line/features/home/domain/usecases/update_appointment_status.dart';
 
-final homeRemoteDataSourceProvider = Provider<HomeRemoteDataSource>((ref) {
-  return HomeRemoteDataSource(ref.watch(apiClientProvider));
-});
+// Data providers (home & auth repositories) are provided by data layer
 
-final homeLocalDataSourceProvider = Provider<HomeLocalDataSource>((ref) {
-  return HomeLocalDataSource(ref.watch(appDatabaseProvider));
-});
-
-final homeRepositoryProvider = Provider<HomeRepository>((ref) {
-  return HomeRepository(
-    remote: ref.watch(homeRemoteDataSourceProvider),
-    local: ref.watch(homeLocalDataSourceProvider),
+final bookAppointmentUseCaseProvider = Provider<BookAppointmentUseCase>((ref) {
+  return BookAppointmentUseCase(
+    repository: ref.watch(homeRepositoryProvider),
+    authRepository: ref.watch(authRepositoryProvider),
   );
+});
+
+final rescheduleAppointmentUseCaseProvider = Provider<RescheduleAppointmentUseCase>((ref) {
+  return RescheduleAppointmentUseCase(ref.watch(homeRepositoryProvider));
+});
+
+final cancelAppointmentUseCaseProvider = Provider<CancelAppointmentUseCase>((ref) {
+  return CancelAppointmentUseCase(ref.watch(homeRepositoryProvider));
+});
+
+final updateAppointmentStatusUseCaseProvider = Provider<UpdateAppointmentStatusUseCase>((ref) {
+  return UpdateAppointmentStatusUseCase(ref.watch(homeRepositoryProvider));
 });
 
 class AppointmentNotifier extends StateNotifier<List<Appointment>> {
   final Ref _ref;
-  final HomeRepository _repository;
+  final IHomeRepository _repository;
 
   AppointmentNotifier(this._ref, this._repository) : super([]) {
     _loadAppointments();
   }
 
-  String _normalizeDoctorName(String name) {
-    return name
-        .replaceFirst(RegExp(r'^dr\.?\s*', caseSensitive: false), '')
-        .trim()
-        .toLowerCase();
-  }
-
   Future<void> _loadAppointments() async {
-    state = await _repository.getAppointments();
-  }
-
-  DateTime _combineDateAndTime(DateTime date, String timeSlot) {
-    final parts = timeSlot.split(':').map(int.parse).toList();
-    if (parts.length != 2) return date;
-    return DateTime(date.year, date.month, date.day, parts[0], parts[1]);
-  }
-
-  bool _hasConflict(
-    DateTime date,
-    String timeSlot,
-    String doctorName, {
-    String? ignoreId,
-  }) {
-    final norm = _normalizeDoctorName(doctorName);
-    return state.any((appointment) {
-      if (appointment.status.toLowerCase() == 'cancelled') return false;
-      if (ignoreId != null && appointment.id == ignoreId) return false;
-      if (_normalizeDoctorName(appointment.doctorName) != norm) return false;
-      return appointment.date.year == date.year &&
-          appointment.date.month == date.month &&
-          appointment.date.day == date.day &&
-          appointment.timeSlot == timeSlot;
-    });
-  }
-
-  bool _isInPast(DateTime date, String timeSlot) {
-    final selected = _combineDateAndTime(date, timeSlot);
-    return selected.isBefore(DateTime.now());
+    state = await _repository.fetchAllAppointments();
   }
 
   Future<void> bookAppointment({
@@ -74,54 +50,22 @@ class AppointmentNotifier extends StateNotifier<List<Appointment>> {
     required DateTime date,
     required String timeSlot,
   }) async {
-    final currentUser = _ref.read(authProvider).value;
-    if (currentUser == null) {
-      throw Exception('User must be logged in to book an appointment');
-    }
-
-    if (_isInPast(date, timeSlot)) {
-      throw Exception('Cannot book appointments in the past');
-    }
-
-    if (_hasConflict(date, timeSlot, doctorName)) {
-      throw Exception('Appointment conflict detected');
-    }
-
-    final normalizedForSave = doctorName
-        .replaceFirst(RegExp(r'^dr\.?\s*', caseSensitive: false), '')
-        .trim();
-    final appointment = Appointment(
-      id: DateTime.now().millisecondsSinceEpoch.toString(),
-      patientName:
-          currentUser.name.isNotEmpty ? currentUser.name : currentUser.username,
-      doctorName: normalizedForSave,
-      date: date,
-      timeSlot: timeSlot,
-      status: 'Upcoming',
-      patientId: currentUser.id,
-      doctorId: doctorId,
-    );
-
-    final created = await _repository.addAppointment(appointment);
+    final created = await _ref.read(bookAppointmentUseCaseProvider).call(
+          doctorName: doctorName,
+          doctorId: doctorId,
+          date: date,
+          timeSlot: timeSlot,
+          existingAppointments: state,
+        );
     state = [...state, created];
   }
 
   Future<void> rescheduleAppointment(
       String id, DateTime newDate, String newTimeSlot) async {
-    if (_isInPast(newDate, newTimeSlot)) {
-      throw Exception('Cannot reschedule into the past');
-    }
-
     final current = state.firstWhere((app) => app.id == id);
-    if (_hasConflict(newDate, newTimeSlot, current.doctorName, ignoreId: id)) {
-      throw Exception('Appointment conflict detected');
-    }
-
-    final updated = await _repository.rescheduleAppointment(
-      current,
-      newDate,
-      newTimeSlot,
-    );
+    final updated = await _ref
+        .read(rescheduleAppointmentUseCaseProvider)
+        .call(current, newDate, newTimeSlot, state);
 
     state = [
       for (final app in state)
@@ -130,7 +74,9 @@ class AppointmentNotifier extends StateNotifier<List<Appointment>> {
   }
 
   Future<void> updateAppointmentStatus(String id, String newStatus) async {
-    final updated = await _repository.updateAppointmentStatus(id, newStatus);
+    final updated = await _ref
+        .read(updateAppointmentStatusUseCaseProvider)
+        .call(id, newStatus);
     state = [
       for (final app in state)
         if (app.id == id) updated else app,

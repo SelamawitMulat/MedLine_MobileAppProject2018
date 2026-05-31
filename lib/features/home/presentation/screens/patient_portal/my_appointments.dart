@@ -7,7 +7,7 @@ import 'package:med_line/features/auth/presentation/providers/auth_provider.dart
 
 // FIXED: Converted relative backsteps to absolute package paths
 import 'package:med_line/features/home/presentation/providers/appointment_provider.dart';
-import 'package:med_line/features/home/domain/appointment_model.dart';
+import 'package:med_line/features/home/domain/entities/appointment.dart';
 
 class MyAppointmentsScreen extends ConsumerWidget {
   const MyAppointmentsScreen({super.key});

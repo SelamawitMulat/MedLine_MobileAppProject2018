@@ -2,8 +2,8 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:med_line/features/auth/presentation/providers/auth_provider.dart';
-import 'package:med_line/features/home/domain/appointment_model.dart';
-import 'package:med_line/features/home/domain/visit_summary_model.dart';
+import 'package:med_line/features/home/domain/entities/appointment.dart';
+import 'package:med_line/features/home/domain/entities/visit_summary.dart';
 
 // Landing & Auth Imports
 import 'package:med_line/features/home/presentation/screens/landing_page.dart';

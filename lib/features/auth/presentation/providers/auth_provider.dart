@@ -1,44 +1,47 @@
 import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:med_line/features/auth/data/auth_repository.dart';
-import 'package:med_line/features/auth/data/auth_remote_datasource.dart';
-import 'package:med_line/features/auth/data/auth_local_datasource.dart';
-import 'package:med_line/features/auth/domain/user_model.dart';
-import 'package:med_line/core/network/api_client.dart';
-import 'package:med_line/core/database/app_database.dart';
+import 'package:med_line/core/providers.dart';
+import 'package:med_line/features/auth/data/providers.dart';
+import 'package:med_line/features/auth/domain/entities/user.dart';
+import 'package:med_line/features/auth/domain/usecases/delete_account.dart';
+import 'package:med_line/features/auth/domain/usecases/get_current_user.dart';
+import 'package:med_line/features/auth/domain/usecases/login_user.dart';
+import 'package:med_line/features/auth/domain/usecases/logout_user.dart';
+import 'package:med_line/features/auth/domain/usecases/signup_user.dart';
 
-// Data Layer Providers
-final apiClientProvider = Provider<ApiClient>((ref) => ApiClient());
-final appDatabaseProvider = Provider<AppDatabase>((ref) => AppDatabase());
-
-final authRemoteDataSourceProvider = Provider<AuthRemoteDataSource>((ref) {
-  return AuthRemoteDataSource(ref.watch(apiClientProvider));
+final getCurrentUserUseCaseProvider = Provider<GetCurrentUserUseCase>((ref) {
+  return GetCurrentUserUseCase(ref.watch(authRepositoryProvider));
 });
 
-final authLocalDataSourceProvider = Provider<AuthLocalDataSource>((ref) {
-  return AuthLocalDataSource(ref.watch(appDatabaseProvider));
+final loginUserUseCaseProvider = Provider<LoginUserUseCase>((ref) {
+  return LoginUserUseCase(ref.watch(authRepositoryProvider));
 });
 
-final authRepositoryProvider = Provider<AuthRepository>((ref) {
-  return AuthRepository(
-    localDataSource: ref.watch(authLocalDataSourceProvider),
-    remoteDataSource: ref.watch(authRemoteDataSourceProvider),
-  );
+final signupUserUseCaseProvider = Provider<SignupUserUseCase>((ref) {
+  return SignupUserUseCase(ref.watch(authRepositoryProvider));
+});
+
+final logoutUserUseCaseProvider = Provider<LogoutUserUseCase>((ref) {
+  return LogoutUserUseCase(ref.watch(authRepositoryProvider));
+});
+
+final deleteAccountUseCaseProvider = Provider<DeleteAccountUseCase>((ref) {
+  return DeleteAccountUseCase(ref.watch(authRepositoryProvider));
 });
 
 // Presentation Layer AuthNotifier
 class AuthNotifier extends AsyncNotifier<User?> {
   @override
   FutureOr<User?> build() async {
-    return await ref.watch(authRepositoryProvider).getCurrentUser();
+    return await ref.watch(getCurrentUserUseCaseProvider).call();
   }
 
-  // UPDATED: Completely removed the String selectedRole parameter
   Future<void> login(String identifier, String password) async {
     state = const AsyncValue.loading();
     state = await AsyncValue.guard(() async {
-      // Passes just identifier and password to your repository layer
-      return await ref.read(authRepositoryProvider).login(identifier, password);
+      return await ref
+          .read(loginUserUseCaseProvider)
+          .call(identifier, password);
     });
   }
 
@@ -51,7 +54,7 @@ class AuthNotifier extends AsyncNotifier<User?> {
   }) async {
     state = const AsyncValue.loading();
     state = await AsyncValue.guard(() async {
-      return await ref.read(authRepositoryProvider).signup(
+      return await ref.read(signupUserUseCaseProvider).call(
             username: username,
             password: password,
             role: role,
@@ -62,14 +65,14 @@ class AuthNotifier extends AsyncNotifier<User?> {
   }
 
   Future<void> logout() async {
-    await ref.read(authRepositoryProvider).logout();
+    await ref.read(logoutUserUseCaseProvider).call();
     state = const AsyncValue.data(null);
   }
 
   Future<void> deleteAccount() async {
     state = const AsyncValue.loading();
     try {
-      await ref.read(authRepositoryProvider).deleteAccount();
+      await ref.read(deleteAccountUseCaseProvider).call();
       state = const AsyncValue.data(null);
     } catch (e, stack) {
       state = AsyncValue.error(e, stack);

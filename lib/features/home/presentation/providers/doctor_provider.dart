@@ -24,7 +24,6 @@ final doctorIdProvider = Provider<String>((ref) {
 
 final doctorDeleteProvider = Provider<Future<void> Function()>((ref) {
   return () async {
-    final repo = ref.read(authRepositoryProvider);
-    await repo.deleteAccount();
+    await ref.read(deleteAccountUseCaseProvider).call();
   };
 });

@@ -1,5 +1,6 @@
 import 'package:med_line/core/database/app_database.dart';
-import 'package:med_line/features/auth/domain/user_model.dart';
+import 'package:med_line/features/auth/data/models/user_model.dart';
+import 'package:med_line/features/auth/domain/entities/user.dart';
 
 class AuthLocalDataSource {
   final AppDatabase _db;
@@ -16,7 +17,7 @@ class AuthLocalDataSource {
 
   Future<List<User>> getCachedUsers() async {
     final data = await _db.getAll('users');
-    return data.map((json) => User.fromJson(json)).toList();
+    return data.map((json) => UserModel.fromJson(json)).toList();
   }
 
   /// Saves the user data to the local SQLite database and marks them as logged in
@@ -34,7 +35,7 @@ class AuthLocalDataSource {
       (user) => user?['isLoggedIn'] == 1,
       orElse: () => null,
     );
-    return loggedInUser != null ? User.fromJson(loggedInUser) : null;
+    return loggedInUser != null ? UserModel.fromJson(loggedInUser) : null;
   }
 
   /// Clears only the logged-in flag for all cached users

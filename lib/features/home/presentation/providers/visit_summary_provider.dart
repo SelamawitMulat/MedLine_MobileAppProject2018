@@ -1,29 +1,12 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:med_line/features/auth/presentation/providers/auth_provider.dart';
-import 'package:med_line/features/home/data/visit_summary_local_datasource.dart';
-import 'package:med_line/features/home/data/visit_summary_remote_datasource.dart';
-import 'package:med_line/features/home/data/visit_summary_repository.dart';
-import 'package:med_line/features/home/domain/visit_summary_model.dart';
+import 'package:med_line/features/home/data/providers.dart';
+import 'package:med_line/features/home/domain/repositories/visit_summary_repository.dart';
+import 'package:med_line/features/home/domain/entities/visit_summary.dart';
 
-final visitSummaryLocalDataSourceProvider =
-    Provider<VisitSummaryLocalDataSource>((ref) {
-  return VisitSummaryLocalDataSource(ref.watch(appDatabaseProvider));
-});
-
-final visitSummaryRemoteDataSourceProvider =
-    Provider<VisitSummaryRemoteDataSource>((ref) {
-  return VisitSummaryRemoteDataSource(ref.watch(apiClientProvider));
-});
-
-final visitSummaryRepositoryProvider = Provider<VisitSummaryRepository>((ref) {
-  return VisitSummaryRepository(
-    local: ref.watch(visitSummaryLocalDataSourceProvider),
-    remote: ref.watch(visitSummaryRemoteDataSourceProvider),
-  );
-});
+// repository provider is provided by data layer in features/home/data/providers.dart
 
 class VisitSummaryNotifier extends StateNotifier<List<VisitSummary>> {
-  final VisitSummaryRepository _repository;
+  final IVisitSummaryRepository _repository;
 
   VisitSummaryNotifier(this._repository) : super([]) {
     _loadSummaries();
