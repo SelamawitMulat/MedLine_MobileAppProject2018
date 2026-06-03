@@ -1,32 +1,22 @@
 const { verify } = require('../shared/utils/jwt');
 
 function authMiddleware(req, res, next) {
-  const authHeader = req.headers.authorization;
+  const authHeader = req.headers.authorization || '';
 
-  if (!authHeader || typeof authHeader !== 'string' || !authHeader.startsWith('Bearer ')) {
-    req.user = null;
-    return next();
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    return res.status(401).json({ error: 'Unauthorized: missing token' });
   }
 
-  const parts = authHeader.split(' ');
-  if (parts.length !== 2) {
-    req.user = null;
-    return next();
-  }
-
-  const token = parts[1];
+  const token = authHeader.split(' ')[1];
   try {
     const payload = verify(token);
     if (!payload || !payload.id) {
-      req.user = null;
-      return next();
+      return res.status(401).json({ error: 'Unauthorized: invalid token' });
     }
-
     req.user = payload;
     return next();
-  } catch (_) {
-    req.user = null;
-    return next();
+  } catch (err) {
+    return res.status(401).json({ error: 'Unauthorized: invalid token' });
   }
 }
 

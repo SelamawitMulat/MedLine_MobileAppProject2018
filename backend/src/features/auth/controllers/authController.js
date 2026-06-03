@@ -1,10 +1,14 @@
 const authService = require('../services/authService');
 
+exports.loginStatus = (req, res) => {
+  res.json({ message: 'Auth feature placeholder ready for Phase 2' });
+};
+
 exports.signup = async (req, res, next) => {
   try {
     const { name, email, password } = req.body || {};
-    const user = await authService.signup({ name: (name || '').trim(), email: (email || '').trim(), password });
-    res.status(201).json({ user });
+    const result = await authService.signup({ name: (name || '').trim(), email: (email || '').trim(), password });
+    res.status(201).json(result);
   } catch (err) {
     next(err);
   }
@@ -22,16 +26,20 @@ exports.login = async (req, res, next) => {
 
 exports.me = async (req, res, next) => {
   try {
-    if (!req.user || !req.user.id) {
-      return res.json({
-        message:
-          'Protected endpoint. Use GET /api/auth/me with Authorization: Bearer <token>.',
-      });
-    }
-
+    if (!req.user || !req.user.id) return res.status(401).json({ error: 'Not authenticated' });
     const user = await authService.getUserById(req.user.id);
     if (!user) return res.status(404).json({ error: 'User not found' });
     res.json({ user });
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.deleteAccount = async (req, res, next) => {
+  try {
+    if (!req.user || !req.user.id) return res.status(401).json({ error: 'Not authenticated' });
+    await authService.deleteAccount(req.user.id);
+    res.json({ message: 'Account deleted successfully' });
   } catch (err) {
     next(err);
   }
