@@ -16,7 +16,7 @@ class RescheduleAppointmentUseCase {
       throw Exception('Cannot reschedule into the past');
     }
 
-    if (_hasConflict(newDate, newTimeSlot, appointment.doctorName,
+    if (_hasConflict(newDate, newTimeSlot,
         existingAppointments: existingAppointments,
         ignoreId: appointment.id)) {
       throw Exception('Appointment conflict detected');
@@ -33,16 +33,13 @@ class RescheduleAppointmentUseCase {
 
   bool _hasConflict(
     DateTime date,
-    String timeSlot,
-    String doctorName, {
+    String timeSlot, {
     required List<Appointment> existingAppointments,
     String? ignoreId,
   }) {
-    final norm = _normalizeDoctorName(doctorName);
     return existingAppointments.any((appointment) {
       if (appointment.status.toLowerCase() == 'cancelled') return false;
       if (ignoreId != null && appointment.id == ignoreId) return false;
-      if (_normalizeDoctorName(appointment.doctorName) != norm) return false;
       return appointment.date.year == date.year &&
           appointment.date.month == date.month &&
           appointment.date.day == date.day &&
@@ -59,12 +56,5 @@ class RescheduleAppointmentUseCase {
     final parts = timeSlot.split(':').map(int.parse).toList();
     if (parts.length != 2) return date;
     return DateTime(date.year, date.month, date.day, parts[0], parts[1]);
-  }
-
-  String _normalizeDoctorName(String name) {
-    return name
-        .replaceFirst(RegExp(r'^dr\.?\s*', caseSensitive: false), '')
-        .trim()
-        .toLowerCase();
   }
 }

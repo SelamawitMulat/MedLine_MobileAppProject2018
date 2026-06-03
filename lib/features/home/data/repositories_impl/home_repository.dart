@@ -59,6 +59,22 @@ class HomeRepository implements IHomeRepository {
   }
 
   @override
+  Future<void> deleteAppointment(String id) async {
+    try {
+      await remote.deleteAppointment(id);
+    } catch (_) {
+      // Remote may be unavailable; keep working locally.
+    }
+    
+    // Update local cache to mark as cancelled
+    final appointment = await local.getCachedAppointmentById(id);
+    if (appointment != null) {
+      final cancelled = appointment.copyWith(status: 'Cancelled');
+      await local.updateAppointment(cancelled);
+    }
+  }
+
+  @override
   Future<Appointment?> getCachedAppointmentById(String id) async {
     return await local.getCachedAppointmentById(id);
   }

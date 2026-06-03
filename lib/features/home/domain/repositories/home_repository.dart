@@ -11,5 +11,7 @@ abstract class IHomeRepository {
 
   Future<Appointment> updateAppointment(Appointment appointment);
 
+  Future<void> deleteAppointment(String id);
+
   Future<Appointment?> getCachedAppointmentById(String id);
 }

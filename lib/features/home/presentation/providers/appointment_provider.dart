@@ -47,16 +47,14 @@ class AppointmentNotifier extends StateNotifier<List<Appointment>> {
   }
 
   Future<void> bookAppointment({
-    required String doctorName,
-    required String doctorId,
     required DateTime date,
     required String timeSlot,
+    required String reason,
   }) async {
     final created = await _ref.read(bookAppointmentUseCaseProvider).call(
-          doctorName: doctorName,
-          doctorId: doctorId,
           date: date,
           timeSlot: timeSlot,
+          reason: reason,
           existingAppointments: state,
         );
     state = [...state, created];
@@ -83,6 +81,16 @@ class AppointmentNotifier extends StateNotifier<List<Appointment>> {
       for (final app in state)
         if (app.id == id) updated else app,
     ];
+  }
+
+  Future<void> cancelAppointment(String id) async {
+    await _repository.deleteAppointment(id);
+    
+    state = state.where((app) => app.id != id).toList();
+  }
+  
+  Future<void> refreshAppointments() async {
+    await _loadAppointments();
   }
 }
 

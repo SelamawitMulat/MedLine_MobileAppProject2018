@@ -12,10 +12,9 @@ class BookAppointmentUseCase {
   });
 
   Future<Appointment> call({
-    required String doctorName,
-    required String doctorId,
     required DateTime date,
     required String timeSlot,
+    required String reason,
     required List<Appointment> existingAppointments,
   }) async {
     final currentUser = await authRepository.getCurrentUser();
@@ -27,26 +26,22 @@ class BookAppointmentUseCase {
       throw Exception('Cannot book appointments in the past');
     }
 
-    if (_hasConflict(date, timeSlot, doctorName,
-        existingAppointments: existingAppointments)) {
+    if (_hasConflict(date, timeSlot, existingAppointments: existingAppointments)) {
       throw Exception('Appointment conflict detected');
     }
-
-    final normalizedForSave = doctorName
-        .replaceFirst(RegExp(r'^dr\.?\s*', caseSensitive: false), '')
-        .trim();
 
     final appointment = Appointment(
       id: DateTime.now().millisecondsSinceEpoch.toString(),
       patientName: currentUser.name.isNotEmpty
           ? currentUser.name
           : currentUser.username,
-      doctorName: normalizedForSave,
+      doctorName: 'Dr. Selam Mulat',
       date: date,
       timeSlot: timeSlot,
       status: 'Upcoming',
       patientId: currentUser.id,
-      doctorId: doctorId,
+      doctorId: '1',
+      reason: reason,
     );
 
     return await repository.createAppointment(appointment);
@@ -54,16 +49,13 @@ class BookAppointmentUseCase {
 
   bool _hasConflict(
     DateTime date,
-    String timeSlot,
-    String doctorName, {
+    String timeSlot, {
     required List<Appointment> existingAppointments,
     String? ignoreId,
   }) {
-    final norm = _normalizeDoctorName(doctorName);
     return existingAppointments.any((appointment) {
       if (appointment.status.toLowerCase() == 'cancelled') return false;
       if (ignoreId != null && appointment.id == ignoreId) return false;
-      if (_normalizeDoctorName(appointment.doctorName) != norm) return false;
       return appointment.date.year == date.year &&
           appointment.date.month == date.month &&
           appointment.date.day == date.day &&
@@ -80,12 +72,5 @@ class BookAppointmentUseCase {
     final parts = timeSlot.split(':').map(int.parse).toList();
     if (parts.length != 2) return date;
     return DateTime(date.year, date.month, date.day, parts[0], parts[1]);
-  }
-
-  String _normalizeDoctorName(String name) {
-    return name
-        .replaceFirst(RegExp(r'^dr\.?\s*', caseSensitive: false), '')
-        .trim()
-        .toLowerCase();
   }
 }

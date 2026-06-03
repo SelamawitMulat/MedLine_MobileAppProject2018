@@ -131,7 +131,7 @@ class PatientPortalScreen extends ConsumerWidget {
 
     final upcomingAppointments = appointments
         .where((app) =>
-            app.status == "Upcoming" &&
+            app.status != "Cancelled" &&
             (app.patientId == currentPatientId ||
                 app.patientName.toLowerCase() == currentPatientName))
         .toList();
@@ -140,7 +140,7 @@ class PatientPortalScreen extends ConsumerWidget {
 
     final hasAppointment = upcomingAppointments.isNotEmpty;
 
-    // 3. FIX: Select .first (the nearest appointment) instead of .last
+    // Select .first (the nearest appointment)
     final nextApp = hasAppointment ? upcomingAppointments.first : null;
 
     return Scaffold(
@@ -245,6 +245,27 @@ class PatientPortalScreen extends ConsumerWidget {
                               ),
                             ],
                           ),
+                          if (nextApp.reason.isNotEmpty) ...[
+                            const SizedBox(height: 10),
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Icon(Icons.description_outlined,
+                                    color: Colors.grey, size: 20),
+                                const SizedBox(width: 5),
+                                Expanded(
+                                  child: Text(
+                                    "Reason: ${nextApp.reason}",
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: const TextStyle(
+                                        fontWeight: FontWeight.w500,
+                                        color: Color(0xFF475569)),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
                           const SizedBox(height: 15),
                           Container(
                             padding: const EdgeInsets.all(12),

@@ -4,7 +4,6 @@ import 'package:go_router/go_router.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:med_line/features/home/domain/entities/appointment.dart';
 import 'package:med_line/features/home/presentation/providers/appointment_provider.dart';
-import 'package:med_line/features/home/presentation/providers/doctor_provider.dart';
 
 class BookAppointmentScreen extends ConsumerStatefulWidget {
   final Appointment? rescheduleAppointment;
@@ -17,32 +16,40 @@ class BookAppointmentScreen extends ConsumerStatefulWidget {
 }
 
 class _BookAppointmentScreenState extends ConsumerState<BookAppointmentScreen> {
-  DateTime _focusedDay = DateTime.now();
+  late DateTime _focusedDay;
   DateTime? _selectedDay;
   String? _selectedTime;
+  final TextEditingController _reasonController = TextEditingController();
 
   final String _soleDoctor = "Dr. Selam Mulat";
 
   final List<String> _timeSlots = [
-    "09:00",
-    "09:30",
-    "10:00",
-    "10:30",
-    "11:00",
-    "11:30",
-    "14:00",
-    "14:30",
-    "15:00",
-    "15:30",
-    "16:00",
-    "16:30",
+    "09:00", "09:30", "10:00", "10:30", "11:00", "11:30",
+    "14:00", "14:30", "15:00", "15:30", "16:00", "16:30",
   ];
 
+  @override
+  void initState() {
+    super.initState();
+    _focusedDay = widget.rescheduleAppointment?.date ?? DateTime.now();
+    if (widget.rescheduleAppointment != null) {
+      _selectedDay = widget.rescheduleAppointment!.date;
+      _selectedTime = widget.rescheduleAppointment!.timeSlot;
+      _reasonController.text = widget.rescheduleAppointment!.reason;
+    }
+  }
+
+  @override
+  void dispose() {
+    _reasonController.dispose();
+    super.dispose();
+  }
+
   Future<void> _handleConfirmAppointment() async {
-    if (_selectedDay == null || _selectedTime == null) {
+    if (_selectedDay == null || _selectedTime == null || _reasonController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text("Please select both a date and a time slot."),
+          content: Text("Please select date, time, and enter a reason."),
           backgroundColor: Colors.orange,
         ),
       );
@@ -53,32 +60,34 @@ class _BookAppointmentScreenState extends ConsumerState<BookAppointmentScreen> {
       final isReschedule = widget.rescheduleAppointment != null;
       if (isReschedule) {
         await ref.read(appointmentProvider.notifier).rescheduleAppointment(
-              widget.rescheduleAppointment!.id,
-              _selectedDay!,
-              _selectedTime!,
-            );
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text("Appointment rescheduled successfully!"),
-            backgroundColor: Colors.green,
-            duration: Duration(seconds: 2),
-          ),
+          widget.rescheduleAppointment!.id,
+          _selectedDay!,
+          _selectedTime!,
         );
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text("Appointment rescheduled successfully!"),
+              backgroundColor: Colors.green,
+              duration: Duration(seconds: 2),
+            ),
+          );
+        }
       } else {
-        final doctorId = ref.read(doctorIdProvider);
         await ref.read(appointmentProvider.notifier).bookAppointment(
-              doctorName: _soleDoctor,
-              doctorId: doctorId,
-              date: _selectedDay!,
-              timeSlot: _selectedTime!,
-            );
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text("Appointment booked successfully!"),
-            backgroundColor: Colors.green,
-            duration: Duration(seconds: 2),
-          ),
+          date: _selectedDay!,
+          timeSlot: _selectedTime!,
+          reason: _reasonController.text,
         );
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text("Appointment booked successfully!"),
+              backgroundColor: Colors.green,
+              duration: Duration(seconds: 2),
+            ),
+          );
+        }
       }
       if (mounted) context.pop();
     } catch (e) {
@@ -88,16 +97,6 @@ class _BookAppointmentScreenState extends ConsumerState<BookAppointmentScreen> {
           backgroundColor: Colors.red,
         ),
       );
-    }
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    if (widget.rescheduleAppointment != null) {
-      _selectedDay = widget.rescheduleAppointment!.date;
-      _focusedDay = widget.rescheduleAppointment!.date;
-      _selectedTime = widget.rescheduleAppointment!.timeSlot;
     }
   }
 
@@ -116,7 +115,10 @@ class _BookAppointmentScreenState extends ConsumerState<BookAppointmentScreen> {
         title: Text(
           isReschedule ? "Reschedule Appointment" : "Book Appointment",
           style: const TextStyle(
-              color: Colors.black, fontSize: 22, fontWeight: FontWeight.bold),
+            color: Colors.black,
+            fontSize: 22,
+            fontWeight: FontWeight.bold,
+          ),
         ),
       ),
       body: SingleChildScrollView(
@@ -125,7 +127,8 @@ class _BookAppointmentScreenState extends ConsumerState<BookAppointmentScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Text("Select Date",
-                style: TextStyle(fontSize: 19, fontWeight: FontWeight.bold)),
+              style: TextStyle(fontSize: 19, fontWeight: FontWeight.bold),
+            ),
             const SizedBox(height: 15),
             Container(
               padding: const EdgeInsets.only(bottom: 10),
@@ -133,10 +136,7 @@ class _BookAppointmentScreenState extends ConsumerState<BookAppointmentScreen> {
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(15),
                 boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withAlpha(12),
-                    blurRadius: 10,
-                  )
+                  BoxShadow(color: Colors.black.withAlpha(12), blurRadius: 10)
                 ],
               ),
               child: TableCalendar(
@@ -153,24 +153,28 @@ class _BookAppointmentScreenState extends ConsumerState<BookAppointmentScreen> {
                 headerStyle: const HeaderStyle(
                   formatButtonVisible: false,
                   titleCentered: true,
-                  titleTextStyle:
-                      TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  titleTextStyle: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
                 calendarStyle: CalendarStyle(
                   selectedDecoration: const BoxDecoration(
-                      color: Color(0xFF2563EB), shape: BoxShape.circle),
+                    color: Color(0xFF2563EB),
+                    shape: BoxShape.circle,
+                  ),
                   todayDecoration: BoxDecoration(
                     color: const Color(0xFF2563EB).withAlpha(50),
                     shape: BoxShape.circle,
                   ),
                   todayTextStyle: const TextStyle(
-                      color: Color(0xFF2563EB), fontWeight: FontWeight.bold),
+                    color: Color(0xFF2563EB),
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
             ),
             const SizedBox(height: 35),
             const Text("Available Time Slots",
-                style: TextStyle(fontSize: 19, fontWeight: FontWeight.bold)),
+              style: TextStyle(fontSize: 19, fontWeight: FontWeight.bold),
+            ),
             const SizedBox(height: 15),
             GridView.builder(
               shrinkWrap: true,
@@ -185,13 +189,10 @@ class _BookAppointmentScreenState extends ConsumerState<BookAppointmentScreen> {
               itemBuilder: (context, index) {
                 final isSelected = _selectedTime == _timeSlots[index];
                 return InkWell(
-                  onTap: () =>
-                      setState(() => _selectedTime = _timeSlots[index]),
+                  onTap: () => setState(() => _selectedTime = _timeSlots[index]),
                   child: Container(
                     decoration: BoxDecoration(
-                      color: isSelected
-                          ? const Color(0xFF2563EB)
-                          : const Color(0xFFF2F2F2),
+                      color: isSelected ? const Color(0xFF2563EB) : const Color(0xFFF2F2F2),
                       borderRadius: BorderRadius.circular(10),
                     ),
                     alignment: Alignment.center,
@@ -207,21 +208,50 @@ class _BookAppointmentScreenState extends ConsumerState<BookAppointmentScreen> {
               },
             ),
             const SizedBox(height: 40),
+            const Text("Reason for Visit",
+              style: TextStyle(fontSize: 19, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 15),
+            TextField(
+              controller: _reasonController,
+              maxLines: 4,
+              decoration: InputDecoration(
+                hintText: "Enter the reason for your appointment...",
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                  borderSide: const BorderSide(color: Color(0xFFDDDDDD)),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                  borderSide: const BorderSide(color: Color(0xFFDDDDDD)),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                  borderSide: const BorderSide(color: Color(0xFF2563EB), width: 2),
+                ),
+                filled: true,
+                fillColor: const Color(0xFFF9FAFB),
+              ),
+            ),
+            const SizedBox(height: 40),
             SizedBox(
               width: double.infinity,
               child: ElevatedButton.icon(
                 onPressed: _handleConfirmAppointment,
                 icon: const Icon(Icons.check, color: Colors.white, size: 28),
                 label: const Text("Confirm Appointment",
-                    style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 17,
-                        fontWeight: FontWeight.bold)),
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 17,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF2563EB),
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(15)),
+                    borderRadius: BorderRadius.circular(15),
+                  ),
                 ),
               ),
             ),
@@ -232,3 +262,4 @@ class _BookAppointmentScreenState extends ConsumerState<BookAppointmentScreen> {
     );
   }
 }
+

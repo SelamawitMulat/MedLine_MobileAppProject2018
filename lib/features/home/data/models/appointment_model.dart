@@ -10,6 +10,7 @@ class AppointmentModel extends Appointment {
     String status = 'Upcoming',
     String? patientId,
     String? doctorId,
+    String reason = '',
     bool isCheckedIn = false,
   }) : super(
           id: id,
@@ -20,6 +21,7 @@ class AppointmentModel extends Appointment {
           status: status,
           patientId: patientId,
           doctorId: doctorId,
+          reason: reason,
           isCheckedIn: isCheckedIn,
         );
 
@@ -33,6 +35,7 @@ class AppointmentModel extends Appointment {
       status: appointment.status,
       patientId: appointment.patientId,
       doctorId: appointment.doctorId,
+      reason: appointment.reason,
       isCheckedIn: appointment.isCheckedIn,
     );
   }
@@ -48,15 +51,19 @@ class AppointmentModel extends Appointment {
     final isCheckedIn =
         rawIsCheckedIn == true || rawIsCheckedIn == 1 || rawIsCheckedIn == '1';
 
+    final status = json['status'] ?? 'Upcoming';
+    final mappedStatus = status.toString().toLowerCase() == 'cancelled' ? 'Cancelled' : 'Upcoming';
+
     return AppointmentModel(
       id: json['id']?.toString() ?? '',
-      patientName: json['patientName']?.toString() ?? json['patientId']?.toString() ?? '',
+      patientName: json['patientName']?.toString() ?? json['patient_id']?.toString() ?? '',
       date: parsedDate,
-      timeSlot: json['timeSlot']?.toString() ?? json['appointment_time']?.toString() ?? '',
-      doctorName: json['doctorName']?.toString() ?? json['doctorId']?.toString() ?? 'Dr. Selam Mulat',
-      status: json['status']?.toString() ?? 'Upcoming',
-      patientId: json['patientId']?.toString(),
-      doctorId: json['doctorId']?.toString(),
+      timeSlot: json['timeSlot']?.toString() ?? json['time']?.toString() ?? '',
+      doctorName: json['doctorName']?.toString() ?? 'Dr. Selam Mulat',
+      status: mappedStatus,
+      patientId: json['patientId']?.toString() ?? json['patient_id']?.toString(),
+      doctorId: json['doctorId']?.toString() ?? json['doctor_id']?.toString(),
+      reason: json['reason']?.toString() ?? '',
       isCheckedIn: isCheckedIn,
     );
   }
@@ -71,20 +78,17 @@ class AppointmentModel extends Appointment {
       'status': status,
       if (patientId != null) 'patientId': patientId,
       if (doctorId != null) 'doctorId': doctorId,
+      'reason': reason,
       'isCheckedIn': isCheckedIn ? 1 : 0,
     };
   }
 
   Map<String, dynamic> toApiJson() {
     return {
-      'patientName': patientName,
-      'date': date.toIso8601String(),
-      'timeSlot': timeSlot,
-      'doctorName': doctorName,
-      'status': status,
       if (patientId != null) 'patientId': patientId,
-      if (doctorId != null) 'doctorId': doctorId,
-      'isCheckedIn': isCheckedIn,
+      'appointmentDate': date.toIso8601String().split('T')[0],
+      'appointmentTime': timeSlot,
+      'reason': reason,
     };
   }
 }

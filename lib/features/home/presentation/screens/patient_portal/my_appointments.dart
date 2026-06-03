@@ -61,12 +61,31 @@ class MyAppointmentsScreen extends ConsumerWidget {
                   SizedBox(
                     width: 100,
                     child: ElevatedButton(
-                      onPressed: () {
-                        ref
-                            .read(appointmentProvider.notifier)
-                            .updateAppointmentStatus(
-                                appointmentId, "Cancelled");
-                        Navigator.pop(context);
+                      onPressed: () async {
+                        try {
+                          await ref
+                              .read(appointmentProvider.notifier)
+                              .cancelAppointment(appointmentId);
+                          if (context.mounted) {
+                            Navigator.pop(context);
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text("Appointment cancelled successfully"),
+                                backgroundColor: Colors.green,
+                              ),
+                            );
+                          }
+                        } catch (e) {
+                          if (context.mounted) {
+                            Navigator.pop(context);
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(e.toString().replaceAll('Exception: ', '')),
+                                backgroundColor: Colors.red,
+                              ),
+                            );
+                          }
+                        }
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.white,
@@ -225,12 +244,21 @@ class MyAppointmentsScreen extends ConsumerWidget {
     final currentUser = ref.watch(authProvider).value;
     final currentPatientId = currentUser?.id ?? '';
     final currentPatientName = currentUser?.name.toLowerCase() ?? '';
-    final upcomingAppointments = appointments
+    
+    // Filter appointments for current user that are not cancelled
+    final userAppointments = appointments
         .where((app) =>
-            app.status == "Upcoming" &&
+            app.status.toLowerCase() != 'cancelled' &&
             (app.patientId == currentPatientId ||
                 app.patientName.toLowerCase() == currentPatientName))
         .toList();
+
+    // Sort by upcoming first, by date/time ascending.
+    userAppointments.sort((a, b) {
+      final dateCompare = a.date.compareTo(b.date);
+      if (dateCompare != 0) return dateCompare;
+      return a.timeSlot.compareTo(b.timeSlot);
+    });
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -243,7 +271,7 @@ class MyAppointmentsScreen extends ConsumerWidget {
           title: const Text("My Appointments",
               style:
                   TextStyle(color: Colors.black, fontWeight: FontWeight.bold))),
-      body: upcomingAppointments.isEmpty
+      body: userAppointments.isEmpty
           ? const Center(
               child: Text(
                 "No active appointments found.\nGo back to book a new one!",
@@ -253,9 +281,9 @@ class MyAppointmentsScreen extends ConsumerWidget {
             )
           : ListView.builder(
               padding: const EdgeInsets.all(25),
-              itemCount: upcomingAppointments.length,
+              itemCount: userAppointments.length,
               itemBuilder: (context, index) {
-                final app = upcomingAppointments[index];
+                final app = userAppointments[index];
                 return Padding(
                   padding: const EdgeInsets.only(bottom: 20),
                   child: _buildAppointmentItem(context, ref, app, index + 1),
@@ -275,6 +303,7 @@ class MyAppointmentsScreen extends ConsumerWidget {
           borderRadius: BorderRadius.circular(20),
           border: Border.all(color: Colors.grey.shade100)),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -324,6 +353,23 @@ class MyAppointmentsScreen extends ConsumerWidget {
               Text(app.timeSlot),
             ],
           ),
+          if (app.reason.isNotEmpty) ...[
+            const SizedBox(height: 10),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Icon(Icons.description_outlined, color: Colors.black, size: 20),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    app.reason,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ],
+            ),
+          ],
           const SizedBox(height: 25),
           Row(
             children: [
