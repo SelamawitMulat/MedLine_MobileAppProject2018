@@ -44,7 +44,7 @@ class PatientPortalScreen extends ConsumerWidget {
                             borderRadius: BorderRadius.circular(8),
                             side: BorderSide(color: Colors.grey.shade300)),
                       ),
-                      child: const Text("NO",
+                      child: const Text("Cancel",
                           style: TextStyle(color: Colors.black)),
                     ),
                   ),
@@ -72,6 +72,41 @@ class PatientPortalScreen extends ConsumerWidget {
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  void _showDeleteAccountDialog(BuildContext context, WidgetRef ref) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Delete Account'),
+        content: const Text('This action cannot be undone.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () async {
+              final goRouter = GoRouter.of(context);
+              final scaffoldMessenger = ScaffoldMessenger.of(context);
+              Navigator.pop(context);
+              try {
+                await ref.read(authProvider.notifier).deleteAccount();
+                goRouter.go('/login');
+              } catch (e) {
+                scaffoldMessenger.showSnackBar(
+                  const SnackBar(
+                    content: Text('Failed to delete account. Please try again.'),
+                  ),
+                );
+              }
+            },
+            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            child: const Text('Delete'),
+          ),
+        ],
       ),
     );
   }
@@ -129,10 +164,21 @@ class PatientPortalScreen extends ConsumerWidget {
                               fontSize: 22, fontWeight: FontWeight.bold)),
                     ],
                   ),
-                  IconButton(
-                      icon: const Icon(Icons.logout,
-                          color: Colors.black, size: 28),
-                      onPressed: () => _showLogoutDialog(context, ref)),
+                  Row(
+                    children: [
+                      IconButton(
+                        icon: const Icon(Icons.delete,
+                            color: Colors.red, size: 26),
+                        tooltip: 'Delete Account',
+                        onPressed: () => _showDeleteAccountDialog(context, ref),
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.logout,
+                            color: Colors.black, size: 28),
+                        onPressed: () => _showLogoutDialog(context, ref),
+                      ),
+                    ],
+                  ),
                 ],
               ),
               const SizedBox(height: 25),

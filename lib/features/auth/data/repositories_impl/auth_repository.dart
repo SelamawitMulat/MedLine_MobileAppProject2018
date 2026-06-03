@@ -44,7 +44,10 @@ class AuthRepository implements IAuthRepository {
 
   @override
   Future<void> deleteUser(String id) async {
-    await remoteDataSource.deleteUser(id);
+    final token = await localDataSource.getAuthToken();
+    if (token != null && token.isNotEmpty) {
+      await remoteDataSource.deleteUser(token);
+    }
     await localDataSource.deleteUser(id);
   }
 
