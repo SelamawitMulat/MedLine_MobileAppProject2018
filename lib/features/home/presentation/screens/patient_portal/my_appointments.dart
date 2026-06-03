@@ -70,7 +70,8 @@ class MyAppointmentsScreen extends ConsumerWidget {
                             Navigator.pop(context);
                             ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(
-                                content: Text("Appointment cancelled successfully"),
+                                content:
+                                    Text("Appointment cancelled successfully"),
                                 backgroundColor: Colors.green,
                               ),
                             );
@@ -80,7 +81,8 @@ class MyAppointmentsScreen extends ConsumerWidget {
                             Navigator.pop(context);
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
-                                content: Text(e.toString().replaceAll('Exception: ', '')),
+                                content: Text(
+                                    e.toString().replaceAll('Exception: ', '')),
                                 backgroundColor: Colors.red,
                               ),
                             );
@@ -244,7 +246,7 @@ class MyAppointmentsScreen extends ConsumerWidget {
     final currentUser = ref.watch(authProvider).value;
     final currentPatientId = currentUser?.id ?? '';
     final currentPatientName = currentUser?.name.toLowerCase() ?? '';
-    
+
     // Filter appointments for current user that are not cancelled
     final userAppointments = appointments
         .where((app) =>
@@ -358,7 +360,8 @@ class MyAppointmentsScreen extends ConsumerWidget {
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Icon(Icons.description_outlined, color: Colors.black, size: 20),
+                const Icon(Icons.description_outlined,
+                    color: Colors.black, size: 20),
                 const SizedBox(width: 10),
                 Expanded(
                   child: Text(

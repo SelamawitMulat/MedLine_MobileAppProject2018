@@ -98,7 +98,8 @@ class PatientPortalScreen extends ConsumerWidget {
               } catch (e) {
                 scaffoldMessenger.showSnackBar(
                   const SnackBar(
-                    content: Text('Failed to delete account. Please try again.'),
+                    content:
+                        Text('Failed to delete account. Please try again.'),
                   ),
                 );
               }

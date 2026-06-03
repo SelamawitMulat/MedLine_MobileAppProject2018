@@ -12,16 +12,18 @@ class HomeRemoteDataSource {
   Future<List<Appointment>> fetchAllAppointments() async {
     try {
       final dynamic data = await _api.get(_url);
-      
+
       // Handle both single object and array responses
       if (data is List) {
         return data
-            .map((json) => AppointmentModel.fromJson(json as Map<String, dynamic>))
+            .map((json) =>
+                AppointmentModel.fromJson(json as Map<String, dynamic>))
             .toList();
       } else if (data is Map && data.containsKey('appointments')) {
         final appointments = data['appointments'] as List;
         return appointments
-            .map((json) => AppointmentModel.fromJson(json as Map<String, dynamic>))
+            .map((json) =>
+                AppointmentModel.fromJson(json as Map<String, dynamic>))
             .toList();
       } else {
         return [];
@@ -34,12 +36,13 @@ class HomeRemoteDataSource {
   Future<Appointment> createAppointment(Appointment appointment) async {
     try {
       final responseData = await _api.post(_url, data: appointment.toApiJson());
-      
+
       // Handle both direct object and {appointment: {...}} response
-      final appointmentData = responseData is Map && responseData.containsKey('appointment')
-          ? responseData['appointment']
-          : responseData;
-      
+      final appointmentData =
+          responseData is Map && responseData.containsKey('appointment')
+              ? responseData['appointment']
+              : responseData;
+
       return AppointmentModel.fromJson(appointmentData as Map<String, dynamic>);
     } catch (e) {
       throw Exception('Failed to create appointment: $e');
@@ -52,14 +55,16 @@ class HomeRemoteDataSource {
         'appointmentDate': appointment.date.toIso8601String().split('T')[0],
         'appointmentTime': appointment.timeSlot,
       };
-      
-      final responseData = await _api.put('$_url/${appointment.id}', data: updateData);
-      
+
+      final responseData =
+          await _api.put('$_url/${appointment.id}', data: updateData);
+
       // Handle both direct object and {appointment: {...}} response
-      final appointmentData = responseData is Map && responseData.containsKey('appointment')
-          ? responseData['appointment']
-          : responseData;
-      
+      final appointmentData =
+          responseData is Map && responseData.containsKey('appointment')
+              ? responseData['appointment']
+              : responseData;
+
       return AppointmentModel.fromJson(appointmentData as Map<String, dynamic>);
     } catch (e) {
       throw Exception('Failed to update appointment: $e');

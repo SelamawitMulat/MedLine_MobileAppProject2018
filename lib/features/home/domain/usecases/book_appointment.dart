@@ -26,15 +26,15 @@ class BookAppointmentUseCase {
       throw Exception('Cannot book appointments in the past');
     }
 
-    if (_hasConflict(date, timeSlot, existingAppointments: existingAppointments)) {
+    if (_hasConflict(date, timeSlot,
+        existingAppointments: existingAppointments)) {
       throw Exception('Appointment conflict detected');
     }
 
     final appointment = Appointment(
       id: DateTime.now().millisecondsSinceEpoch.toString(),
-      patientName: currentUser.name.isNotEmpty
-          ? currentUser.name
-          : currentUser.username,
+      patientName:
+          currentUser.name.isNotEmpty ? currentUser.name : currentUser.username,
       doctorName: 'Dr. Selam Mulat',
       date: date,
       timeSlot: timeSlot,

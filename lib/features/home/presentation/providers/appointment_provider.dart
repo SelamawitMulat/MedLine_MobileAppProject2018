@@ -22,15 +22,18 @@ final bookAppointmentUseCaseProvider = Provider<BookAppointmentUseCase>((ref) {
   );
 });
 
-final rescheduleAppointmentUseCaseProvider = Provider<RescheduleAppointmentUseCase>((ref) {
+final rescheduleAppointmentUseCaseProvider =
+    Provider<RescheduleAppointmentUseCase>((ref) {
   return RescheduleAppointmentUseCase(ref.watch(homeRepositoryProvider));
 });
 
-final cancelAppointmentUseCaseProvider = Provider<CancelAppointmentUseCase>((ref) {
+final cancelAppointmentUseCaseProvider =
+    Provider<CancelAppointmentUseCase>((ref) {
   return CancelAppointmentUseCase(ref.watch(homeRepositoryProvider));
 });
 
-final updateAppointmentStatusUseCaseProvider = Provider<UpdateAppointmentStatusUseCase>((ref) {
+final updateAppointmentStatusUseCaseProvider =
+    Provider<UpdateAppointmentStatusUseCase>((ref) {
   return UpdateAppointmentStatusUseCase(ref.watch(homeRepositoryProvider));
 });
 
@@ -85,10 +88,10 @@ class AppointmentNotifier extends StateNotifier<List<Appointment>> {
 
   Future<void> cancelAppointment(String id) async {
     await _repository.deleteAppointment(id);
-    
+
     state = state.where((app) => app.id != id).toList();
   }
-  
+
   Future<void> refreshAppointments() async {
     await _loadAppointments();
   }

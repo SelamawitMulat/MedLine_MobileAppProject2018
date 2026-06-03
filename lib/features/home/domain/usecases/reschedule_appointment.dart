@@ -17,8 +17,7 @@ class RescheduleAppointmentUseCase {
     }
 
     if (_hasConflict(newDate, newTimeSlot,
-        existingAppointments: existingAppointments,
-        ignoreId: appointment.id)) {
+        existingAppointments: existingAppointments, ignoreId: appointment.id)) {
       throw Exception('Appointment conflict detected');
     }
 

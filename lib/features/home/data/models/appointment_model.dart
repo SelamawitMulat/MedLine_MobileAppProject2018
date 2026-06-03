@@ -41,7 +41,8 @@ class AppointmentModel extends Appointment {
   }
 
   factory AppointmentModel.fromJson(Map<String, dynamic> json) {
-    final dateValue = json['date'] ?? json['dateTime'] ?? json['appointment_date'];
+    final dateValue =
+        json['date'] ?? json['dateTime'] ?? json['appointment_date'];
     final parsedDate = dateValue != null
         ? DateTime.parse(dateValue.toString())
         : DateTime.now();
@@ -52,16 +53,21 @@ class AppointmentModel extends Appointment {
         rawIsCheckedIn == true || rawIsCheckedIn == 1 || rawIsCheckedIn == '1';
 
     final status = json['status'] ?? 'Upcoming';
-    final mappedStatus = status.toString().toLowerCase() == 'cancelled' ? 'Cancelled' : 'Upcoming';
+    final mappedStatus = status.toString().toLowerCase() == 'cancelled'
+        ? 'Cancelled'
+        : 'Upcoming';
 
     return AppointmentModel(
       id: json['id']?.toString() ?? '',
-      patientName: json['patientName']?.toString() ?? json['patient_id']?.toString() ?? '',
+      patientName: json['patientName']?.toString() ??
+          json['patient_id']?.toString() ??
+          '',
       date: parsedDate,
       timeSlot: json['timeSlot']?.toString() ?? json['time']?.toString() ?? '',
       doctorName: json['doctorName']?.toString() ?? 'Dr. Selam Mulat',
       status: mappedStatus,
-      patientId: json['patientId']?.toString() ?? json['patient_id']?.toString(),
+      patientId:
+          json['patientId']?.toString() ?? json['patient_id']?.toString(),
       doctorId: json['doctorId']?.toString() ?? json['doctor_id']?.toString(),
       reason: json['reason']?.toString() ?? '',
       isCheckedIn: isCheckedIn,

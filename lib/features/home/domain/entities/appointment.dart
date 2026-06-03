@@ -50,9 +50,10 @@ class Appointment extends Equatable {
         json['isCheckedIn'] ?? json['checked_in'] ?? json['is_checked_in'];
     final isCheckedIn =
         rawIsCheckedIn == true || rawIsCheckedIn == 1 || rawIsCheckedIn == '1';
-    
+
     final status = json['status'] ?? "Upcoming";
-    final mappedStatus = status.toLowerCase() == 'cancelled' ? 'Cancelled' : 'Upcoming';
+    final mappedStatus =
+        status.toLowerCase() == 'cancelled' ? 'Cancelled' : 'Upcoming';
 
     return Appointment(
       id: json['id']?.toString() ?? '',
@@ -61,7 +62,8 @@ class Appointment extends Equatable {
       timeSlot: json['timeSlot'] ?? json['time'] ?? '',
       doctorName: json['doctorName'] ?? "Dr. Selam Mulat",
       status: mappedStatus,
-      patientId: json['patientId']?.toString() ?? json['patient_id']?.toString(),
+      patientId:
+          json['patientId']?.toString() ?? json['patient_id']?.toString(),
       doctorId: json['doctorId']?.toString() ?? json['doctor_id']?.toString(),
       reason: json['reason']?.toString() ?? '',
       isCheckedIn: isCheckedIn,

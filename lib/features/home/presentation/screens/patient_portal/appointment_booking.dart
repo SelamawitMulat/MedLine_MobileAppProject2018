@@ -24,8 +24,18 @@ class _BookAppointmentScreenState extends ConsumerState<BookAppointmentScreen> {
   final String _soleDoctor = "Dr. Selam Mulat";
 
   final List<String> _timeSlots = [
-    "09:00", "09:30", "10:00", "10:30", "11:00", "11:30",
-    "14:00", "14:30", "15:00", "15:30", "16:00", "16:30",
+    "09:00",
+    "09:30",
+    "10:00",
+    "10:30",
+    "11:00",
+    "11:30",
+    "14:00",
+    "14:30",
+    "15:00",
+    "15:30",
+    "16:00",
+    "16:30",
   ];
 
   @override
@@ -46,7 +56,9 @@ class _BookAppointmentScreenState extends ConsumerState<BookAppointmentScreen> {
   }
 
   Future<void> _handleConfirmAppointment() async {
-    if (_selectedDay == null || _selectedTime == null || _reasonController.text.isEmpty) {
+    if (_selectedDay == null ||
+        _selectedTime == null ||
+        _reasonController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text("Please select date, time, and enter a reason."),
@@ -60,10 +72,10 @@ class _BookAppointmentScreenState extends ConsumerState<BookAppointmentScreen> {
       final isReschedule = widget.rescheduleAppointment != null;
       if (isReschedule) {
         await ref.read(appointmentProvider.notifier).rescheduleAppointment(
-          widget.rescheduleAppointment!.id,
-          _selectedDay!,
-          _selectedTime!,
-        );
+              widget.rescheduleAppointment!.id,
+              _selectedDay!,
+              _selectedTime!,
+            );
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
@@ -75,10 +87,10 @@ class _BookAppointmentScreenState extends ConsumerState<BookAppointmentScreen> {
         }
       } else {
         await ref.read(appointmentProvider.notifier).bookAppointment(
-          date: _selectedDay!,
-          timeSlot: _selectedTime!,
-          reason: _reasonController.text,
-        );
+              date: _selectedDay!,
+              timeSlot: _selectedTime!,
+              reason: _reasonController.text,
+            );
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
@@ -126,7 +138,8 @@ class _BookAppointmentScreenState extends ConsumerState<BookAppointmentScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text("Select Date",
+            const Text(
+              "Select Date",
               style: TextStyle(fontSize: 19, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 15),
@@ -153,7 +166,8 @@ class _BookAppointmentScreenState extends ConsumerState<BookAppointmentScreen> {
                 headerStyle: const HeaderStyle(
                   formatButtonVisible: false,
                   titleCentered: true,
-                  titleTextStyle: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  titleTextStyle:
+                      TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
                 calendarStyle: CalendarStyle(
                   selectedDecoration: const BoxDecoration(
@@ -172,7 +186,8 @@ class _BookAppointmentScreenState extends ConsumerState<BookAppointmentScreen> {
               ),
             ),
             const SizedBox(height: 35),
-            const Text("Available Time Slots",
+            const Text(
+              "Available Time Slots",
               style: TextStyle(fontSize: 19, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 15),
@@ -189,10 +204,13 @@ class _BookAppointmentScreenState extends ConsumerState<BookAppointmentScreen> {
               itemBuilder: (context, index) {
                 final isSelected = _selectedTime == _timeSlots[index];
                 return InkWell(
-                  onTap: () => setState(() => _selectedTime = _timeSlots[index]),
+                  onTap: () =>
+                      setState(() => _selectedTime = _timeSlots[index]),
                   child: Container(
                     decoration: BoxDecoration(
-                      color: isSelected ? const Color(0xFF2563EB) : const Color(0xFFF2F2F2),
+                      color: isSelected
+                          ? const Color(0xFF2563EB)
+                          : const Color(0xFFF2F2F2),
                       borderRadius: BorderRadius.circular(10),
                     ),
                     alignment: Alignment.center,
@@ -208,7 +226,8 @@ class _BookAppointmentScreenState extends ConsumerState<BookAppointmentScreen> {
               },
             ),
             const SizedBox(height: 40),
-            const Text("Reason for Visit",
+            const Text(
+              "Reason for Visit",
               style: TextStyle(fontSize: 19, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 15),
@@ -227,7 +246,8 @@ class _BookAppointmentScreenState extends ConsumerState<BookAppointmentScreen> {
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(10),
-                  borderSide: const BorderSide(color: Color(0xFF2563EB), width: 2),
+                  borderSide:
+                      const BorderSide(color: Color(0xFF2563EB), width: 2),
                 ),
                 filled: true,
                 fillColor: const Color(0xFFF9FAFB),
@@ -239,7 +259,8 @@ class _BookAppointmentScreenState extends ConsumerState<BookAppointmentScreen> {
               child: ElevatedButton.icon(
                 onPressed: _handleConfirmAppointment,
                 icon: const Icon(Icons.check, color: Colors.white, size: 28),
-                label: const Text("Confirm Appointment",
+                label: const Text(
+                  "Confirm Appointment",
                   style: TextStyle(
                     color: Colors.white,
                     fontSize: 17,
@@ -262,4 +283,3 @@ class _BookAppointmentScreenState extends ConsumerState<BookAppointmentScreen> {
     );
   }
 }
-

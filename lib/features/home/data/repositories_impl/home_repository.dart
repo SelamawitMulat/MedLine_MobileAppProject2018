@@ -65,7 +65,7 @@ class HomeRepository implements IHomeRepository {
     } catch (_) {
       // Remote may be unavailable; keep working locally.
     }
-    
+
     // Update local cache to mark as cancelled
     final appointment = await local.getCachedAppointmentById(id);
     if (appointment != null) {
