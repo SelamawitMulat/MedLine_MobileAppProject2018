@@ -1,0 +1,1 @@
+exports.getStatus = () => ({ ready: true });
