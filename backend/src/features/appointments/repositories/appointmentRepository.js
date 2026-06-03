@@ -33,3 +33,53 @@ exports.insertAppointment = async (appointment) => {
     });
   });
 };
+
+exports.updateAppointment = async (id, updateFields) => {
+  return new Promise((resolve, reject) => {
+    const setClauses = [];
+    const params = [];
+
+    if (updateFields.date) {
+      setClauses.push('date = ?');
+      params.push(updateFields.date);
+    }
+    if (updateFields.time) {
+      setClauses.push('time = ?');
+      params.push(updateFields.time);
+    }
+
+    if (setClauses.length === 0) {
+      return reject(new Error('No fields to update'));
+    }
+
+    params.push(id);
+    const sql = `UPDATE appointments SET ${setClauses.join(', ')} WHERE id = ?`;
+
+    db.run(sql, params, function (err) {
+      if (err) return reject(err);
+      if (this.changes === 0) {
+        const error = new Error('Appointment not found');
+        error.status = 404;
+        return reject(error);
+      }
+      resolve({ id, ...updateFields });
+    });
+  });
+};
+
+exports.updateAppointmentStatus = async (id, status) => {
+  return new Promise((resolve, reject) => {
+    const sql = 'UPDATE appointments SET status = ? WHERE id = ?';
+    const params = [status, id];
+
+    db.run(sql, params, function (err) {
+      if (err) return reject(err);
+      if (this.changes === 0) {
+        const error = new Error('Appointment not found');
+        error.status = 404;
+        return reject(error);
+      }
+      resolve({ id, status });
+    });
+  });
+};

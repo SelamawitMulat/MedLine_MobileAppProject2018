@@ -21,3 +21,23 @@ exports.createAppointment = async (req, res, next) => {
     next(err);
   }
 };
+
+exports.rescheduleAppointment = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const appointment = await appointmentService.updateAppointment(id, req.body);
+    res.json({ appointment });
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.cancelAppointment = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const appointment = await appointmentService.cancelAppointment(id);
+    res.json({ appointment });
+  } catch (err) {
+    next(err);
+  }
+};
