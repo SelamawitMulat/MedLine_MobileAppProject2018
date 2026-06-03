@@ -12,3 +12,12 @@ exports.getAllAppointments = async (req, res, next) => {
     next(err);
   }
 };
+
+exports.createAppointment = async (req, res, next) => {
+  try {
+    const appointment = await appointmentService.createAppointment(req.body);
+    res.status(201).json({ appointment });
+  } catch (err) {
+    next(err);
+  }
+};

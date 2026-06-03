@@ -41,8 +41,43 @@ function seedDefaultDoctor() {
   });
 }
 
+function migrateAppointmentsTable() {
+  return new Promise((resolve, reject) => {
+    db.all("PRAGMA table_info(appointments);", [], (err, columns) => {
+      if (err) return reject(err);
+      
+      const columnNames = columns.map((col) => col.name);
+      const missingColumns = [];
+      
+      if (!columnNames.includes('doctor_id')) {
+        missingColumns.push('ALTER TABLE appointments ADD COLUMN doctor_id INTEGER');
+      }
+      if (!columnNames.includes('reason')) {
+        missingColumns.push('ALTER TABLE appointments ADD COLUMN reason TEXT');
+      }
+      
+      if (missingColumns.length === 0) {
+        return resolve();
+      }
+      
+      let completed = 0;
+      missingColumns.forEach((sql) => {
+        db.run(sql, (err) => {
+          if (err) return reject(err);
+          completed++;
+          if (completed === missingColumns.length) {
+            console.log('Appointment table migrated with missing columns');
+            resolve();
+          }
+        });
+      });
+    });
+  });
+}
+
 async function initializeDatabase() {
   await createSchema();
+  await migrateAppointmentsTable();
   await seedDefaultDoctor();
 }
 

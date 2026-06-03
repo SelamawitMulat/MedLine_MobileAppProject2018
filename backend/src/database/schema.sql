@@ -12,12 +12,15 @@ CREATE TABLE IF NOT EXISTS users (
 CREATE TABLE IF NOT EXISTS appointments (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   patient_id INTEGER NOT NULL,
+  doctor_id INTEGER NOT NULL,
   date TEXT NOT NULL,
   time TEXT NOT NULL,
+  reason TEXT NOT NULL,
   status TEXT NOT NULL DEFAULT 'pending',
   queue_position INTEGER,
   checked_in INTEGER NOT NULL DEFAULT 0 CHECK(checked_in IN (0,1)),
-  FOREIGN KEY(patient_id) REFERENCES users(id)
+  FOREIGN KEY(patient_id) REFERENCES users(id),
+  FOREIGN KEY(doctor_id) REFERENCES users(id)
 );
 
 CREATE TABLE IF NOT EXISTS visit_summaries (
