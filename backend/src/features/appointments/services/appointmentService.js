@@ -1,4 +1,5 @@
 const appointmentRepository = require('../repositories/appointmentRepository');
+const DOCTOR_ID = 1;
 
 exports.getStatus = () => ({ ready: true });
 
@@ -7,7 +8,7 @@ exports.getAllAppointments = async () => {
 };
 
 exports.createAppointment = async (appointmentData) => {
-  const requiredFields = ['patientId', 'doctorId', 'appointmentDate', 'appointmentTime', 'reason'];
+  const requiredFields = ['patientId', 'appointmentDate', 'appointmentTime', 'reason'];
   const missingFields = requiredFields.filter((field) => !appointmentData[field]);
 
   if (missingFields.length) {
@@ -18,7 +19,7 @@ exports.createAppointment = async (appointmentData) => {
 
   const appointment = {
     patient_id: appointmentData.patientId,
-    doctor_id: appointmentData.doctorId,
+    doctor_id: DOCTOR_ID,
     date: appointmentData.appointmentDate,
     time: appointmentData.appointmentTime,
     reason: appointmentData.reason,
@@ -31,7 +32,7 @@ exports.createAppointment = async (appointmentData) => {
 
   return {
     ...insertedAppointment,
-    doctorId: appointmentData.doctorId,
+    doctorId: DOCTOR_ID,
     reason: appointmentData.reason,
   };
 };
