@@ -50,6 +50,42 @@ class AuthRepository implements IAuthRepository {
 
   @override
   Future<User> createRemoteUser(User user) async {
-    return await remoteDataSource.signup(user);
+    final response = await remoteDataSource.signup(user.name, user.email, user.passwordHash);
+    final token = response['token']?.toString();
+    final userData = response['user'] as Map<String, dynamic>;
+    return User.fromJson({...userData, 'token': token});
+  }
+
+  @override
+  Future<User?> login(String email, String password) async {
+    final response = await remoteDataSource.login(email, password);
+    final token = response['token']?.toString();
+    final userData = response['user'] as Map<String, dynamic>;
+    final user = User.fromJson({...userData, 'token': token});
+    await saveCurrentUser(user);
+    return user;
+  }
+
+  @override
+  Future<User> signup({
+    required String name,
+    required String email,
+    required String password,
+  }) async {
+    final response = await remoteDataSource.signup(name, email, password);
+    final token = response['token']?.toString();
+    final userData = response['user'] as Map<String, dynamic>;
+    final user = User.fromJson({...userData, 'token': token});
+    await saveCurrentUser(user);
+    return user;
+  }
+
+  @override
+  Future<User?> fetchCurrentUser(String token) async {
+    final response = await remoteDataSource.getCurrentUser(token);
+    final userData = response['user'] as Map<String, dynamic>;
+    final user = User.fromJson({...userData, 'token': token});
+    await saveCurrentUser(user);
+    return user;
   }
 }

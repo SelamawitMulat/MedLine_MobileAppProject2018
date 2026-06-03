@@ -4,25 +4,29 @@ function authMiddleware(req, res, next) {
   const authHeader = req.headers.authorization;
 
   if (!authHeader || typeof authHeader !== 'string' || !authHeader.startsWith('Bearer ')) {
-    return res.status(401).json({ error: 'Unauthorized: missing or invalid Authorization header' });
+    req.user = null;
+    return next();
   }
 
   const parts = authHeader.split(' ');
   if (parts.length !== 2) {
-    return res.status(401).json({ error: 'Unauthorized: malformed Authorization header' });
+    req.user = null;
+    return next();
   }
 
   const token = parts[1];
   try {
     const payload = verify(token);
     if (!payload || !payload.id) {
-      return res.status(401).json({ error: 'Unauthorized: invalid token payload' });
+      req.user = null;
+      return next();
     }
 
     req.user = payload;
     return next();
-  } catch (err) {
-    return res.status(401).json({ error: 'Unauthorized: invalid token' });
+  } catch (_) {
+    req.user = null;
+    return next();
   }
 }
 

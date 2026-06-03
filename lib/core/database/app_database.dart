@@ -97,7 +97,8 @@ class AppDatabase {
           email TEXT,
           role TEXT,
           passwordHash TEXT,
-          isLoggedIn INTEGER
+          token TEXT,
+          isLoggedin INTEGER
         )
       ''');
     } else {
@@ -107,11 +108,12 @@ class AppDatabase {
         'name',
         'email',
         'passwordHash',
-        'isLoggedIn'
+        'token',
+        'isLoggedin'
       };
       for (var col in needed) {
         if (!existingColumns.contains(col)) {
-          final sqlType = col == 'isLoggedIn' ? 'INTEGER' : 'TEXT';
+          final sqlType = col == 'isLoggedin' ? 'INTEGER' : 'TEXT';
           await db.execute('ALTER TABLE users ADD COLUMN $col $sqlType');
         }
       }

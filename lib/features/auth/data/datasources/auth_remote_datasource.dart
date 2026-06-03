@@ -33,15 +33,40 @@ class AuthRemoteDataSource {
     }
   }
 
-  Future<User> signup(User user) async {
-    final response = await apiClient.post(ApiEndpoints.users, data: {
-      'username': user.username,
-      'passwordHash': user.passwordHash,
-      'role': user.role,
-      'name': user.name.trim(),
-      'email': user.email,
-    });
-    return User.fromJson(response as Map<String, dynamic>);
+  Future<Map<String, dynamic>> signup(
+      String name, String email, String password) async {
+    try {
+      final response = await apiClient.post(ApiEndpoints.authSignup, data: {
+        'name': name.trim(),
+        'email': email.trim().toLowerCase(),
+        'password': password,
+      });
+      return response as Map<String, dynamic>;
+    } catch (e) {
+      print('Signup error: $e');
+      rethrow;
+    }
+  }
+
+  Future<Map<String, dynamic>> login(String email, String password) async {
+    try {
+      final response = await apiClient.post(ApiEndpoints.authLogin, data: {
+        'email': email.trim().toLowerCase(),
+        'password': password,
+      });
+      return response as Map<String, dynamic>;
+    } catch (e) {
+      print('Login error: $e');
+      rethrow;
+    }
+  }
+
+  Future<Map<String, dynamic>> getCurrentUser(String token) async {
+    final response = await apiClient.get(
+      ApiEndpoints.authMe,
+      headers: {'Authorization': 'Bearer $token'},
+    );
+    return response as Map<String, dynamic>;
   }
 
   Future<void> deleteUser(String id) async {

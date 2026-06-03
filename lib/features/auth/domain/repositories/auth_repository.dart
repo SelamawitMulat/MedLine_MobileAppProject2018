@@ -18,4 +18,14 @@ abstract class IAuthRepository {
   Future<void> deleteUser(String id);
 
   Future<User> createRemoteUser(User user);
+
+  Future<User?> login(String email, String password);
+
+  Future<User> signup({
+    required String name,
+    required String email,
+    required String password,
+  });
+
+  Future<User?> fetchCurrentUser(String token);
 }

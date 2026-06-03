@@ -21,7 +21,6 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
   final TextEditingController _confirmPasswordController =
       TextEditingController();
 
-  String _selectedRole = 'Patient';
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
   bool _isLoading = false;
@@ -58,7 +57,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                 ? _usernameController.text.trim().toLowerCase()
                 : _generateUsername(),
             password: _passwordController.text.trim(),
-            role: _selectedRole.toLowerCase(),
+            role: 'patient',
             name: _nameController.text.trim(),
             email: _emailController.text.trim(),
           );
@@ -175,30 +174,6 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                             _obscureConfirmPassword = !_obscureConfirmPassword),
                       ),
                       const SizedBox(height: 20),
-                      const Text("I am a",
-                          style: TextStyle(fontWeight: FontWeight.w600)),
-                      Row(
-                        children: [
-                          Radio<String>(
-                            value: 'Patient',
-                            groupValue: _selectedRole,
-                            activeColor: Colors.black,
-                            onChanged: (val) =>
-                                setState(() => _selectedRole = val!),
-                          ),
-                          const Text("Patient"),
-                          const SizedBox(width: 20),
-                          Radio<String>(
-                            value: 'Doctor',
-                            groupValue: _selectedRole,
-                            activeColor: Colors.black,
-                            onChanged: (val) =>
-                                setState(() => _selectedRole = val!),
-                          ),
-                          const Text("Doctor"),
-                        ],
-                      ),
-                      const SizedBox(height: 25),
                       SizedBox(
                         width: double.infinity,
                         child: ElevatedButton(

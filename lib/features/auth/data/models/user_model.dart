@@ -8,6 +8,7 @@ class UserModel extends User {
     required String name,
     required String email,
     required String passwordHash,
+    String? token,
   }) : super(
           id: id,
           username: username,
@@ -15,6 +16,7 @@ class UserModel extends User {
           name: name,
           email: email,
           passwordHash: passwordHash,
+          token: token,
         );
 
   factory UserModel.fromEntity(User user) {
@@ -25,6 +27,7 @@ class UserModel extends User {
       name: user.name,
       email: user.email,
       passwordHash: user.passwordHash,
+      token: user.token,
     );
   }
 
@@ -55,6 +58,7 @@ class UserModel extends User {
       name: json['name']?.toString().trim() ?? '',
       email: email,
       passwordHash: passwordHash,
+      token: json['token']?.toString().trim(),
     );
   }
 
@@ -83,6 +87,7 @@ class UserModel extends User {
       'name': name,
       'email': email,
       'passwordHash': passwordHash,
+      'token': token,
     };
   }
 
@@ -94,6 +99,7 @@ class UserModel extends User {
       'name': name,
       'email': email,
       'passwordHash': passwordHash,
+      'token': token,
     };
   }
 }

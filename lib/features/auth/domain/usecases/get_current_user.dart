@@ -7,6 +7,18 @@ class GetCurrentUserUseCase {
   GetCurrentUserUseCase(this.repository);
 
   Future<User?> call() async {
-    return await repository.getCurrentUser();
+    final localUser = await repository.getCurrentUser();
+    if (localUser == null) return null;
+
+    final token = localUser.token;
+    if (token == null || token.isEmpty) {
+      return localUser;
+    }
+
+    try {
+      return await repository.fetchCurrentUser(token);
+    } catch (_) {
+      return localUser;
+    }
   }
 }

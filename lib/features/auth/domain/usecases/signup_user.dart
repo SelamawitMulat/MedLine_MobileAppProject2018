@@ -14,40 +14,16 @@ class SignupUserUseCase {
     required String email,
   }) async {
     final normalizedEmail = email.trim().toLowerCase();
-    final normalizedUsername = username.trim().toLowerCase();
+    final cleanedName = name.trim();
 
-    var cachedUsers = await repository.getCachedUsers();
-    if (cachedUsers.isEmpty) {
-      final remoteUsers = await repository.fetchUsers();
-      cachedUsers = remoteUsers;
-      if (remoteUsers.isNotEmpty) {
-        await repository.cacheUsers(remoteUsers);
-      }
+    if (normalizedEmail.isEmpty || cleanedName.isEmpty || password.trim().isEmpty) {
+      throw Exception('Invalid signup data');
     }
 
-    final userExists = cachedUsers.any((u) =>
-        u.email.toLowerCase() == normalizedEmail ||
-        u.username.toLowerCase() == normalizedUsername);
-    if (userExists) {
-      throw Exception('User already exists');
-    }
-
-    final newUser = User(
-      id: DateTime.now().microsecondsSinceEpoch.toString(),
-      username: normalizedUsername,
-      role: role,
-      name: name.trim(),
+    return await repository.signup(
+      name: cleanedName,
       email: normalizedEmail,
-      passwordHash: User.hashPassword(password.trim()),
+      password: password.trim(),
     );
-
-    try {
-      final createdUser = await repository.createRemoteUser(newUser);
-      await repository.saveCurrentUser(createdUser);
-      return createdUser;
-    } catch (_) {
-      await repository.saveCurrentUser(newUser);
-      return newUser;
-    }
   }
 }

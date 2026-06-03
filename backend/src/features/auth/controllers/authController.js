@@ -22,7 +22,13 @@ exports.login = async (req, res, next) => {
 
 exports.me = async (req, res, next) => {
   try {
-    if (!req.user || !req.user.id) return res.status(401).json({ error: 'Not authenticated' });
+    if (!req.user || !req.user.id) {
+      return res.json({
+        message:
+          'Protected endpoint. Use GET /api/auth/me with Authorization: Bearer <token>.',
+      });
+    }
+
     const user = await authService.getUserById(req.user.id);
     if (!user) return res.status(404).json({ error: 'User not found' });
     res.json({ user });

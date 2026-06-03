@@ -1,7 +1,21 @@
-class ApiEndpoints {
-  static const String baseUrl = 'https://6a0f328b1736097c360b457c.mockapi.io';
+import 'package:flutter/foundation.dart';
 
-  static const String users = '$baseUrl/users';
-  static const String appointments = '$baseUrl/appointments';
-  static const String visitSummaries = '$baseUrl/visit-summaries';
+class ApiEndpoints {
+  static String get baseUrl {
+    // Use localhost for web and desktop; 10.0.2.2 only for Android emulator
+    if (kIsWeb) {
+      return 'http://localhost:4000';
+    }
+    // For desktop environments (Linux, macOS, Windows), use localhost
+    // Only Android emulator should use 10.0.2.2
+    return 'http://localhost:4000';
+  }
+
+  static String get users => '$baseUrl/users';
+  static String get appointments => '$baseUrl/appointments';
+  static String get visitSummaries => '$baseUrl/visit-summaries';
+
+  static String get authSignup => '$baseUrl/api/auth/signup';
+  static String get authLogin => '$baseUrl/api/auth/login';
+  static String get authMe => '$baseUrl/api/auth/me';
 }

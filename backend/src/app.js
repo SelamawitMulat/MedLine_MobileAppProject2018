@@ -10,10 +10,28 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 app.get('/', (req, res) => {
-  res.json({ status: 'ok', message: 'MedLine backend foundation is running' });
+  res.json({
+    message: 'MedLine Backend Running',
+    routes: [
+      '/api/auth/signup',
+      '/api/auth/login',
+      '/api/auth/me',
+      '/api/users',
+      '/api/appointments',
+      '/api/visit-summaries',
+    ],
+  });
 });
 
 app.use('/api', routes);
+
+app.use((req, res) => {
+  res.status(404).json({
+    error: 'Route not found',
+    message: 'Check API documentation.',
+  });
+});
+
 app.use(errorMiddleware);
 
 module.exports = app;

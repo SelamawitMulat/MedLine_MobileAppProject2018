@@ -11,6 +11,7 @@ class User extends Equatable {
   final String name;
   final String email;
   final String passwordHash;
+  final String? token;
 
   const User({
     required this.id,
@@ -19,6 +20,7 @@ class User extends Equatable {
     required this.name,
     required this.email,
     required this.passwordHash,
+    this.token,
   });
 
   static String hashPassword(String password) {
@@ -52,6 +54,7 @@ class User extends Equatable {
       name: json['name']?.toString().trim() ?? '',
       email: email,
       passwordHash: passwordHash,
+      token: json['token']?.toString().trim(),
     );
   }
 
@@ -63,6 +66,7 @@ class User extends Equatable {
       'name': name,
       'email': email,
       'passwordHash': passwordHash,
+      'token': token,
     };
   }
 
@@ -74,5 +78,6 @@ class User extends Equatable {
         name,
         email,
         passwordHash,
+        token,
       ];
 }
