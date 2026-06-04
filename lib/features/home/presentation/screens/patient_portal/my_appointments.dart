@@ -158,98 +158,121 @@ class MyAppointmentsScreen extends ConsumerWidget {
           right: 20,
           top: 20,
         ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            const Text(
-              'Reschedule Appointment',
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 20),
-            TableCalendar(
-              firstDay: DateTime.now(),
-              lastDay: DateTime.now().add(const Duration(days: 365)),
-              focusedDay: focusedDay,
-              selectedDayPredicate: (day) => isSameDay(day, selectedDay),
-              onDaySelected: (day, focus) {
-                selectedDay = day;
-                focusedDay = focus;
-              },
-              headerStyle: const HeaderStyle(
-                formatButtonVisible: false,
-                titleCentered: true,
+        child: StatefulBuilder(
+          builder: (context, setState) => Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              const Text(
+                'Reschedule Appointment',
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               ),
-            ),
-            const SizedBox(height: 20),
-            Wrap(
-              spacing: 10,
-              runSpacing: 10,
-              children: timeSlots.map((timeSlot) {
-                final isSelected = timeSlot == selectedTime;
-                return ChoiceChip(
-                  label: Text(timeSlot),
-                  selected: isSelected,
-                  onSelected: (_) {
-                    selectedTime = timeSlot;
-                  },
-                );
-              }).toList(),
-            ),
-            const SizedBox(height: 25),
-            ElevatedButton(
-              onPressed: () async {
-                if (selectedDay.isBefore(DateTime.now()) ||
-                    (selectedDay.isAtSameMomentAs(DateTime.now()) &&
-                        selectedTime == appointment.timeSlot &&
-                        selectedDay.isBefore(DateTime.now()))) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content:
-                          Text('Cannot reschedule into the past or same slot.'),
-                      backgroundColor: Colors.red,
-                    ),
+              const SizedBox(height: 20),
+              TableCalendar(
+                firstDay: DateTime.now(),
+                lastDay: DateTime.now().add(const Duration(days: 365)),
+                focusedDay: focusedDay,
+                selectedDayPredicate: (day) => isSameDay(day, selectedDay),
+                onDaySelected: (day, focus) {
+                  setState(() {
+                    selectedDay = day;
+                    focusedDay = focus;
+                  });
+                },
+                headerStyle: const HeaderStyle(
+                  formatButtonVisible: false,
+                  titleCentered: true,
+                ),
+              ),
+              const SizedBox(height: 20),
+              Wrap(
+                spacing: 10,
+                runSpacing: 10,
+                children: timeSlots.map((timeSlot) {
+                  final isSelected = timeSlot == selectedTime;
+                  return ChoiceChip(
+                    label: Text(timeSlot),
+                    selected: isSelected,
+                    onSelected: (_) {
+                      setState(() {
+                        selectedTime = timeSlot;
+                      });
+                    },
                   );
-                  return;
-                }
+                }).toList(),
+              ),
+              const SizedBox(height: 25),
+              ElevatedButton(
+                onPressed: () async {
+                  final selectedDateTime = DateTime(
+                    selectedDay.year,
+                    selectedDay.month,
+                    selectedDay.day,
+                    int.parse(selectedTime.split(':')[0]),
+                    int.parse(selectedTime.split(':')[1]),
+                  );
 
-                try {
-                  await ref
-                      .read(appointmentProvider.notifier)
-                      .rescheduleAppointment(
-                        appointment.id,
-                        selectedDay,
-                        selectedTime,
-                      );
-                  if (!context.mounted) {
+                  if (selectedDateTime.isBefore(DateTime.now())) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Cannot reschedule into the past.'),
+                        backgroundColor: Colors.red,
+                      ),
+                    );
                     return;
                   }
-                  Navigator.pop(context);
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Appointment rescheduled.'),
-                      backgroundColor: Colors.green,
-                    ),
-                  );
-                } catch (e) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(e.toString().replaceAll('Exception: ', '')),
-                      backgroundColor: Colors.red,
-                    ),
-                  );
-                }
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF2563EB),
-                padding: const EdgeInsets.symmetric(vertical: 16),
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12)),
+
+                  if (isSameDay(selectedDay, appointment.date) &&
+                      selectedTime == appointment.timeSlot) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content:
+                            Text('Please choose a different date or time.'),
+                        backgroundColor: Colors.red,
+                      ),
+                    );
+                    return;
+                  }
+
+                  try {
+                    await ref
+                        .read(appointmentProvider.notifier)
+                        .rescheduleAppointment(
+                          appointment.id,
+                          selectedDay,
+                          selectedTime,
+                        );
+                    if (!context.mounted) {
+                      return;
+                    }
+                    Navigator.pop(context);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Appointment rescheduled.'),
+                        backgroundColor: Colors.green,
+                      ),
+                    );
+                  } catch (e) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content:
+                            Text(e.toString().replaceAll('Exception: ', '')),
+                        backgroundColor: Colors.red,
+                      ),
+                    );
+                  }
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF2563EB),
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12)),
+                ),
+                child: const Text('Confirm Reschedule'),
               ),
-              child: const Text('Confirm Reschedule'),
-            ),
-            const SizedBox(height: 20),
-          ],
+              const SizedBox(height: 20),
+            ],
+          ),
         ),
       ),
     );
