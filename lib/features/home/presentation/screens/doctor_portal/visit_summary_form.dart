@@ -147,6 +147,8 @@ class _VisitSummaryFormState extends ConsumerState<VisitSummaryForm> {
                   onPressed: () async {
                     if (!_formKey.currentState!.validate()) return;
 
+                    final messenger = ScaffoldMessenger.of(context);
+                    final router = GoRouter.of(context);
                     final isEditing = widget.summary != null;
                     final appointment = widget.appointment;
                     Appointment? resolvedAppointment = appointment;
@@ -201,25 +203,33 @@ class _VisitSummaryFormState extends ConsumerState<VisitSummaryForm> {
                       prescription: _prescriptionController.text.trim(),
                     );
 
-                    await ref
-                        .read(visitSummaryProvider.notifier)
-                        .addVisitSummary(summary);
+                    if (isEditing) {
+                      await ref
+                          .read(visitSummaryProvider.notifier)
+                          .updateVisitSummary(summary);
+                    } else {
+                      await ref
+                          .read(visitSummaryProvider.notifier)
+                          .addVisitSummary(summary);
+                    }
 
                     if (resolvedAppointment != null) {
                       await ref
                           .read(appointmentProvider.notifier)
                           .updateAppointmentStatus(
-                              resolvedAppointment.id, 'completed');
+                            resolvedAppointment.id,
+                            'completed',
+                          );
                     }
 
                     if (!mounted) return;
 
-                    ScaffoldMessenger.of(context).showSnackBar(
+                    messenger.showSnackBar(
                       const SnackBar(
                           content: Text("Visit Summary Saved Successfully!"),
                           backgroundColor: Colors.green),
                     );
-                    context.go('/doctor-visit-summary');
+                    router.pop(true);
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF2563EB),

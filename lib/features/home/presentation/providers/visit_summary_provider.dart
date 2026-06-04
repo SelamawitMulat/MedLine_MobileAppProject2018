@@ -25,6 +25,15 @@ class VisitSummaryNotifier extends StateNotifier<List<VisitSummary>> {
     ];
   }
 
+  Future<void> updateVisitSummary(VisitSummary summary) async {
+    await _repository.updateVisitSummary(summary);
+    state = [
+      for (final existing in state)
+        if (existing.appointmentId != summary.appointmentId) existing,
+      summary,
+    ];
+  }
+
   Future<void> deleteVisitSummary(String appointmentId) async {
     await _repository.deleteVisitSummary(appointmentId);
     state = state
