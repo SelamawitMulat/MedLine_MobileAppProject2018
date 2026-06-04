@@ -27,6 +27,8 @@ class Appointment extends Equatable {
 
   static const String pending = 'pending';
   static const String checkedIn = 'checked_in';
+  static const String completed = 'completed';
+  static const String missed = 'missed';
   static const String cancelled = 'cancelled';
   static const String canceled = 'canceled';
   static const String skipped = 'skipped';
@@ -70,12 +72,38 @@ class Appointment extends Equatable {
         .join(' ');
   }
 
+  DateTime? get appointmentDateTime {
+    try {
+      final parts = timeSlot.split(':').map(int.parse).toList();
+      return DateTime(date.year, date.month, date.day, parts[0], parts[1])
+          .toLocal();
+    } catch (_) {
+      return null;
+    }
+  }
+
+  bool get isOverdue {
+    final appointmentDateTime = this.appointmentDateTime;
+    if (appointmentDateTime == null) return false;
+    return DateTime.now().toLocal().isAfter(appointmentDateTime);
+  }
+
+  bool get isMissed {
+    final low = status.toLowerCase();
+    if (low == cancelled || low == skipped || low == completed) {
+      return false;
+    }
+    return isOverdue;
+  }
+
   String get displayStatus {
     final low = status.toLowerCase();
-    if (low == pending) return 'Pending';
-    if (low == checkedIn) return 'Checked In';
+    if (low == completed) return 'Completed';
     if (low == cancelled) return 'Cancelled';
     if (low == skipped) return 'Skipped';
+    if (isMissed) return 'Missed';
+    if (low == checkedIn) return 'Checked In';
+    if (low == pending) return 'Pending';
     return _capitalizeStatus(status);
   }
 
@@ -94,11 +122,13 @@ class Appointment extends Equatable {
       ];
 
   factory Appointment.fromJson(Map<String, dynamic> json) {
-    final dateValue =
-        json['date'] ?? json['dateTime'] ?? json['appointment_date'];
+    final dateValue = json['date'] ??
+        json['dateTime'] ??
+        json['appointment_date'] ??
+        json['appointmentDate'];
     final parsedDate = dateValue != null
-        ? DateTime.parse(dateValue.toString())
-        : DateTime.now();
+        ? DateTime.parse(dateValue.toString()).toLocal()
+        : DateTime.now().toLocal();
 
     final rawIsCheckedIn =
         json['isCheckedIn'] ?? json['checked_in'] ?? json['is_checked_in'];

@@ -41,11 +41,13 @@ class AppointmentModel extends Appointment {
   }
 
   factory AppointmentModel.fromJson(Map<String, dynamic> json) {
-    final dateValue =
-        json['date'] ?? json['dateTime'] ?? json['appointment_date'];
+    final dateValue = json['date'] ??
+        json['dateTime'] ??
+        json['appointment_date'] ??
+        json['appointmentDate'];
     final parsedDate = dateValue != null
-        ? DateTime.parse(dateValue.toString())
-        : DateTime.now();
+        ? DateTime.parse(dateValue.toString()).toLocal()
+        : DateTime.now().toLocal();
 
     final rawIsCheckedIn =
         json['isCheckedIn'] ?? json['checked_in'] ?? json['is_checked_in'];

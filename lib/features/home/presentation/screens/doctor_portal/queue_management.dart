@@ -137,9 +137,12 @@ class QueueManagementScreen extends ConsumerWidget {
                     .watch(visitSummaryProvider)
                     .any((summary) => summary.appointmentId == app.id);
                 final isSkipped = app.status.toLowerCase() == 'skipped';
+                final isCheckedIn =
+                    app.status.toLowerCase() == 'checked_in' || app.isCheckedIn;
+                final isMissed = app.isMissed;
 
                 return Opacity(
-                  opacity: isSkipped ? 0.6 : 1.0,
+                  opacity: isSkipped || isMissed ? 0.6 : 1.0,
                   child: Container(
                     padding: const EdgeInsets.all(15),
                     decoration: BoxDecoration(
@@ -197,7 +200,7 @@ class QueueManagementScreen extends ConsumerWidget {
                           children: [
                             Expanded(
                               child: OutlinedButton.icon(
-                                onPressed: isSkipped
+                                onPressed: (isSkipped || isCheckedIn)
                                     ? null
                                     : () => _showSkipDialog(
                                           context,
