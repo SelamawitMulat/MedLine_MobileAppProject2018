@@ -320,8 +320,10 @@ class MyAppointmentsScreen extends ConsumerWidget {
       BuildContext context, WidgetRef ref, Appointment app, int queueNumber) {
     final isSkipped = app.status.toLowerCase() == 'skipped';
 
+    final isCompleted = app.status.toLowerCase() == 'completed';
+
     return Opacity(
-      opacity: isSkipped ? 0.6 : 1.0,
+      opacity: (isSkipped || isCompleted) ? 0.6 : 1.0,
       child: Container(
         margin: const EdgeInsets.only(bottom: 15),
         padding: const EdgeInsets.all(20),
@@ -413,7 +415,7 @@ class MyAppointmentsScreen extends ConsumerWidget {
               children: [
                 Expanded(
                   child: OutlinedButton(
-                    onPressed: (app.isCheckedIn || isSkipped)
+                    onPressed: (app.isCheckedIn || isSkipped || isCompleted)
                         ? null
                         : () => _showRescheduleModal(context, ref, app),
                     style: OutlinedButton.styleFrom(
@@ -428,7 +430,7 @@ class MyAppointmentsScreen extends ConsumerWidget {
                 const SizedBox(width: 15),
                 Expanded(
                   child: OutlinedButton.icon(
-                    onPressed: (app.isCheckedIn || isSkipped)
+                    onPressed: (app.isCheckedIn || isSkipped || isCompleted)
                         ? null
                         : () => _showCancelDialog(context, ref, app.id),
                     icon: const Icon(Icons.cancel_outlined,

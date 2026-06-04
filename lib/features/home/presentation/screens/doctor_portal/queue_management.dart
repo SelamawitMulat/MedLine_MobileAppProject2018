@@ -137,6 +137,8 @@ class QueueManagementScreen extends ConsumerWidget {
                     .watch(visitSummaryProvider)
                     .any((summary) => summary.appointmentId == app.id);
                 final isSkipped = app.status.toLowerCase() == 'skipped';
+                final isCompleted =
+                    app.status.toLowerCase() == 'completed' || hasSummary;
 
                 return Opacity(
                   opacity: isSkipped ? 0.6 : 1.0,
@@ -197,7 +199,7 @@ class QueueManagementScreen extends ConsumerWidget {
                           children: [
                             Expanded(
                               child: OutlinedButton.icon(
-                                onPressed: isSkipped
+                                onPressed: (isSkipped || isCompleted)
                                     ? null
                                     : () => _showSkipDialog(
                                           context,
@@ -217,7 +219,7 @@ class QueueManagementScreen extends ConsumerWidget {
                             const SizedBox(width: 10),
                             Expanded(
                               child: ElevatedButton.icon(
-                                onPressed: isSkipped
+                                onPressed: (isSkipped || isCompleted)
                                     ? null
                                     : () async {
                                         final result = await context.push<bool>(
@@ -226,21 +228,18 @@ class QueueManagementScreen extends ConsumerWidget {
                                         );
                                         if (result == true) {
                                           // Placeholder: user navigated to create visit summary.
-                                          // Status updates are deferred to future Visit Summary feature.
                                         }
                                       },
                                 icon: const Icon(Icons.check_circle_outline,
                                     size: 18, color: Colors.black),
                                 label: Text(
-                                  hasSummary ? 'Completed' : 'Complete',
+                                  isCompleted ? 'Completed' : 'Complete',
                                   style: const TextStyle(color: Colors.black),
                                 ),
                                 style: ElevatedButton.styleFrom(
-                                  backgroundColor: isSkipped
+                                  backgroundColor: (isSkipped || isCompleted)
                                       ? Colors.grey.shade300
-                                      : hasSummary
-                                          ? Colors.grey.shade300
-                                          : const Color(0xFF81C784),
+                                      : const Color(0xFF81C784),
                                   elevation: 0,
                                   shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(8)),

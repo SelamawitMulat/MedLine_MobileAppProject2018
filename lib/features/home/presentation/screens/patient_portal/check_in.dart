@@ -16,11 +16,12 @@ class CheckInScreen extends ConsumerWidget {
     final currentUser = ref.watch(authProvider).value;
     final currentPatientId = currentUser?.id ?? '';
     final currentPatientName = currentUser?.name.toLowerCase() ?? '';
-    // Show only pending and already checked-in appointments (exclude cancelled and skipped)
+    // Show only pending and already checked-in appointments (exclude cancelled, skipped, and completed)
     final upcomingAppointments = appointments
         .where((app) =>
             app.status.toLowerCase() != 'cancelled' &&
             app.status.toLowerCase() != 'skipped' &&
+            app.status.toLowerCase() != 'completed' &&
             (app.patientId == currentPatientId ||
                 app.patientName.toLowerCase() == currentPatientName))
         .toList();

@@ -30,6 +30,9 @@ class Appointment extends Equatable {
   static const String cancelled = 'cancelled';
   static const String canceled = 'canceled';
   static const String skipped = 'skipped';
+  static const String completed = 'completed';
+
+  bool get isCompleted => status.toLowerCase() == completed;
 
   static bool parseCheckedInFlag(dynamic rawIsCheckedIn) {
     return rawIsCheckedIn == true ||
