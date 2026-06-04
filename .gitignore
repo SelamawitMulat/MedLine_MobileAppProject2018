@@ -44,3 +44,13 @@ app.*.map.json
 /android/app/profile
 /android/app/release
 backend/node_modules/
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+
+# Generated/temporary files
+analyze_output.txt
+backend/test_*.js
+backend/tools/
