@@ -19,26 +19,22 @@ class VisitSummaryForm extends ConsumerStatefulWidget {
 
 class _VisitSummaryFormState extends ConsumerState<VisitSummaryForm> {
   final _formKey = GlobalKey<FormState>();
-  final _patientNameController = TextEditingController();
-  final _timeSlotController = TextEditingController();
   final _diagnosisController = TextEditingController();
   final _prescriptionController = TextEditingController();
+  Appointment? _selectedAppointment;
 
   @override
   void initState() {
     super.initState();
-    _patientNameController.text =
-        widget.summary?.patientName ?? widget.appointment?.patientName ?? '';
-    _timeSlotController.text =
-        widget.summary?.timeSlot ?? widget.appointment?.timeSlot ?? '';
+    if (widget.appointment != null) {
+      _selectedAppointment = widget.appointment;
+    }
     _diagnosisController.text = widget.summary?.diagnosis ?? '';
     _prescriptionController.text = widget.summary?.prescription ?? '';
   }
 
   @override
   void dispose() {
-    _patientNameController.dispose();
-    _timeSlotController.dispose();
     _diagnosisController.dispose();
     _prescriptionController.dispose();
     super.dispose();
@@ -47,12 +43,20 @@ class _VisitSummaryFormState extends ConsumerState<VisitSummaryForm> {
   @override
   Widget build(BuildContext context) {
     final currentDoctorName = ref.watch(doctorNameProvider);
+    final appointments = ref.watch(appointmentProvider);
 
     String normalize(String n) => n
         .replaceFirst(RegExp(r'^dr\.?\s*', caseSensitive: false), '')
         .trim()
         .toLowerCase();
     final normDoctor = normalize(currentDoctorName);
+
+    // Filter checked-in appointments for this doctor
+    final checkedInAppointments = appointments
+        .where((app) =>
+            app.status.toLowerCase() == 'checked_in' &&
+            normalize(app.doctorName) == normDoctor)
+        .toList();
 
     final pageTitle =
         widget.summary != null ? 'Edit Visit Summary' : 'Create Visit Summary';
@@ -77,11 +81,26 @@ class _VisitSummaryFormState extends ConsumerState<VisitSummaryForm> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              TextFormField(
-                controller: _patientNameController,
+              const Text("Select Patient",
+                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+              const SizedBox(height: 10),
+              DropdownButtonFormField<Appointment>(
+                initialValue: _selectedAppointment,
+                items: checkedInAppointments.map((app) {
+                  return DropdownMenuItem<Appointment>(
+                    value: app,
+                    child: Text(
+                      '${app.patientName} - ${app.date.toLocal().toString().split(' ').first} ${app.timeSlot}',
+                    ),
+                  );
+                }).toList(),
+                onChanged: (appointment) {
+                  setState(() {
+                    _selectedAppointment = appointment;
+                  });
+                },
                 decoration: InputDecoration(
-                  hintText: "Enter patient name...",
-                  labelText: "Patient Name",
+                  hintText: "Select a checked-in patient...",
                   fillColor: const Color(0xFFF8F9FB),
                   filled: true,
                   border: OutlineInputBorder(
@@ -89,24 +108,11 @@ class _VisitSummaryFormState extends ConsumerState<VisitSummaryForm> {
                       borderSide: BorderSide.none),
                 ),
                 validator: (value) {
-                  if (value == null || value.trim().isEmpty) {
-                    return 'Please enter a patient name';
+                  if (value == null) {
+                    return 'Please select a patient';
                   }
                   return null;
                 },
-              ),
-              const SizedBox(height: 20),
-              TextFormField(
-                controller: _timeSlotController,
-                decoration: InputDecoration(
-                  hintText: "Enter visit time slot...",
-                  labelText: "Time Slot",
-                  fillColor: const Color(0xFFF8F9FB),
-                  filled: true,
-                  border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide.none),
-                ),
               ),
               const SizedBox(height: 25),
               const Text("Diagnosis Details",
@@ -136,8 +142,7 @@ class _VisitSummaryFormState extends ConsumerState<VisitSummaryForm> {
                   filled: true,
                   border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
-                      borderSide:
-                          BorderSide.none), // Fixed deprecated values line 40
+                      borderSide: BorderSide.none),
                 ),
               ),
               const SizedBox(height: 40),
@@ -150,55 +155,26 @@ class _VisitSummaryFormState extends ConsumerState<VisitSummaryForm> {
                     final messenger = ScaffoldMessenger.of(context);
                     final router = GoRouter.of(context);
                     final isEditing = widget.summary != null;
-                    final appointment = widget.appointment;
-                    Appointment? resolvedAppointment = appointment;
+                    final appointment = _selectedAppointment;
 
-                    if (!isEditing && resolvedAppointment == null) {
-                      final patientName = _patientNameController.text.trim();
-                      final appointments = ref.read(appointmentProvider);
-                      try {
-                        resolvedAppointment = appointments.firstWhere((app) =>
-                            app.patientName.toLowerCase() ==
-                                patientName.toLowerCase() &&
-                            normalize(app.doctorName) == normDoctor);
-                      } catch (_) {
-                        resolvedAppointment = null;
-                      }
-
-                      if (resolvedAppointment == null) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text(
-                              "Patient must already have an appointment.",
-                            ),
-                            backgroundColor: Colors.red,
-                          ),
-                        );
-                        return;
-                      }
+                    if (appointment == null) {
+                      messenger.showSnackBar(
+                        const SnackBar(
+                          content: Text("Please select a patient appointment."),
+                          backgroundColor: Colors.red,
+                        ),
+                      );
+                      return;
                     }
 
-                    final timeSlot =
-                        resolvedAppointment?.timeSlot.isNotEmpty == true
-                            ? resolvedAppointment!.timeSlot
-                            : _timeSlotController.text.trim().isNotEmpty
-                                ? _timeSlotController.text.trim()
-                                : 'Now';
-
                     final summary = VisitSummary(
-                      appointmentId: widget.summary?.appointmentId ??
-                          resolvedAppointment?.id ??
-                          DateTime.now().millisecondsSinceEpoch.toString(),
-                      patientId: resolvedAppointment?.patientId ??
-                          widget.summary?.patientId ??
-                          '',
-                      doctorId: resolvedAppointment?.doctorId ??
-                          widget.summary?.doctorId ??
-                          '',
-                      patientName: _patientNameController.text.trim(),
+                      appointmentId: appointment.id,
+                      patientId: appointment.patientId ?? '',
+                      doctorId: appointment.doctorId ?? '',
+                      patientName: appointment.patientName,
                       doctorName: currentDoctorName,
-                      date: resolvedAppointment?.date ?? DateTime.now(),
-                      timeSlot: timeSlot,
+                      date: appointment.date,
+                      timeSlot: appointment.timeSlot,
                       diagnosis: _diagnosisController.text.trim(),
                       prescription: _prescriptionController.text.trim(),
                     );
@@ -213,14 +189,12 @@ class _VisitSummaryFormState extends ConsumerState<VisitSummaryForm> {
                           .addVisitSummary(summary);
                     }
 
-                    if (resolvedAppointment != null) {
-                      await ref
-                          .read(appointmentProvider.notifier)
-                          .updateAppointmentStatus(
-                            resolvedAppointment.id,
-                            'completed',
-                          );
-                    }
+                    await ref
+                        .read(appointmentProvider.notifier)
+                        .updateAppointmentStatus(
+                          appointment.id,
+                          'completed',
+                        );
 
                     if (!mounted) return;
 
