@@ -12,7 +12,7 @@ class CancelAppointmentUseCase {
       throw Exception('Appointment not found');
     }
 
-    final cancelled = current.copyWith(status: 'Cancelled');
+    final cancelled = current.copyWith(status: 'cancelled');
     return await repository.updateAppointment(cancelled);
   }
 }

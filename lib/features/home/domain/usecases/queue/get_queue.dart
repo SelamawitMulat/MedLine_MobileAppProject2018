@@ -6,11 +6,20 @@ class GetQueueUseCase {
     final queueAppointments = appointments
         .where((app) =>
             _normalizeDoctorName(app.doctorName) == normalizedDoctor &&
-            app.status != 'Cancelled' &&
-            app.status != 'Completed')
+            app.status != 'cancelled')
         .toList();
 
-    queueAppointments.sort((a, b) => a.date.compareTo(b.date));
+    DateTime combine(Appointment ap) {
+      try {
+        final parts = ap.timeSlot.split(':').map(int.parse).toList();
+        return DateTime(
+            ap.date.year, ap.date.month, ap.date.day, parts[0], parts[1]);
+      } catch (_) {
+        return ap.date;
+      }
+    }
+
+    queueAppointments.sort((a, b) => combine(a).compareTo(combine(b)));
     return queueAppointments;
   }
 

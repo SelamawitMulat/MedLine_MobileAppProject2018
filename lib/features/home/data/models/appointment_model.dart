@@ -7,7 +7,7 @@ class AppointmentModel extends Appointment {
     required DateTime date,
     required String timeSlot,
     String doctorName = 'Dr. Selam Mulat',
-    String status = 'Upcoming',
+    String status = 'pending',
     String? patientId,
     String? doctorId,
     String reason = '',
@@ -49,13 +49,13 @@ class AppointmentModel extends Appointment {
 
     final rawIsCheckedIn =
         json['isCheckedIn'] ?? json['checked_in'] ?? json['is_checked_in'];
+    final rawStatus = json['status'] ?? json['statusText'];
+    final mappedStatus = Appointment.normalizeStatus(
+      rawStatus,
+      isCheckedIn: Appointment.parseCheckedInFlag(rawIsCheckedIn),
+    );
     final isCheckedIn =
-        rawIsCheckedIn == true || rawIsCheckedIn == 1 || rawIsCheckedIn == '1';
-
-    final status = json['status'] ?? 'Upcoming';
-    final mappedStatus = status.toString().toLowerCase() == 'cancelled'
-        ? 'Cancelled'
-        : 'Upcoming';
+        Appointment.effectiveCheckedIn(rawIsCheckedIn, mappedStatus);
 
     return AppointmentModel(
       id: json['id']?.toString() ?? '',
@@ -74,6 +74,7 @@ class AppointmentModel extends Appointment {
     );
   }
 
+  @override
   Map<String, dynamic> toLocalJson() {
     return {
       'id': id,
@@ -89,6 +90,7 @@ class AppointmentModel extends Appointment {
     };
   }
 
+  @override
   Map<String, dynamic> toApiJson() {
     return {
       if (patientId != null) 'patientId': patientId,

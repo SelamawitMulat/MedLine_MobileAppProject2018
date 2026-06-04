@@ -7,8 +7,13 @@ exports.appointmentStatus = (req, res) => {
 exports.getAllAppointments = async (req, res, next) => {
   try {
     const appointments = await appointmentService.getAllAppointments();
+    console.log('Appointments retrieved:', appointments?.length || 0, 'items');
+    if (appointments && appointments.length > 0) {
+      console.log('First appointment:', JSON.stringify(appointments[0]));
+    }
     res.json({ appointments });
   } catch (err) {
+    console.error('Error in getAllAppointments:', err.message, err.stack);
     next(err);
   }
 };

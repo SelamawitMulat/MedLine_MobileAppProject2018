@@ -44,7 +44,6 @@ exports.updateAppointment = async (id, updateData) => {
     throw error;
   }
 
-  const allowedFields = ['appointmentDate', 'appointmentTime'];
   const updateFields = {};
 
   if (updateData.appointmentDate) {
@@ -54,8 +53,18 @@ exports.updateAppointment = async (id, updateData) => {
     updateFields.time = updateData.appointmentTime;
   }
 
+  // allow status and checked_in via the same PUT endpoint for check-in and other status updates
+  if (typeof updateData.status !== 'undefined') {
+    updateFields.status = updateData.status;
+  }
+
+  if (typeof updateData.checked_in !== 'undefined') {
+    // accept either boolean or numeric truthy value
+    updateFields.checked_in = updateData.checked_in ? 1 : 0;
+  }
+
   if (Object.keys(updateFields).length === 0) {
-    const error = new Error('No valid fields to update. Allowed fields: appointmentDate, appointmentTime');
+    const error = new Error('No valid fields to update. Allowed fields: appointmentDate, appointmentTime, status, checked_in');
     error.status = 400;
     throw error;
   }

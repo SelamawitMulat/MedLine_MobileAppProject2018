@@ -24,7 +24,7 @@ class RescheduleAppointmentUseCase {
     final updated = appointment.copyWith(
       date: newDate,
       timeSlot: newTimeSlot,
-      status: 'Upcoming',
+      status: 'pending',
     );
 
     return await repository.updateAppointment(updated);

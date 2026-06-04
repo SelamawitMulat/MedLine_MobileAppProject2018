@@ -29,16 +29,36 @@ class DoctorPortalScreen extends ConsumerWidget {
     final doctorAppointments = appointments
         .where((app) =>
             normalize(app.doctorName) == normDoctor &&
-            app.status != 'Cancelled')
+            app.status != 'cancelled')
         .toList();
-    final queueAppointments = doctorAppointments
-        .where((app) => app.status == 'Upcoming' || app.status == 'Checked In')
+
+    // Queue Overview: Show 3 nearest appointments from ALL patients
+    final allQueueAppointments = appointments
+        .where((app) => app.status != 'cancelled')
         .toList()
-      ..sort((a, b) => a.date.compareTo(b.date));
+      ..sort((a, b) {
+        // sort by combined date+time
+        DateTime combine(Appointment ap) {
+          try {
+            final parts = ap.timeSlot.split(':').map(int.parse).toList();
+            return DateTime(
+                ap.date.year, ap.date.month, ap.date.day, parts[0], parts[1]);
+          } catch (_) {
+            return ap.date;
+          }
+        }
+
+        return combine(a).compareTo(combine(b));
+      });
+    final queueOverview = allQueueAppointments.take(3).toList();
+
+    // Queue stats: For this doctor's appointments
+    final queueAppointments = doctorAppointments
+        .where((app) => app.status == 'pending' || app.status == 'checked_in')
+        .toList();
 
     final totalAppointments = doctorAppointments.length;
     final inQueue = queueAppointments.length;
-    final queueOverview = queueAppointments.take(2).toList();
 
     void showLogoutDialog() {
       showDialog(
@@ -202,9 +222,8 @@ class DoctorPortalScreen extends ConsumerWidget {
                       )
                     else
                       for (var i = 0; i < queueOverview.length; i++) ...[
-                        _buildPatientTile(
-                          queueOverview[i].patientName,
-                          queueOverview[i].timeSlot,
+                        _buildQueueAppointmentCard(
+                          queueOverview[i],
                           '#${i + 1}',
                         ),
                         if (i < queueOverview.length - 1)
@@ -276,36 +295,94 @@ class DoctorPortalScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildPatientTile(String name, String time, String queueNum) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 12),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey.shade200),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(name, style: const TextStyle(fontWeight: FontWeight.w600)),
-              Text(
-                time,
-                style: const TextStyle(color: AppColors.textGrey, fontSize: 12),
-              ),
-            ],
-          ),
-          Text(
-            queueNum,
-            style: const TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-              color: AppColors.primaryBlue,
+  Widget _buildQueueAppointmentCard(Appointment appointment, String queueNum) {
+    final isSkipped = appointment.status.toLowerCase() == 'skipped';
+
+    return Opacity(
+      opacity: isSkipped ? 0.6 : 1.0,
+      child: Container(
+        padding: const EdgeInsets.all(15),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: Colors.grey.shade200),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        appointment.patientName,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 14,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        '${appointment.date.toLocal().toString().split(' ').first} · ${appointment.timeSlot}',
+                        style: const TextStyle(
+                          color: AppColors.textGrey,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 5,
+                      ),
+                      decoration: BoxDecoration(
+                        color: isSkipped
+                            ? Colors.grey.withAlpha(30)
+                            : Colors.green.withAlpha(30),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Text(
+                        appointment.displayStatus,
+                        style: TextStyle(
+                          color: isSkipped ? Colors.grey : Colors.green,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 11,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Container(
+                      width: 32,
+                      height: 32,
+                      decoration: BoxDecoration(
+                        color: AppColors.primaryBlue,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Center(
+                        child: Text(
+                          queueNum,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 14,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

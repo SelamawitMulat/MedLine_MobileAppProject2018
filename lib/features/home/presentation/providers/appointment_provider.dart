@@ -76,14 +76,35 @@ class AppointmentNotifier extends StateNotifier<List<Appointment>> {
     ];
   }
 
-  Future<void> updateAppointmentStatus(String id, String newStatus) async {
-    final updated = await _ref
-        .read(updateAppointmentStatusUseCaseProvider)
-        .call(id, newStatus);
+  void updateAppointmentInList(Appointment updatedAppointment) {
     state = [
       for (final app in state)
-        if (app.id == id) updated else app,
+        if (app.id == updatedAppointment.id) updatedAppointment else app,
     ];
+  }
+
+  Future<void> updateAppointmentStatus(String id, String newStatus) async {
+    final current = state.firstWhere(
+      (app) => app.id == id,
+      orElse: () => throw Exception('Appointment not found for status update'),
+    );
+
+    final optimistic = current.copyWith(
+      status: newStatus,
+      isCheckedIn: newStatus == Appointment.checkedIn,
+    );
+
+    updateAppointmentInList(optimistic);
+
+    try {
+      final updated = await _ref
+          .read(updateAppointmentStatusUseCaseProvider)
+          .call(id, newStatus);
+      updateAppointmentInList(updated);
+    } catch (e) {
+      updateAppointmentInList(current);
+      rethrow;
+    }
   }
 
   Future<void> cancelAppointment(String id) async {

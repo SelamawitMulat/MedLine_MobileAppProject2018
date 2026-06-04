@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:med_line/core/providers.dart';
 import 'package:med_line/features/auth/data/providers.dart';
 import 'package:med_line/features/auth/domain/entities/user.dart';
 import 'package:med_line/features/auth/domain/usecases/delete_account.dart';

@@ -7,11 +7,13 @@ class SkipPatientUseCase {
   SkipPatientUseCase(this.repository);
 
   Future<Appointment> call(String appointmentId) async {
-    final appointment = await repository.getCachedAppointmentById(appointmentId);
+    final appointment =
+        await repository.getCachedAppointmentById(appointmentId);
     if (appointment == null) {
       throw Exception('Appointment not found');
     }
-    final updated = appointment.copyWith(status: 'Skipped');
+    // Set status to 'skipped' to keep appointment visible with lower priority
+    final updated = appointment.copyWith(status: 'skipped');
     return await repository.updateAppointment(updated);
   }
 }

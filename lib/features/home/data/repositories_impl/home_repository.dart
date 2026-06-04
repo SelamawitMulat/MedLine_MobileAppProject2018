@@ -2,6 +2,7 @@ import 'package:med_line/features/home/domain/repositories/home_repository.dart'
 import 'package:med_line/features/home/domain/entities/appointment.dart';
 import 'package:med_line/features/home/data/datasources/home_remote_datasource.dart';
 import 'package:med_line/features/home/data/datasources/home_local_datasource.dart';
+import 'package:med_line/core/logging/app_logger.dart';
 
 class HomeRepository implements IHomeRepository {
   final HomeRemoteDataSource remote;
@@ -12,15 +13,16 @@ class HomeRepository implements IHomeRepository {
   @override
   Future<List<Appointment>> fetchAllAppointments() async {
     final cached = await local.getCachedAppointments();
-    if (cached.isNotEmpty) {
-      return cached;
-    }
-
     try {
       final remoteData = await remote.fetchAllAppointments();
+      AppLogger.info('Fetched ${remoteData.length} appointments from remote',
+          name: 'HomeRepository');
       await local.cacheAppointments(remoteData);
       return remoteData;
-    } catch (_) {
+    } catch (e, st) {
+      AppLogger.error('Failed to fetch remote appointments: $e',
+          name: 'HomeRepository');
+      AppLogger.error(st.toString(), name: 'HomeRepository');
       return cached;
     }
   }
@@ -39,38 +41,45 @@ class HomeRepository implements IHomeRepository {
   Future<Appointment> createAppointment(Appointment app) async {
     try {
       final createdApp = await remote.createAppointment(app);
+      AppLogger.info('Created appointment ${createdApp.id}',
+          name: 'HomeRepository');
       await local.addAppointment(createdApp);
       return createdApp;
-    } catch (_) {
-      await local.addAppointment(app);
-      return app;
+    } catch (e, st) {
+      AppLogger.error('Failed to create appointment: $e',
+          name: 'HomeRepository');
+      AppLogger.error(st.toString(), name: 'HomeRepository');
+      rethrow;
     }
   }
 
   @override
   Future<Appointment> updateAppointment(Appointment appointment) async {
     try {
-      await remote.updateAppointment(appointment);
-    } catch (_) {
-      // Remote may be unavailable; keep working locally.
+      final updatedRemote = await remote.updateAppointment(appointment);
+      AppLogger.info('Updated appointment ${updatedRemote.id}',
+          name: 'HomeRepository');
+      await local.updateAppointment(updatedRemote);
+      return updatedRemote;
+    } catch (e, st) {
+      AppLogger.error('Failed to update appointment ${appointment.id}: $e',
+          name: 'HomeRepository');
+      AppLogger.error(st.toString(), name: 'HomeRepository');
+      rethrow;
     }
-    await local.updateAppointment(appointment);
-    return appointment;
   }
 
   @override
   Future<void> deleteAppointment(String id) async {
     try {
       await remote.deleteAppointment(id);
-    } catch (_) {
-      // Remote may be unavailable; keep working locally.
-    }
-
-    // Update local cache to mark as cancelled
-    final appointment = await local.getCachedAppointmentById(id);
-    if (appointment != null) {
-      final cancelled = appointment.copyWith(status: 'Cancelled');
-      await local.updateAppointment(cancelled);
+      AppLogger.info('Deleted appointment $id', name: 'HomeRepository');
+      await local.removeAppointment(id);
+    } catch (e, st) {
+      AppLogger.error('Failed to delete appointment $id: $e',
+          name: 'HomeRepository');
+      AppLogger.error(st.toString(), name: 'HomeRepository');
+      rethrow;
     }
   }
 

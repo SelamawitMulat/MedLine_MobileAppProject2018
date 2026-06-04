@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:med_line/features/auth/presentation/providers/auth_provider.dart';
 import 'package:med_line/features/home/domain/entities/appointment.dart';
 import 'package:med_line/features/home/presentation/providers/appointment_provider.dart';
 import 'package:med_line/features/home/presentation/providers/visit_summary_provider.dart';
@@ -59,9 +58,10 @@ class QueueManagementScreen extends ConsumerWidget {
                     width: 100,
                     child: ElevatedButton(
                       onPressed: () {
+                        // Map skip to 'skipped' status to keep appointment visible
                         ref
                             .read(appointmentProvider.notifier)
-                            .updateAppointmentStatus(appointmentId, 'Skipped');
+                            .updateAppointmentStatus(appointmentId, 'skipped');
                         Navigator.pop(context);
                       },
                       style: ElevatedButton.styleFrom(
@@ -86,25 +86,26 @@ class QueueManagementScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final authUser = ref.watch(authProvider).value;
-    final doctorName = authUser?.name.isNotEmpty == true
-        ? authUser!.name
-        : authUser?.username ?? 'Doctor';
     final appointments = ref.watch(appointmentProvider);
 
-    String normalize(String n) => n
-        .replaceFirst(RegExp(r'^dr\.?\s*', caseSensitive: false), '')
-        .trim()
-        .toLowerCase();
-    final normDoctor = normalize(doctorName);
-
+    // Show ALL appointments (not filtered by doctor) excluding cancelled
     final queueAppointments = appointments
-        .where((app) =>
-            normalize(app.doctorName) == normDoctor &&
-            app.status != 'Cancelled' &&
-            app.status != 'Completed')
+        .where((app) => app.status.toLowerCase() != 'cancelled')
         .toList()
-      ..sort((a, b) => a.date.compareTo(b.date));
+      ..sort((a, b) {
+        // Sort by date + time
+        DateTime combine(Appointment ap) {
+          try {
+            final parts = ap.timeSlot.split(':').map(int.parse).toList();
+            return DateTime(
+                ap.date.year, ap.date.month, ap.date.day, parts[0], parts[1]);
+          } catch (_) {
+            return ap.date;
+          }
+        }
+
+        return combine(a).compareTo(combine(b));
+      });
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -119,10 +120,10 @@ class QueueManagementScreen extends ConsumerWidget {
             style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
       ),
       body: queueAppointments.isEmpty
-          ? Center(
+          ? const Center(
               child: Text(
-                'No queue appointments found for $doctorName.',
-                style: const TextStyle(color: Colors.grey, fontSize: 16),
+                'No queue appointments available.',
+                style: TextStyle(color: Colors.grey, fontSize: 16),
                 textAlign: TextAlign.center,
               ),
             )
@@ -135,12 +136,10 @@ class QueueManagementScreen extends ConsumerWidget {
                 final hasSummary = ref
                     .watch(visitSummaryProvider)
                     .any((summary) => summary.appointmentId == app.id);
-                final isSkipped = app.status == 'Skipped';
-                final isCompleted = app.status == 'Completed';
-                final queueLabel = '#${index + 1}';
+                final isSkipped = app.status.toLowerCase() == 'skipped';
 
                 return Opacity(
-                  opacity: isSkipped ? 0.5 : 1,
+                  opacity: isSkipped ? 0.6 : 1.0,
                   child: Container(
                     padding: const EdgeInsets.all(15),
                     decoration: BoxDecoration(
@@ -178,25 +177,15 @@ class QueueManagementScreen extends ConsumerWidget {
                               padding: const EdgeInsets.symmetric(
                                   horizontal: 12, vertical: 6),
                               decoration: BoxDecoration(
-                                color: isCompleted
-                                    ? Colors.blue.withAlpha(30)
-                                    : isSkipped
-                                        ? Colors.red.withAlpha(30)
-                                        : Colors.green.withAlpha(30),
+                                color: isSkipped
+                                    ? Colors.grey.withAlpha(30)
+                                    : Colors.green.withAlpha(30),
                                 borderRadius: BorderRadius.circular(10),
                               ),
                               child: Text(
-                                isCompleted
-                                    ? 'Completed'
-                                    : isSkipped
-                                        ? 'Skipped'
-                                        : app.status,
+                                app.displayStatus,
                                 style: TextStyle(
-                                  color: isCompleted
-                                      ? Colors.blue
-                                      : isSkipped
-                                          ? Colors.red
-                                          : Colors.green,
+                                  color: isSkipped ? Colors.grey : Colors.green,
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
@@ -208,7 +197,7 @@ class QueueManagementScreen extends ConsumerWidget {
                           children: [
                             Expanded(
                               child: OutlinedButton.icon(
-                                onPressed: isSkipped || isCompleted
+                                onPressed: isSkipped
                                     ? null
                                     : () => _showSkipDialog(
                                           context,
@@ -216,9 +205,7 @@ class QueueManagementScreen extends ConsumerWidget {
                                           app.id,
                                         ),
                                 icon: const Icon(Icons.skip_next, size: 18),
-                                label: Text(
-                                  isSkipped ? 'Skipped' : 'Skip',
-                                ),
+                                label: const Text('Skip'),
                                 style: OutlinedButton.styleFrom(
                                   foregroundColor: Colors.black,
                                   shape: RoundedRectangleBorder(
@@ -230,7 +217,7 @@ class QueueManagementScreen extends ConsumerWidget {
                             const SizedBox(width: 10),
                             Expanded(
                               child: ElevatedButton.icon(
-                                onPressed: isSkipped || hasSummary
+                                onPressed: isSkipped
                                     ? null
                                     : () async {
                                         final result = await context.push<bool>(
@@ -238,7 +225,8 @@ class QueueManagementScreen extends ConsumerWidget {
                                           extra: app,
                                         );
                                         if (result == true) {
-                                          // The form already updates the appointment status.
+                                          // Placeholder: user navigated to create visit summary.
+                                          // Status updates are deferred to future Visit Summary feature.
                                         }
                                       },
                                 icon: const Icon(Icons.check_circle_outline,
@@ -248,9 +236,11 @@ class QueueManagementScreen extends ConsumerWidget {
                                   style: const TextStyle(color: Colors.black),
                                 ),
                                 style: ElevatedButton.styleFrom(
-                                  backgroundColor: hasSummary
+                                  backgroundColor: isSkipped
                                       ? Colors.grey.shade300
-                                      : const Color(0xFF81C784),
+                                      : hasSummary
+                                          ? Colors.grey.shade300
+                                          : const Color(0xFF81C784),
                                   elevation: 0,
                                   shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(8)),

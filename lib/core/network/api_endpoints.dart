@@ -11,9 +11,9 @@ class ApiEndpoints {
     return 'http://localhost:4000';
   }
 
-  static String get users => '$baseUrl/users';
-  static String get appointments => '$baseUrl/appointments';
-  static String get visitSummaries => '$baseUrl/visit-summaries';
+  static String get users => '$baseUrl/api/users';
+  static String get appointments => '$baseUrl/api/appointments';
+  static String get visitSummaries => '$baseUrl/api/visit-summaries';
 
   static String get authSignup => '$baseUrl/api/auth/signup';
   static String get authLogin => '$baseUrl/api/auth/login';

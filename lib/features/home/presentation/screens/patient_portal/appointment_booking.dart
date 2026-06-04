@@ -21,8 +21,6 @@ class _BookAppointmentScreenState extends ConsumerState<BookAppointmentScreen> {
   String? _selectedTime;
   final TextEditingController _reasonController = TextEditingController();
 
-  final String _soleDoctor = "Dr. Selam Mulat";
-
   final List<String> _timeSlots = [
     "09:00",
     "09:30",

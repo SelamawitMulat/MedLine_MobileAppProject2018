@@ -6,11 +6,13 @@ class CallNextPatientUseCase {
 
   CallNextPatientUseCase(this.repository);
 
-  Future<Appointment?> call(List<Appointment> appointments, String doctorName) async {
+  Future<Appointment?> call(
+      List<Appointment> appointments, String doctorName) async {
     final upcoming = appointments
         .where((app) =>
-            _normalizeDoctorName(app.doctorName) == _normalizeDoctorName(doctorName) &&
-            app.status == 'Upcoming')
+            _normalizeDoctorName(app.doctorName) ==
+                _normalizeDoctorName(doctorName) &&
+            app.status == 'pending')
         .toList();
 
     if (upcoming.isEmpty) {
@@ -18,9 +20,9 @@ class CallNextPatientUseCase {
     }
 
     upcoming.sort((a, b) => a.date.compareTo(b.date));
-    final next = upcoming.first;
-    final updated = next.copyWith(status: 'In Progress');
-    return await repository.updateAppointment(updated);
+    // Return the next pending appointment; do not change status here to avoid
+    // introducing non-standard statuses. Caller can decide how to proceed.
+    return upcoming.first;
   }
 
   String _normalizeDoctorName(String name) {

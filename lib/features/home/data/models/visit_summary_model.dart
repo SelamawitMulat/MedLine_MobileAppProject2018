@@ -53,6 +53,7 @@ class VisitSummaryModel extends VisitSummary {
     );
   }
 
+  @override
   Map<String, dynamic> toJson() {
     return {
       'appointmentId': appointmentId,

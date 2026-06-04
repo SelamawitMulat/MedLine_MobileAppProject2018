@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:med_line/features/auth/presentation/providers/auth_provider.dart';
+import 'package:med_line/core/logging/app_logger.dart';
 
 // FIXED: Converted relative backsteps to absolute package paths
 import 'package:med_line/features/home/presentation/providers/appointment_provider.dart';
@@ -63,9 +64,17 @@ class MyAppointmentsScreen extends ConsumerWidget {
                     child: ElevatedButton(
                       onPressed: () async {
                         try {
+                          AppLogger.info(
+                            'Attempting to cancel appointment $appointmentId',
+                            name: 'MyAppointmentsScreen',
+                          );
                           await ref
                               .read(appointmentProvider.notifier)
                               .cancelAppointment(appointmentId);
+                          AppLogger.info(
+                            'Cancelled appointment $appointmentId',
+                            name: 'MyAppointmentsScreen',
+                          );
                           if (context.mounted) {
                             Navigator.pop(context);
                             ScaffoldMessenger.of(context).showSnackBar(
@@ -76,7 +85,13 @@ class MyAppointmentsScreen extends ConsumerWidget {
                               ),
                             );
                           }
-                        } catch (e) {
+                        } catch (e, st) {
+                          AppLogger.error(
+                            'Failed to cancel appointment $appointmentId: $e',
+                            name: 'MyAppointmentsScreen',
+                          );
+                          AppLogger.error(st.toString(),
+                              name: 'MyAppointmentsScreen');
                           if (context.mounted) {
                             Navigator.pop(context);
                             ScaffoldMessenger.of(context).showSnackBar(
@@ -255,12 +270,18 @@ class MyAppointmentsScreen extends ConsumerWidget {
                 app.patientName.toLowerCase() == currentPatientName))
         .toList();
 
-    // Sort by upcoming first, by date/time ascending.
-    userAppointments.sort((a, b) {
-      final dateCompare = a.date.compareTo(b.date);
-      if (dateCompare != 0) return dateCompare;
-      return a.timeSlot.compareTo(b.timeSlot);
-    });
+    // Sort by upcoming first, by combined date+time ascending.
+    DateTime combine(Appointment ap) {
+      try {
+        final parts = ap.timeSlot.split(':').map(int.parse).toList();
+        return DateTime(
+            ap.date.year, ap.date.month, ap.date.day, parts[0], parts[1]);
+      } catch (_) {
+        return ap.date;
+      }
+    }
+
+    userAppointments.sort((a, b) => combine(a).compareTo(combine(b)));
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -297,116 +318,135 @@ class MyAppointmentsScreen extends ConsumerWidget {
 
   Widget _buildAppointmentItem(
       BuildContext context, WidgetRef ref, Appointment app, int queueNumber) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 15),
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-          color: const Color(0xFFF8F9FB),
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: Colors.grey.shade100)),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                decoration: BoxDecoration(
-                  color: Colors.blue.withAlpha(25),
-                  borderRadius: BorderRadius.circular(10),
+    final isSkipped = app.status.toLowerCase() == 'skipped';
+
+    return Opacity(
+      opacity: isSkipped ? 0.6 : 1.0,
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 15),
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+            color: const Color(0xFFF8F9FB),
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: Colors.grey.shade100)),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                // Show checked-in badge when applicable
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: isSkipped
+                        ? Colors.grey.withAlpha(25)
+                        : app.isCheckedIn
+                            ? Colors.green.withAlpha(25)
+                            : Colors.blue.withAlpha(25),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Text(
+                    app.displayStatus,
+                    style: TextStyle(
+                        color: isSkipped
+                            ? Colors.grey
+                            : app.displayStatus == 'Checked In'
+                                ? Colors.green
+                                : Colors.blue,
+                        fontWeight: FontWeight.bold),
+                  ),
                 ),
-                child: Text(
-                  app.status,
-                  style: const TextStyle(
-                      color: Colors.blue, fontWeight: FontWeight.bold),
+                Row(
+                  children: [
+                    const Icon(Icons.people_outline,
+                        color: Colors.grey, size: 20),
+                    const SizedBox(width: 5),
+                    Text(
+                      "Queue: $queueNumber",
+                      style: const TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                  ],
                 ),
-              ),
+              ],
+            ),
+            const SizedBox(height: 20),
+            Row(
+              children: [
+                const Icon(Icons.calendar_today, color: Colors.black, size: 20),
+                const SizedBox(width: 10),
+                Text(
+                  DateFormat('EEEE, MMMM d, yyyy').format(app.date),
+                  style: const TextStyle(fontWeight: FontWeight.w500),
+                ),
+              ],
+            ),
+            const SizedBox(height: 10),
+            Row(
+              children: [
+                const Icon(Icons.access_time, color: Colors.black, size: 20),
+                const SizedBox(width: 10),
+                Text(app.timeSlot),
+              ],
+            ),
+            if (app.reason.isNotEmpty) ...[
+              const SizedBox(height: 10),
               Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Icon(Icons.people_outline,
-                      color: Colors.grey, size: 20),
-                  const SizedBox(width: 5),
-                  Text(
-                    "Queue: $queueNumber",
-                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  const Icon(Icons.description_outlined,
+                      color: Colors.black, size: 20),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      app.reason,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
                   ),
                 ],
               ),
             ],
-          ),
-          const SizedBox(height: 20),
-          Row(
-            children: [
-              const Icon(Icons.calendar_today, color: Colors.black, size: 20),
-              const SizedBox(width: 10),
-              Text(
-                DateFormat('EEEE, MMMM d, yyyy').format(app.date),
-                style: const TextStyle(fontWeight: FontWeight.w500),
-              ),
-            ],
-          ),
-          const SizedBox(height: 10),
-          Row(
-            children: [
-              const Icon(Icons.access_time, color: Colors.black, size: 20),
-              const SizedBox(width: 10),
-              Text(app.timeSlot),
-            ],
-          ),
-          if (app.reason.isNotEmpty) ...[
-            const SizedBox(height: 10),
+            const SizedBox(height: 25),
             Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Icon(Icons.description_outlined,
-                    color: Colors.black, size: 20),
-                const SizedBox(width: 10),
                 Expanded(
-                  child: Text(
-                    app.reason,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
+                  child: OutlinedButton(
+                    onPressed: (app.isCheckedIn || isSkipped)
+                        ? null
+                        : () => _showRescheduleModal(context, ref, app),
+                    style: OutlinedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10)),
+                    ),
+                    child: const Text("Reschedule",
+                        style: TextStyle(color: Colors.black)),
+                  ),
+                ),
+                const SizedBox(width: 15),
+                Expanded(
+                  child: OutlinedButton.icon(
+                    onPressed: (app.isCheckedIn || isSkipped)
+                        ? null
+                        : () => _showCancelDialog(context, ref, app.id),
+                    icon: const Icon(Icons.cancel_outlined,
+                        color: Colors.red, size: 20),
+                    label: const Text("Cancel",
+                        style: TextStyle(color: Colors.red)),
+                    style: OutlinedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      side: const BorderSide(color: Colors.red),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10)),
+                    ),
                   ),
                 ),
               ],
-            ),
+            )
           ],
-          const SizedBox(height: 25),
-          Row(
-            children: [
-              Expanded(
-                child: OutlinedButton(
-                  onPressed: () => _showRescheduleModal(context, ref, app),
-                  style: OutlinedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10)),
-                  ),
-                  child: const Text("Reschedule",
-                      style: TextStyle(color: Colors.black)),
-                ),
-              ),
-              const SizedBox(width: 15),
-              Expanded(
-                child: OutlinedButton.icon(
-                  onPressed: () => _showCancelDialog(context, ref, app.id),
-                  icon: const Icon(Icons.cancel_outlined,
-                      color: Colors.red, size: 20),
-                  label:
-                      const Text("Cancel", style: TextStyle(color: Colors.red)),
-                  style: OutlinedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                    side: const BorderSide(color: Colors.red),
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10)),
-                  ),
-                ),
-              ),
-            ],
-          )
-        ],
+        ),
       ),
     );
   }

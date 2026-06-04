@@ -3,7 +3,7 @@ import 'package:path/path.dart';
 
 class AppDatabase {
   static const _dbName = 'medline.db';
-  static const _dbVersion = 3;
+  static const _dbVersion = 4;
   static Database? _database;
 
   Future<Database> get database async {
@@ -56,6 +56,7 @@ class AppDatabase {
           status TEXT,
           patientId TEXT,
           doctorId TEXT,
+          reason TEXT,
           isCheckedIn INTEGER,
           createdAt TEXT,
           updatedAt TEXT
@@ -70,6 +71,7 @@ class AppDatabase {
         'status',
         'patientId',
         'doctorId',
+        'reason',
         'isCheckedIn',
         'createdAt',
         'updatedAt'

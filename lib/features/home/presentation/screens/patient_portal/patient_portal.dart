@@ -132,7 +132,7 @@ class PatientPortalScreen extends ConsumerWidget {
 
     final upcomingAppointments = appointments
         .where((app) =>
-            app.status != "Cancelled" &&
+            app.status != 'cancelled' &&
             (app.patientId == currentPatientId ||
                 app.patientName.toLowerCase() == currentPatientName))
         .toList();

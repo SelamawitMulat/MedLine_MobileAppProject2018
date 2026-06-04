@@ -1,5 +1,6 @@
 const express = require('express');
 const cors = require('cors');
+const loggingMiddleware = require('./middleware/loggingMiddleware');
 const routes = require('./routes');
 const errorMiddleware = require('./middleware/errorMiddleware');
 
@@ -8,6 +9,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(loggingMiddleware);
 
 app.get('/', (req, res) => {
   res.json({

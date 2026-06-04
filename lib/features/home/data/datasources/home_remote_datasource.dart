@@ -51,13 +51,22 @@ class HomeRemoteDataSource {
 
   Future<Appointment> updateAppointment(Appointment appointment) async {
     try {
-      final updateData = {
-        'appointmentDate': appointment.date.toIso8601String().split('T')[0],
-        'appointmentTime': appointment.timeSlot,
-      };
+      final updateData = <String, dynamic>{};
 
-      final responseData =
-          await _api.put('$_url/${appointment.id}', data: updateData);
+      updateData['appointmentDate'] =
+          appointment.date.toIso8601String().split('T')[0];
+      updateData['appointmentTime'] = appointment.timeSlot;
+
+      // include status and checked_in when relevant (e.g., check-in)
+      if (appointment.status.isNotEmpty) {
+        updateData['status'] = appointment.status;
+      }
+      if (appointment.isCheckedIn) {
+        updateData['checked_in'] = 1;
+      }
+
+      final requestUrl = '$_url/${appointment.id}';
+      final responseData = await _api.put(requestUrl, data: updateData);
 
       // Handle both direct object and {appointment: {...}} response
       final appointmentData =

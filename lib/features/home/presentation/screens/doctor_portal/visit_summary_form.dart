@@ -205,12 +205,9 @@ class _VisitSummaryFormState extends ConsumerState<VisitSummaryForm> {
                         .read(visitSummaryProvider.notifier)
                         .addVisitSummary(summary);
 
-                    if (resolvedAppointment != null) {
-                      await ref
-                          .read(appointmentProvider.notifier)
-                          .updateAppointmentStatus(
-                              resolvedAppointment.id, 'Completed');
-                    }
+                    // Note: appointment status updates for visit completion
+                    // are deferred to a future Visit Summary feature.
+                    // For now, we record the visit summary without changing appointment status.
 
                     if (!mounted) return;
 

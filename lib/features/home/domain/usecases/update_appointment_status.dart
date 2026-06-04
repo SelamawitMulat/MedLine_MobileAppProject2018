@@ -12,7 +12,22 @@ class UpdateAppointmentStatusUseCase {
       throw Exception('Appointment not found');
     }
 
-    final updated = current.copyWith(status: newStatus);
+    // Standardize incoming status to canonical values
+    final normalized = newStatus.toString().trim().toLowerCase();
+
+    if (normalized == 'checked_in') {
+      final updated = current.copyWith(status: 'checked_in', isCheckedIn: true);
+      return await repository.updateAppointment(updated);
+    }
+
+    if (normalized == 'cancelled') {
+      final updated = current.copyWith(status: 'cancelled');
+      return await repository.updateAppointment(updated);
+    }
+
+    // default: set to pending or pass through
+    final updated = current.copyWith(
+        status: normalized == 'pending' ? 'pending' : normalized);
     return await repository.updateAppointment(updated);
   }
 }

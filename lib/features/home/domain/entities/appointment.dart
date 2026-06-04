@@ -18,12 +18,66 @@ class Appointment extends Equatable {
     required this.date,
     required this.timeSlot,
     this.doctorName = "Dr. Selam Mulat",
-    this.status = "Upcoming",
+    this.status = "pending",
     this.patientId,
     this.doctorId,
     this.reason = "",
     this.isCheckedIn = false,
   });
+
+  static const String pending = 'pending';
+  static const String checkedIn = 'checked_in';
+  static const String cancelled = 'cancelled';
+  static const String canceled = 'canceled';
+  static const String skipped = 'skipped';
+
+  static bool parseCheckedInFlag(dynamic rawIsCheckedIn) {
+    return rawIsCheckedIn == true ||
+        rawIsCheckedIn == 1 ||
+        rawIsCheckedIn == '1';
+  }
+
+  static String normalizeStatus(dynamic rawStatus, {bool isCheckedIn = false}) {
+    if (isCheckedIn) return checkedIn;
+
+    final low = rawStatus?.toString().trim().toLowerCase() ?? '';
+    if (low.isEmpty) return pending;
+    if (low == pending) return pending;
+    if (low == checkedIn ||
+        low == 'check_in' ||
+        low == 'checkin' ||
+        low == 'check-in' ||
+        low == 'checked in') {
+      return checkedIn;
+    }
+    if (low == cancelled || low == canceled) return cancelled;
+    if (low == skipped) return skipped;
+    return low;
+  }
+
+  static bool effectiveCheckedIn(dynamic rawIsCheckedIn, String status) {
+    return parseCheckedInFlag(rawIsCheckedIn) || status == checkedIn;
+  }
+
+  static String _capitalizeStatus(String input) {
+    return input
+        .trim()
+        .replaceAll('_', ' ')
+        .split(RegExp(r'\s+'))
+        .map((word) => word.isEmpty
+            ? word
+            : '${word[0].toUpperCase()}${word.substring(1)}')
+        .join(' ');
+  }
+
+  String get displayStatus {
+    final low = status.toLowerCase();
+    if (low == pending) return 'Pending';
+    if (low == checkedIn) return 'Checked In';
+    if (low == cancelled) return 'Cancelled';
+    if (low == skipped) return 'Skipped';
+    return _capitalizeStatus(status);
+  }
 
   @override
   List<Object?> get props => [
@@ -48,12 +102,12 @@ class Appointment extends Equatable {
 
     final rawIsCheckedIn =
         json['isCheckedIn'] ?? json['checked_in'] ?? json['is_checked_in'];
-    final isCheckedIn =
-        rawIsCheckedIn == true || rawIsCheckedIn == 1 || rawIsCheckedIn == '1';
-
-    final status = json['status'] ?? "Upcoming";
-    final mappedStatus =
-        status.toLowerCase() == 'cancelled' ? 'Cancelled' : 'Upcoming';
+    final rawStatus = json['status'] ?? json['state'] ?? json['statusText'];
+    final mappedStatus = normalizeStatus(
+      rawStatus,
+      isCheckedIn: parseCheckedInFlag(rawIsCheckedIn),
+    );
+    final isCheckedIn = effectiveCheckedIn(rawIsCheckedIn, mappedStatus);
 
     return Appointment(
       id: json['id']?.toString() ?? '',
@@ -82,6 +136,10 @@ class Appointment extends Equatable {
       if (doctorId != null) 'doctorId': doctorId,
       'isCheckedIn': isCheckedIn ? 1 : 0,
     };
+  }
+
+  Map<String, dynamic> toJson() {
+    return toLocalJson();
   }
 
   Map<String, dynamic> toApiJson() {

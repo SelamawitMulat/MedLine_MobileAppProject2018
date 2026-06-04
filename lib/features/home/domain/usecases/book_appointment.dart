@@ -32,13 +32,13 @@ class BookAppointmentUseCase {
     }
 
     final appointment = Appointment(
-      id: DateTime.now().millisecondsSinceEpoch.toString(),
+      id: '',
       patientName:
           currentUser.name.isNotEmpty ? currentUser.name : currentUser.username,
       doctorName: 'Dr. Selam Mulat',
       date: date,
       timeSlot: timeSlot,
-      status: 'Upcoming',
+      status: 'pending',
       patientId: currentUser.id,
       doctorId: '1',
       reason: reason,

@@ -4,10 +4,22 @@ class UpdateQueueOrderUseCase {
   List<Appointment> call(List<Appointment> appointments, String doctorName) {
     final filtered = appointments
         .where((app) =>
-            _normalizeDoctorName(app.doctorName) == _normalizeDoctorName(doctorName) &&
-            app.status != 'Cancelled')
+            _normalizeDoctorName(app.doctorName) ==
+                _normalizeDoctorName(doctorName) &&
+            app.status != 'cancelled')
         .toList();
-    filtered.sort((a, b) => a.date.compareTo(b.date));
+
+    DateTime combine(Appointment ap) {
+      try {
+        final parts = ap.timeSlot.split(':').map(int.parse).toList();
+        return DateTime(
+            ap.date.year, ap.date.month, ap.date.day, parts[0], parts[1]);
+      } catch (_) {
+        return ap.date;
+      }
+    }
+
+    filtered.sort((a, b) => combine(a).compareTo(combine(b)));
     return filtered;
   }
 
