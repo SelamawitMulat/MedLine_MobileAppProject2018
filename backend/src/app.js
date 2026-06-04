@@ -3,6 +3,14 @@ const cors = require('cors');
 const loggingMiddleware = require('./middleware/loggingMiddleware');
 const routes = require('./routes');
 const errorMiddleware = require('./middleware/errorMiddleware');
+const {
+  visitSummaryStatus,
+  getAllVisitSummaries,
+  getVisitSummary,
+  createVisitSummary,
+  updateVisitSummary,
+  deleteVisitSummary,
+} = require('./features/visit_summary/controllers/visitController');
 
 const app = express();
 
@@ -24,6 +32,13 @@ app.get('/', (req, res) => {
     ],
   });
 });
+
+app.get('/api/visit-summaries', getAllVisitSummaries);
+app.post('/api/visit-summaries', createVisitSummary);
+app.get('/api/visit-summaries/status', visitSummaryStatus);
+app.get('/api/visit-summaries/:appointmentId', getVisitSummary);
+app.put('/api/visit-summaries/:appointmentId', updateVisitSummary);
+app.delete('/api/visit-summaries/:appointmentId', deleteVisitSummary);
 
 app.use('/api', routes);
 
