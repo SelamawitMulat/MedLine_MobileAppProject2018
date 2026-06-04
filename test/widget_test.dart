@@ -1,16 +1,20 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:med_line/main.dart'; // Ensure this matches your pubspec name
 
 void main() {
   testWidgets('App loads smoke test', (WidgetTester tester) async {
-    // 1. Changed MyApp() to MedLineApp()
-    await tester.pumpWidget(const MedLineApp());
+    // Wrap with ProviderScope so Riverpod state is available in the router redirect
+    await tester.pumpWidget(
+      const ProviderScope(
+        child: MedLineApp(),
+      ),
+    );
 
-    // 2. Updated these to look for text that ACTUALLY exists on your landing page
-    // This looks for your main headline
+    // This looks for your main headline text from the landing page
     expect(find.textContaining('Modern'), findsOneWidget);
 
-    // This verifies the login button is there
-    expect(find.text('Login'), findsOneWidget);
+    // This verifies there are login buttons (there are 2 on the landing page)
+    expect(find.text('Login'), findsNWidgets(2));
   });
 }
