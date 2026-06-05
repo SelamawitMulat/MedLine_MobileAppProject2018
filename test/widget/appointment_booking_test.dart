@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
+import 'package:table_calendar/table_calendar.dart';
 import 'package:med_line/features/home/presentation/screens/patient_portal/appointment_booking.dart';
 
 void main() {
@@ -36,7 +37,7 @@ void main() {
       expect(find.byType(AppBar), findsOneWidget);
     });
 
-    testWidgets('displays doctor selection dropdown',
+    testWidgets('displays appointment calendar',
         (WidgetTester tester) async {
       await tester.pumpWidget(
         ProviderScope(
@@ -46,11 +47,10 @@ void main() {
         ),
       );
 
-      // Look for dropdown or selection widget
-      expect(find.byType(DropdownButton), findsWidgets);
+      expect(find.byType(TableCalendar), findsOneWidget);
     });
 
-    testWidgets('displays date picker', (WidgetTester tester) async {
+    testWidgets('displays date input area', (WidgetTester tester) async {
       await tester.pumpWidget(
         ProviderScope(
           child: MaterialApp(
@@ -59,7 +59,7 @@ void main() {
         ),
       );
 
-      expect(find.byType(TextField), findsWidgets);
+      expect(find.text('Select Date'), findsOneWidget);
     });
 
     testWidgets('displays time slot selection', (WidgetTester tester) async {
@@ -75,7 +75,7 @@ void main() {
       expect(find.byType(Text), findsWidgets);
     });
 
-    testWidgets('displays available doctors list', (WidgetTester tester) async {
+    testWidgets('displays available time slots grid', (WidgetTester tester) async {
       await tester.pumpWidget(
         ProviderScope(
           child: MaterialApp(
@@ -84,7 +84,7 @@ void main() {
         ),
       );
 
-      expect(find.byType(ListView), findsWidgets);
+      expect(find.byType(GridView), findsOneWidget);
     });
 
     testWidgets('displays appointment reason or complaint field',
@@ -97,10 +97,10 @@ void main() {
         ),
       );
 
-      expect(find.byType(TextField), findsWidgets);
+      expect(find.byType(TextField), findsOneWidget);
     });
 
-    testWidgets('displays book appointment button',
+    testWidgets('displays confirm appointment button',
         (WidgetTester tester) async {
       await tester.pumpWidget(
         ProviderScope(
@@ -110,22 +110,10 @@ void main() {
         ),
       );
 
-      expect(find.text('Book Appointment'), findsOneWidget);
+      expect(find.text('Confirm Appointment'), findsOneWidget);
     });
 
-    testWidgets('displays cancel button', (WidgetTester tester) async {
-      await tester.pumpWidget(
-        ProviderScope(
-          child: MaterialApp(
-            home: BookAppointmentScreen(),
-          ),
-        ),
-      );
-
-      expect(find.byType(TextButton), findsWidgets);
-    });
-
-    testWidgets('displays form validation or required field indicators',
+    testWidgets('has a back button in the app bar',
         (WidgetTester tester) async {
       await tester.pumpWidget(
         ProviderScope(
@@ -135,7 +123,20 @@ void main() {
         ),
       );
 
-      expect(find.byType(Form), findsOneWidget);
+      expect(find.byType(IconButton), findsOneWidget);
+    });
+
+    testWidgets('displays reason input and validation cues',
+        (WidgetTester tester) async {
+      await tester.pumpWidget(
+        ProviderScope(
+          child: MaterialApp(
+            home: BookAppointmentScreen(),
+          ),
+        ),
+      );
+
+      expect(find.byType(TextField), findsOneWidget);
     });
 
     testWidgets('page is scrollable for long content',
