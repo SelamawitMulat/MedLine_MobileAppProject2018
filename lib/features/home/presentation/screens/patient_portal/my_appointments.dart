@@ -438,7 +438,7 @@ class MyAppointmentsScreen extends ConsumerWidget {
               children: [
                 Expanded(
                   child: OutlinedButton(
-                    onPressed: (app.isCheckedIn || isSkipped || isCompleted)
+                    onPressed: (isSkipped || isCompleted)
                         ? null
                         : () => _showRescheduleModal(context, ref, app),
                     style: OutlinedButton.styleFrom(
@@ -453,7 +453,7 @@ class MyAppointmentsScreen extends ConsumerWidget {
                 const SizedBox(width: 15),
                 Expanded(
                   child: OutlinedButton.icon(
-                    onPressed: (app.isCheckedIn || isSkipped || isCompleted)
+                    onPressed: (isSkipped || isCompleted)
                         ? null
                         : () => _showCancelDialog(context, ref, app.id),
                     icon: const Icon(Icons.cancel_outlined,

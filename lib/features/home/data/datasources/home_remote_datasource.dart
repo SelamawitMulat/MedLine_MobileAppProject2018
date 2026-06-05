@@ -61,9 +61,7 @@ class HomeRemoteDataSource {
       if (appointment.status.isNotEmpty) {
         updateData['status'] = appointment.status;
       }
-      if (appointment.isCheckedIn) {
-        updateData['checked_in'] = 1;
-      }
+      updateData['checked_in'] = appointment.isCheckedIn ? 1 : 0;
 
       final requestUrl = '$_url/${appointment.id}';
       final responseData = await _api.put(requestUrl, data: updateData);

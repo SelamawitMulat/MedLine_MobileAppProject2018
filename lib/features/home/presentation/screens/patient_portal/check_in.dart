@@ -127,58 +127,6 @@ class CheckInScreen extends ConsumerWidget {
                                   return;
                                 }
 
-                                final now = DateTime.now().toLocal();
-                                final appointmentDateTime =
-                                    app.appointmentDateTime;
-                                if (appointmentDateTime == null) {
-                                  AppLogger.warn(
-                                    'Appointment ${app.id} has invalid time slot',
-                                    name: 'CheckInScreen',
-                                  );
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(
-                                      content: Text(
-                                          "Unable to determine appointment time."),
-                                      backgroundColor: Colors.red,
-                                    ),
-                                  );
-                                  return;
-                                }
-
-                                final twoHoursBefore = appointmentDateTime
-                                    .subtract(const Duration(hours: 2));
-                                final isTooEarly = now.isBefore(twoHoursBefore);
-                                final isLate = now.isAfter(appointmentDateTime);
-
-                                if (isTooEarly) {
-                                  AppLogger.warn(
-                                    'Appointment ${app.id} is too early for check-in',
-                                    name: 'CheckInScreen',
-                                  );
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(
-                                      content: Text(
-                                          "Check-in opens 2 hours before the appointment."),
-                                      backgroundColor: Colors.red,
-                                    ),
-                                  );
-                                  return;
-                                }
-
-                                if (isLate) {
-                                  AppLogger.warn(
-                                    'Appointment ${app.id} has already passed',
-                                    name: 'CheckInScreen',
-                                  );
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(
-                                      content: Text(
-                                          "This appointment time has passed and cannot be checked in."),
-                                      backgroundColor: Colors.red,
-                                    ),
-                                  );
-                                  return;
-                                }
 
                                 try {
                                   AppLogger.info(

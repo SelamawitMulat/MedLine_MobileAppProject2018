@@ -137,8 +137,9 @@ class QueueManagementScreen extends ConsumerWidget {
                     .watch(visitSummaryProvider)
                     .any((summary) => summary.appointmentId == app.id);
                 final isSkipped = app.status.toLowerCase() == 'skipped';
+                final isCheckedIn = app.status.toLowerCase() == Appointment.checkedIn || app.isCheckedIn;
                 final isCompleted =
-                    app.status.toLowerCase() == 'completed' || hasSummary;
+                    app.status.toLowerCase() == Appointment.completed || hasSummary;
                 final isMissed = app.isMissed;
 
                 return Opacity(
@@ -202,11 +203,22 @@ class QueueManagementScreen extends ConsumerWidget {
                               child: OutlinedButton.icon(
                                 onPressed: (isSkipped || isCompleted)
                                     ? null
-                                    : () => _showSkipDialog(
-                                          context,
-                                          ref,
-                                          app.id,
-                                        ),
+                                    : isCheckedIn
+                                        ? () {
+                                            ScaffoldMessenger.of(context)
+                                                .showSnackBar(
+                                              const SnackBar(
+                                                content: Text(
+                                                    "Checked-in patients cannot be skipped."),
+                                                backgroundColor: Colors.red,
+                                              ),
+                                            );
+                                          }
+                                        : () => _showSkipDialog(
+                                              context,
+                                              ref,
+                                              app.id,
+                                            ),
                                 icon: const Icon(Icons.skip_next, size: 18),
                                 label: const Text('Skip'),
                                 style: OutlinedButton.styleFrom(
@@ -223,6 +235,17 @@ class QueueManagementScreen extends ConsumerWidget {
                                 onPressed: (isSkipped || isCompleted)
                                     ? null
                                     : () async {
+                                        if (!isCheckedIn) {
+                                          ScaffoldMessenger.of(context)
+                                              .showSnackBar(
+                                            const SnackBar(
+                                              content: Text(
+                                                  "This patient must check in before completion."),
+                                              backgroundColor: Colors.orange,
+                                            ),
+                                          );
+                                          return;
+                                        }
                                         final result = await context.push<bool>(
                                           '/create-summary',
                                           extra: app,
