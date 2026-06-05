@@ -79,18 +79,25 @@ class FakeAuthRepository implements IAuthRepository {
   Future<User> createRemoteUser(User user) async => throw UnimplementedError();
 
   @override
-  Future<User?> login(String email, String password) async => throw UnimplementedError();
+  Future<User?> login(String email, String password) async =>
+      throw UnimplementedError();
 
   @override
-  Future<User> signup({required String name, required String email, required String password}) async => throw UnimplementedError();
+  Future<User> signup(
+          {required String name,
+          required String email,
+          required String password}) async =>
+      throw UnimplementedError();
 
   @override
-  Future<User?> fetchCurrentUser(String token) async => throw UnimplementedError();
+  Future<User?> fetchCurrentUser(String token) async =>
+      throw UnimplementedError();
 }
 
 void main() {
   group('BookAppointmentUseCase', () {
-    test('books appointment when user is logged in and time slot is free', () async {
+    test('books appointment when user is logged in and time slot is free',
+        () async {
       final homeRepository = FakeHomeRepository();
       final authRepository = FakeAuthRepository();
       authRepository.currentUser = const User(
@@ -166,7 +173,8 @@ void main() {
       );
     });
 
-    test('throws when there is a conflict with an existing appointment', () async {
+    test('throws when there is a conflict with an existing appointment',
+        () async {
       final homeRepository = FakeHomeRepository();
       final authRepository = FakeAuthRepository();
       authRepository.currentUser = const User(

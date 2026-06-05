@@ -26,7 +26,9 @@ void main() {
       expect(user.passwordHash, 'secret');
     });
 
-    test('fromJson preserves valid sha256 passwordHash and uses email as fallback username', () {
+    test(
+        'fromJson preserves valid sha256 passwordHash and uses email as fallback username',
+        () {
       final sha256hash = User.hashPassword('password');
       final json = {
         'id': '10',
