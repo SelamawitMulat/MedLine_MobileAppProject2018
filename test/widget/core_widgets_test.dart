@@ -7,7 +7,8 @@ import 'package:med_line/core/widgets/primary_button.dart';
 void main() {
   group('Core Widgets', () {
     group('PrimaryButton', () {
-      testWidgets('renders with text and responds to tap', (WidgetTester tester) async {
+      testWidgets('renders with text and responds to tap',
+          (WidgetTester tester) async {
         int tapCount = 0;
 
         await tester.pumpWidget(
@@ -63,7 +64,8 @@ void main() {
         expect(find.text('With Icon'), findsOneWidget);
       });
 
-      testWidgets('has full width and correct height', (WidgetTester tester) async {
+      testWidgets('has full width and correct height',
+          (WidgetTester tester) async {
         await tester.pumpWidget(
           MaterialApp(
             home: Scaffold(
@@ -82,7 +84,8 @@ void main() {
         expect(sizedBox, findsOneWidget);
       });
 
-      testWidgets('uses primary blue as default background', (WidgetTester tester) async {
+      testWidgets('uses primary blue as default background',
+          (WidgetTester tester) async {
         await tester.pumpWidget(
           MaterialApp(
             home: Scaffold(

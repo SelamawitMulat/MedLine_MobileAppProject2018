@@ -47,7 +47,8 @@ void main() {
         expect(find.text('Create summaries'), findsOneWidget);
       });
 
-      testWidgets('uses provided icon background color', (WidgetTester tester) async {
+      testWidgets('uses provided icon background color',
+          (WidgetTester tester) async {
         await tester.pumpWidget(
           MaterialApp(
             home: Scaffold(
@@ -64,7 +65,8 @@ void main() {
         expect(find.text('Test'), findsOneWidget);
       });
 
-      testWidgets('renders card with proper styling', (WidgetTester tester) async {
+      testWidgets('renders card with proper styling',
+          (WidgetTester tester) async {
         await tester.pumpWidget(
           MaterialApp(
             home: Scaffold(
@@ -81,7 +83,8 @@ void main() {
         expect(find.byType(RoleBenefitCard), findsOneWidget);
       });
 
-      testWidgets('displays empty benefits gracefully', (WidgetTester tester) async {
+      testWidgets('displays empty benefits gracefully',
+          (WidgetTester tester) async {
         await tester.pumpWidget(
           MaterialApp(
             home: Scaffold(
@@ -98,7 +101,8 @@ void main() {
         expect(find.text('Empty Card'), findsOneWidget);
       });
 
-      testWidgets('handles multiple benefits with scroll', (WidgetTester tester) async {
+      testWidgets('handles multiple benefits with scroll',
+          (WidgetTester tester) async {
         final manyBenefits = List.generate(10, (i) => 'Benefit ${i + 1}');
 
         await tester.pumpWidget(

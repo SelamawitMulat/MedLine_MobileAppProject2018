@@ -29,7 +29,8 @@ void main() {
         ),
       );
 
-      expect(find.text('Modern\nHealthcare\nQueue\nManagement'), findsOneWidget);
+      expect(
+          find.text('Modern\nHealthcare\nQueue\nManagement'), findsOneWidget);
     });
 
     testWidgets('displays description text', (WidgetTester tester) async {
@@ -75,8 +76,7 @@ void main() {
       expect(find.text('For Doctors'), findsOneWidget);
     });
 
-    testWidgets('displays two role benefit cards',
-        (WidgetTester tester) async {
+    testWidgets('displays two role benefit cards', (WidgetTester tester) async {
       await tester.pumpWidget(
         ProviderScope(
           child: MaterialApp(

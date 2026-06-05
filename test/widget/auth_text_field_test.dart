@@ -20,7 +20,8 @@ void main() {
       expect(find.byType(AuthTextField), findsOneWidget);
     });
 
-    testWidgets('can be configured as password field', (WidgetTester tester) async {
+    testWidgets('can be configured as password field',
+        (WidgetTester tester) async {
       final widget = AuthTextField(
         label: 'Password',
         hint: 'Enter password',
@@ -73,7 +74,10 @@ void main() {
             body: Column(
               children: [
                 AuthTextField(label: 'Username', hint: 'Enter username'),
-                AuthTextField(label: 'Password', hint: 'Enter password', isPassword: true),
+                AuthTextField(
+                    label: 'Password',
+                    hint: 'Enter password',
+                    isPassword: true),
               ],
             ),
           ),
