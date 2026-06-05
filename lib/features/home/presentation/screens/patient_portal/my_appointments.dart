@@ -344,6 +344,15 @@ class MyAppointmentsScreen extends ConsumerWidget {
     final isSkipped = app.status.toLowerCase() == 'skipped';
 
     final isCompleted = app.status.toLowerCase() == 'completed';
+    final queuePosition = Appointment.queuePosition(
+      app,
+      ref.watch(appointmentProvider),
+      doctorId: app.doctorId,
+      doctorName: app.doctorName,
+    );
+    final waitTimeText = !isSkipped && !isCompleted && queuePosition > 0
+        ? Appointment.estimateWaitTimeText(queuePosition)
+        : null;
 
     return Opacity(
       opacity: (isSkipped || isCompleted) ? 0.6 : 1.0,
@@ -415,6 +424,28 @@ class MyAppointmentsScreen extends ConsumerWidget {
                 Text(app.timeSlot),
               ],
             ),
+            if (waitTimeText != null) ...[
+              const SizedBox(height: 10),
+              Row(
+                children: [
+                  Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    decoration: BoxDecoration(
+                      color: const Color.fromRGBO(249, 115, 22, 0.12),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Text(
+                      'Wait: $waitTimeText',
+                      style: const TextStyle(
+                        color: Colors.orange,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
             if (app.reason.isNotEmpty) ...[
               const SizedBox(height: 10),
               Row(
