@@ -25,7 +25,8 @@ class FakeHomeRepository implements IHomeRepository {
   Future<void> deleteAppointment(String id) async {}
 
   @override
-  Future<Appointment> createAppointment(Appointment appointment) async => appointment;
+  Future<Appointment> createAppointment(Appointment appointment) async =>
+      appointment;
 
   @override
   Future<List<Appointment>> fetchAllAppointments() async => [];
