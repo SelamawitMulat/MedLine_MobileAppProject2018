@@ -46,7 +46,10 @@ class AppointmentNotifier extends StateNotifier<List<Appointment>> {
   }
 
   Future<void> _loadAppointments() async {
-    state = await _repository.fetchAllAppointments();
+    final appointments = await _repository.fetchAllAppointments();
+    if (mounted) {
+      state = appointments;
+    }
   }
 
   Future<void> bookAppointment({

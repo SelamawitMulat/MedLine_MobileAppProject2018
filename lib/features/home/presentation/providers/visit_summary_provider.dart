@@ -13,7 +13,10 @@ class VisitSummaryNotifier extends StateNotifier<List<VisitSummary>> {
   }
 
   Future<void> _loadSummaries() async {
-    state = await _repository.getVisitSummaries();
+    final summaries = await _repository.getVisitSummaries();
+    if (mounted) {
+      state = summaries;
+    }
   }
 
   Future<void> addVisitSummary(VisitSummary summary) async {

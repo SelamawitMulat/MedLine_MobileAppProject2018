@@ -32,7 +32,8 @@ final deleteAccountUseCaseProvider = Provider<DeleteAccountUseCase>((ref) {
 class AuthNotifier extends AsyncNotifier<User?> {
   @override
   FutureOr<User?> build() async {
-    return await ref.watch(getCurrentUserUseCaseProvider).call();
+    final current = await ref.watch(getCurrentUserUseCaseProvider).call();
+    return current;
   }
 
   Future<void> login(String identifier, String password) async {
