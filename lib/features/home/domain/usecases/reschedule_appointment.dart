@@ -25,6 +25,7 @@ class RescheduleAppointmentUseCase {
       date: newDate,
       timeSlot: newTimeSlot,
       status: 'pending',
+      isCheckedIn: false,
     );
 
     return await repository.updateAppointment(updated);

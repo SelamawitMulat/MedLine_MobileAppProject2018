@@ -53,14 +53,43 @@ class _BookAppointmentScreenState extends ConsumerState<BookAppointmentScreen> {
     super.dispose();
   }
 
+  bool _isSlotUnavailable(String timeSlot, List<Appointment> appointments) {
+    if (_selectedDay == null) return false;
+
+    return appointments.any((app) {
+      if (app.status.toLowerCase() == Appointment.cancelled) return false;
+      if (widget.rescheduleAppointment != null && app.id == widget.rescheduleAppointment!.id) {
+        return false;
+      }
+      return app.timeSlot == timeSlot &&
+          app.date.year == _selectedDay!.year &&
+          app.date.month == _selectedDay!.month &&
+          app.date.day == _selectedDay!.day;
+    });
+  }
+
   Future<void> _handleConfirmAppointment() async {
+    final scaffoldMessenger = ScaffoldMessenger.of(context);
+
     if (_selectedDay == null ||
         _selectedTime == null ||
         _reasonController.text.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
+      scaffoldMessenger.showSnackBar(
         const SnackBar(
           content: Text("Please select date, time, and enter a reason."),
           backgroundColor: Colors.orange,
+        ),
+      );
+      return;
+    }
+
+    final appointments = ref.read(appointmentProvider);
+    final slotUnavailable = _isSlotUnavailable(_selectedTime!, appointments);
+    if (slotUnavailable) {
+      scaffoldMessenger.showSnackBar(
+        const SnackBar(
+          content: Text('Selected time slot is unavailable.'),
+          backgroundColor: Colors.red,
         ),
       );
       return;
@@ -75,7 +104,7 @@ class _BookAppointmentScreenState extends ConsumerState<BookAppointmentScreen> {
               _selectedTime!,
             );
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
+          scaffoldMessenger.showSnackBar(
             const SnackBar(
               content: Text("Appointment rescheduled successfully!"),
               backgroundColor: Colors.green,
@@ -90,7 +119,7 @@ class _BookAppointmentScreenState extends ConsumerState<BookAppointmentScreen> {
               reason: _reasonController.text,
             );
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
+          scaffoldMessenger.showSnackBar(
             const SnackBar(
               content: Text("Appointment booked successfully!"),
               backgroundColor: Colors.green,
@@ -101,7 +130,8 @@ class _BookAppointmentScreenState extends ConsumerState<BookAppointmentScreen> {
       }
       if (mounted) context.pop();
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
+      if (!mounted) return;
+      scaffoldMessenger.showSnackBar(
         SnackBar(
           content: Text(e.toString().replaceAll('Exception: ', '')),
           backgroundColor: Colors.red,
@@ -189,37 +219,56 @@ class _BookAppointmentScreenState extends ConsumerState<BookAppointmentScreen> {
               style: TextStyle(fontSize: 19, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 15),
-            GridView.builder(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 3,
-                childAspectRatio: 2.4,
-                crossAxisSpacing: 10,
-                mainAxisSpacing: 10,
-              ),
-              itemCount: _timeSlots.length,
-              itemBuilder: (context, index) {
-                final isSelected = _selectedTime == _timeSlots[index];
-                return InkWell(
-                  onTap: () =>
-                      setState(() => _selectedTime = _timeSlots[index]),
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: isSelected
-                          ? const Color(0xFF2563EB)
-                          : const Color(0xFFF2F2F2),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    alignment: Alignment.center,
-                    child: Text(
-                      _timeSlots[index],
-                      style: TextStyle(
-                        color: isSelected ? Colors.white : Colors.black,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
+            Consumer(
+              builder: (context, ref, _) {
+                final appointments = ref.watch(appointmentProvider);
+                return GridView.builder(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 3,
+                    childAspectRatio: 2.4,
+                    crossAxisSpacing: 10,
+                    mainAxisSpacing: 10,
                   ),
+                  itemCount: _timeSlots.length,
+                  itemBuilder: (context, index) {
+                    final slot = _timeSlots[index];
+                    final isSelected = _selectedTime == slot;
+                    final isUnavailable = _isSlotUnavailable(slot, appointments);
+                    return InkWell(
+                      onTap: isUnavailable
+                          ? null
+                          : () => setState(() => _selectedTime = slot),
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: isSelected
+                              ? const Color(0xFF2563EB)
+                              : isUnavailable
+                                  ? Colors.grey.shade300
+                                  : const Color(0xFFF2F2F2),
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(
+                            color: isUnavailable
+                                ? const Color.fromRGBO(239, 68, 68, 0.5)
+                                : Colors.transparent,
+                          ),
+                        ),
+                        alignment: Alignment.center,
+                        child: Text(
+                          slot,
+                          style: TextStyle(
+                            color: isSelected
+                                ? Colors.white
+                                : isUnavailable
+                                    ? Colors.grey.shade700
+                                    : Colors.black,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    );
+                  },
                 );
               },
             ),

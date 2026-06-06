@@ -37,6 +37,8 @@ final updateAppointmentStatusUseCaseProvider =
   return UpdateAppointmentStatusUseCase(ref.watch(homeRepositoryProvider));
 });
 
+final patientTurnAlertProvider = StateProvider<bool>((ref) => false);
+
 class AppointmentNotifier extends StateNotifier<List<Appointment>> {
   final Ref _ref;
   final IHomeRepository _repository;

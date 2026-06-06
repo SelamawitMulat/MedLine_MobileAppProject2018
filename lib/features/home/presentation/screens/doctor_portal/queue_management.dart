@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:med_line/features/home/domain/entities/appointment.dart';
 import 'package:med_line/features/home/presentation/providers/appointment_provider.dart';
+import 'package:med_line/features/home/presentation/providers/doctor_provider.dart';
 import 'package:med_line/features/home/presentation/providers/visit_summary_provider.dart';
 
 class QueueManagementScreen extends ConsumerWidget {
@@ -87,25 +88,14 @@ class QueueManagementScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final appointments = ref.watch(appointmentProvider);
+    final doctorName = ref.watch(doctorNameProvider);
+    final doctorId = ref.watch(doctorIdProvider);
 
-    // Show ALL appointments (not filtered by doctor) excluding cancelled
-    final queueAppointments = appointments
-        .where((app) => app.status.toLowerCase() != 'cancelled')
-        .toList()
-      ..sort((a, b) {
-        // Sort by date + time
-        DateTime combine(Appointment ap) {
-          try {
-            final parts = ap.timeSlot.split(':').map(int.parse).toList();
-            return DateTime(
-                ap.date.year, ap.date.month, ap.date.day, parts[0], parts[1]);
-          } catch (_) {
-            return ap.date;
-          }
-        }
-
-        return combine(a).compareTo(combine(b));
-      });
+    final queueAppointments = Appointment.queueAppointments(
+      appointments,
+      doctorId: doctorId,
+      doctorName: doctorName,
+    );
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -137,8 +127,9 @@ class QueueManagementScreen extends ConsumerWidget {
                     .watch(visitSummaryProvider)
                     .any((summary) => summary.appointmentId == app.id);
                 final isSkipped = app.status.toLowerCase() == 'skipped';
+                final isCheckedIn = app.status.toLowerCase() == Appointment.checkedIn || app.isCheckedIn;
                 final isCompleted =
-                    app.status.toLowerCase() == 'completed' || hasSummary;
+                    app.status.toLowerCase() == Appointment.completed || hasSummary;
                 final isMissed = app.isMissed;
 
                 return Opacity(
@@ -174,6 +165,14 @@ class QueueManagementScreen extends ConsumerWidget {
                                   '${app.date.toLocal().toString().split(' ').first} · ${app.timeSlot}',
                                   style: const TextStyle(color: Colors.grey),
                                 ),
+                                const SizedBox(height: 6),
+                                Text(
+                                  'Queue position: ${index + 1}',
+                                  style: const TextStyle(
+                                    color: Colors.black87,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
                               ],
                             ),
                             Container(
@@ -202,11 +201,22 @@ class QueueManagementScreen extends ConsumerWidget {
                               child: OutlinedButton.icon(
                                 onPressed: (isSkipped || isCompleted)
                                     ? null
-                                    : () => _showSkipDialog(
-                                          context,
-                                          ref,
-                                          app.id,
-                                        ),
+                                    : isCheckedIn
+                                        ? () {
+                                            ScaffoldMessenger.of(context)
+                                                .showSnackBar(
+                                              const SnackBar(
+                                                content: Text(
+                                                    "Checked-in patients cannot be skipped."),
+                                                backgroundColor: Colors.red,
+                                              ),
+                                            );
+                                          }
+                                        : () => _showSkipDialog(
+                                              context,
+                                              ref,
+                                              app.id,
+                                            ),
                                 icon: const Icon(Icons.skip_next, size: 18),
                                 label: const Text('Skip'),
                                 style: OutlinedButton.styleFrom(
@@ -223,6 +233,17 @@ class QueueManagementScreen extends ConsumerWidget {
                                 onPressed: (isSkipped || isCompleted)
                                     ? null
                                     : () async {
+                                        if (!isCheckedIn) {
+                                          ScaffoldMessenger.of(context)
+                                              .showSnackBar(
+                                            const SnackBar(
+                                              content: Text(
+                                                  "This patient must check in before completion."),
+                                              backgroundColor: Colors.orange,
+                                            ),
+                                          );
+                                          return;
+                                        }
                                         final result = await context.push<bool>(
                                           '/create-summary',
                                           extra: app,

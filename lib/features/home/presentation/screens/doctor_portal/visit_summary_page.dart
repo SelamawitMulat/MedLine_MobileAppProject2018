@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:med_line/core/constants/app_colors.dart';
+import 'package:med_line/features/home/domain/entities/appointment.dart';
+import 'package:med_line/features/home/presentation/providers/appointment_provider.dart';
 import 'package:med_line/features/home/presentation/providers/doctor_provider.dart';
 import 'package:med_line/features/home/presentation/providers/visit_summary_provider.dart';
 
@@ -16,6 +18,12 @@ class VisitSummaryPage extends ConsumerWidget {
         .trim()
         .toLowerCase();
     final normDoctor = normalize(currentDoctorName);
+    final checkedInAppointments = ref
+        .watch(appointmentProvider)
+        .where((app) =>
+            app.status.toLowerCase() == Appointment.checkedIn &&
+            normalize(app.doctorName) == normDoctor)
+        .toList();
     final summaries = ref
         .watch(visitSummaryProvider)
         .where(
@@ -48,7 +56,19 @@ class VisitSummaryPage extends ConsumerWidget {
                     ],
                   ),
                   GestureDetector(
-                    onTap: () => context.push('/create-summary'),
+                    onTap: () {
+                      if (checkedInAppointments.isEmpty) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text(
+                                "No checked-in patients available to add a visit summary."),
+                            backgroundColor: Colors.red,
+                          ),
+                        );
+                        return;
+                      }
+                      context.push('/create-summary');
+                    },
                     child: Container(
                       width: 45,
                       height: 45,

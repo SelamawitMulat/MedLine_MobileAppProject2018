@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:med_line/features/auth/presentation/providers/auth_provider.dart';
+import 'package:med_line/features/home/domain/entities/appointment.dart';
 import '../../providers/appointment_provider.dart';
 
 class PatientPortalScreen extends ConsumerWidget {
@@ -116,6 +117,7 @@ class PatientPortalScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final authState = ref.watch(authProvider);
     final appointments = ref.watch(appointmentProvider);
+    final hasTurnAlertShown = ref.watch(patientTurnAlertProvider);
 
     if (authState.hasValue && authState.value == null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -130,19 +132,42 @@ class PatientPortalScreen extends ConsumerWidget {
     final currentPatientId = user?.id ?? '';
     final currentPatientName = user?.name.toLowerCase() ?? '';
 
-    final upcomingAppointments = appointments
+    final userAppointments = appointments
         .where((app) =>
             app.status != 'cancelled' &&
             (app.patientId == currentPatientId ||
                 app.patientName.toLowerCase() == currentPatientName))
         .toList();
 
-    upcomingAppointments.sort((a, b) => a.date.compareTo(b.date));
+    userAppointments.sort((a, b) => a.date.compareTo(b.date));
 
-    final hasAppointment = upcomingAppointments.isNotEmpty;
+    final hasAppointment = userAppointments.isNotEmpty;
+    final nextApp = hasAppointment ? userAppointments.first : null;
 
-    // Select .first (the nearest appointment)
-    final nextApp = hasAppointment ? upcomingAppointments.first : null;
+    final nextAppointmentPosition = nextApp != null
+        ? Appointment.queuePosition(
+            nextApp,
+            appointments,
+            doctorId: nextApp.doctorId,
+            doctorName: nextApp.doctorName,
+          )
+        : -1;
+    final nextAppointmentWait = nextApp != null
+        ? Appointment.estimateWaitTimeText(nextAppointmentPosition)
+        : null;
+
+    if (!hasTurnAlertShown && nextAppointmentPosition > 0 && nextAppointmentPosition <= 2) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Your turn is near. Please be ready.'),
+            backgroundColor: Colors.purple,
+            duration: Duration(seconds: 4),
+          ),
+        );
+        ref.read(patientTurnAlertProvider.notifier).state = true;
+      });
+    }
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -232,6 +257,38 @@ class PatientPortalScreen extends ConsumerWidget {
                                 color: Colors.grey,
                                 fontWeight: FontWeight.w500),
                           ),
+                          const SizedBox(height: 10),
+                          if (nextAppointmentPosition > 0) ...[
+                            Row(
+                              children: [
+                                const Icon(Icons.numbers,
+                                    color: Colors.black, size: 20),
+                                const SizedBox(width: 8),
+                                Text(
+                                  'Queue position: $nextAppointmentPosition',
+                                  style: const TextStyle(
+                                    color: Colors.black,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 8),
+                            Row(
+                              children: [
+                                const Icon(Icons.timer,
+                                    color: Colors.black, size: 20),
+                                const SizedBox(width: 8),
+                                Text(
+                                  'Estimated wait: $nextAppointmentWait',
+                                  style: const TextStyle(
+                                    color: Colors.black,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
                           const SizedBox(height: 10),
                           Row(
                             children: [
