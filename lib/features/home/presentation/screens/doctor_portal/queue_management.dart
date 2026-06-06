@@ -113,7 +113,7 @@ class QueueManagementScreen extends ConsumerWidget {
           ? const Center(
               child: Text(
                 'No queue appointments available.',
-                style: TextStyle(color: Colors.grey, fontSize: 16),
+                style: TextStyle(color: Color.fromARGB(255, 126, 124, 124), fontSize: 16),
                 textAlign: TextAlign.center,
               ),
             )
