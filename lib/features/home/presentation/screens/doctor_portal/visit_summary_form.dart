@@ -58,6 +58,18 @@ class _VisitSummaryFormState extends ConsumerState<VisitSummaryForm> {
             normalize(app.doctorName) == normDoctor)
         .toList();
 
+    // Ensure dropdown items are unique by appointment id and keep the selected
+    // appointment if it is not currently in the checked-in list.
+    final appointmentsById = <String, Appointment>{};
+    for (final app in checkedInAppointments) {
+      appointmentsById[app.id] = app;
+    }
+    if (_selectedAppointment != null) {
+      appointmentsById.putIfAbsent(
+          _selectedAppointment!.id, () => _selectedAppointment!);
+    }
+    final dropdownAppointments = appointmentsById.values.toList();
+
     final pageTitle =
         widget.summary != null ? 'Edit Visit Summary' : 'Create Visit Summary';
 
@@ -86,7 +98,7 @@ class _VisitSummaryFormState extends ConsumerState<VisitSummaryForm> {
               const SizedBox(height: 10),
               DropdownButtonFormField<Appointment>(
                 initialValue: _selectedAppointment,
-                items: checkedInAppointments.map((app) {
+                items: dropdownAppointments.map((app) {
                   return DropdownMenuItem<Appointment>(
                     value: app,
                     child: Text(
