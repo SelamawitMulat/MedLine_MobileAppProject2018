@@ -200,6 +200,19 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                                       fontWeight: FontWeight.bold)),
                         ),
                       ),
+                      const SizedBox(height: 12),
+                      Center(
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Text("Already have an account? "),
+                            TextButton(
+                              onPressed: () => context.push('/login'),
+                              child: const Text("Login"),
+                            ),
+                          ],
+                        ),
+                      ),
                     ],
                   ),
                 ),

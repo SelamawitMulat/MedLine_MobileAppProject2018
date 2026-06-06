@@ -17,7 +17,7 @@ final _sampleUser = User(
   id: 'doctor-1',
   username: 'doctor1',
   role: 'doctor',
-  name: 'Test Doctor',
+  name: 'Dr. Selam Mulat',
   email: 'doctor@example.com',
   passwordHash: User.hashPassword('password123'),
 );

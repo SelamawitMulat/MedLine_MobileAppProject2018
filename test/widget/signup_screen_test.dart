@@ -109,9 +109,9 @@ void main() {
         ),
       );
 
-      // Check for visibility toggle icons
-      expect(find.byIcon(Icons.visibility), findsWidgets);
-    }, skip: true);
+      // Check for the initial obscured password toggle icons.
+      expect(find.byIcon(Icons.visibility_off), findsWidgets);
+    });
     
 
     testWidgets('displays signup form in form widget',
@@ -164,7 +164,7 @@ void main() {
 
       // Look for login text or button
       expect(find.text('Login'), findsOneWidget);
-    }, skip: true);
+    });
 
     testWidgets('signup button has proper styling',
         (WidgetTester tester) async {
