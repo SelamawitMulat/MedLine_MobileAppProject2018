@@ -149,7 +149,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                       const SizedBox(height: 15),
                       const Text(
                         "Username is optional. If left blank, it will be generated from your email.",
-                        style: TextStyle(color: Colors.grey, fontSize: 12),
+                        style: TextStyle(color: Color.fromARGB(255, 116, 114, 114), fontSize: 12),
                       ),
                       const SizedBox(height: 15),
                       _inputLabel("Email"),
